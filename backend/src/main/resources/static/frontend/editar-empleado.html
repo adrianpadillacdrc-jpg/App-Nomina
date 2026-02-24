@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>NUMA NÓMINA - Editar Empleado</title>
+  <link rel="stylesheet" href="estilos.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="logo-container">
+      <img src="assets/logc.png" alt="Logo" class="logo">
+      <svg class="brand-logo" viewBox="0 0 340 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <style>
+            .g-text {
+              font-family: 'Segoe UI', Arial, sans-serif;
+              font-weight: 800;
+              font-size: 64px
+            }
+
+            .g-small {
+              font-family: 'Segoe UI', Arial, sans-serif;
+              font-weight: 700;
+              font-size: 16px
+            }
+          </style>
+        </defs>
+        <text x="6" y="66" class="g-text" fill="#4a4a4f">NUMA</text>
+        <g transform="translate(120,12) scale(1.6)">
+          <circle cx="12" cy="20" r="10" fill="#6d5aa8" />
+          <circle cx="30" cy="12" r="14" fill="#6d5aa8" />
+          <circle cx="52" cy="20" r="10" fill="#6d5aa8" />
+          <rect x="14" y="20" width="40" height="14" rx="7" fill="#6d5aa8" />
+        </g>
+        <text x="240" y="78" class="g-small" fill="#6d5aa8">nomina</text>
+      </svg>
+    </div>
+    <nav class="menu">
+      <a href="dashboard-admin.html"><i class="fa-solid fa-house"></i><span>Inicio</span></a>
+      <a href="registro-empleados.html"><i class="fa-solid fa-user-plus"></i><span>Registrar</span></a>
+      <a href="liquidacion-nomina.html"><i class="fa-solid fa-file-invoice-dollar"></i><span>Liquidar</span></a>
+      <a href="consulta.html" class="active"><i class="fa-solid fa-magnifying-glass"></i><span>Consultar</span></a>
+      <a href="novedades-empleado.html"><i class="fa-solid fa-clipboard-list"></i><span>Novedades</span></a>
+      <a href="pago-nomina.html"><i class="fa-solid fa-money-check-dollar"></i><span>Pago Nómina</span></a>
+      <a href="login.html" onclick="cerrarSesion()"><i class="fa-solid fa-right-from-bracket"></i><span>Salir</span></a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <h1>Editar Empleado</h1>
+
+    <form id="formEditar" class="form-section">
+      <div class="form-grid">
+        <input type="hidden" id="idEmpleado" />
+
+        <div class="form-group">
+          <label>Tipo de Documento</label>
+          <select id="tipoDoc" required>
+            <option value="C.C.">C.C.</option>
+            <option value="C.E.">C.E.</option>
+            <option value="Pasaporte">Pasaporte</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Número de Identificación</label>
+          <input type="text" id="numId" required />
+        </div>
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="nombres" required />
+        </div>
+        <div class="form-group">
+          <label>Apellido</label>
+          <input type="text" id="apellidos" required />
+        </div>
+        <div class="form-group">
+          <label>Cargo</label>
+          <select id="cargo" required>
+            <option value="Administrador">Administrador</option>
+            <option value="Ventas">Ventas</option>
+            <option value="Cajero">Cajero</option>
+            <option value="Auxiliar de Bodega">Auxiliar de Bodega</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Salario</label>
+          <input type="number" id="salario" required />
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select id="estado" required>
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-buttons">
+        <button type="button" onclick="guardarEdicion()" class="btn-primary">
+          <i class="fa-solid fa-save"></i> Guardar Cambios
+        </button>
+        <button type="button" onclick="window.location.href='consulta.html'" class="button cancel">
+          <i class="fa-solid fa-times"></i> Cancelar
+        </button>
+      </div>
+    </form>
+  </main>
+
+  <div id="mensaje" class="mensaje-flotante"></div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+
+    async function cargarEmpleado() {
+      if (!id) {
+        mostrarMensaje('ID no encontrado', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://localhost:8080/api/empleado/${id}`);
+        if (!res.ok) throw new Error('Empleado no encontrado');
+        const emp = await res.json();
+
+        document.getElementById('idEmpleado').value = emp.id;
+        document.getElementById('tipoDoc').value = emp.tipoDocumento;
+        document.getElementById('numId').value = emp.numeroDocumento;
+        document.getElementById('nombres').value = emp.nombre;
+        document.getElementById('apellidos').value = emp.apellido;
+        document.getElementById('cargo').value = emp.cargo;
+        document.getElementById('salario').value = emp.salarioBase;
+        document.getElementById('estado').value = emp.estado;
+      } catch (error) {
+        mostrarMensaje('Error: ' + error.message, 'error');
+      }
+    }
+
+    function guardarEdicion() {
+      const empleado = {
+        tipoDocumento: document.getElementById('tipoDoc').value,
+        numeroDocumento: document.getElementById('numId').value,
+        nombre: document.getElementById('nombres').value,
+        apellido: document.getElementById('apellidos').value,
+        cargo: document.getElementById('cargo').value,
+        salarioBase: parseFloat(document.getElementById('salario').value),
+        estado: document.getElementById('estado').value,
+        idEmpresa: 1
+      };
+
+      fetch(`http://localhost:8080/api/empleado/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(empleado)
+      })
+        .then(res => {
+          if (!res.ok) throw new Error('Error al guardar');
+          mostrarMensaje('Empleado actualizado', 'exito');
+          setTimeout(() => window.location.href = 'consulta.html', 1500);
+        })
+        .catch(err => mostrarMensaje('Error: ' + err.message, 'error'));
+    }
+
+    function mostrarMensaje(texto, tipo = 'exito') {
+      const msg = document.getElementById('mensaje');
+      msg.textContent = texto;
+      msg.className = `mensaje-flotante ${tipo} mostrar`;
+      setTimeout(() => msg.className = 'mensaje-flotante', 3000);
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarEmpleado);
+  </script>
+</body>
+
+</html>

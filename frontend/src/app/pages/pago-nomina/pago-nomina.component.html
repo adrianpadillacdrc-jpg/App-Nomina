@@ -1,0 +1,120 @@
+<!-- src/app/pages/pago-nomina/pago-nomina.component.html -->
+<div class="page-wrapper">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+    <div class="pago-container">
+      <h1 class="page-title">Pago de Nómina</h1>
+
+      <!-- ENCABEZADO DEL PERÍODO ACTUAL -->
+      <div class="periodo-card" *ngIf="periodoActual">
+        <h2>
+          Nómina Actual:
+          <span class="descripcion-destacada">
+            {{ periodoActual.descripcion }}
+          </span>
+        </h2>
+        <p class="periodo-info">
+          <strong>Del:</strong> {{ periodoActual.fechaInicio | date:'dd/MM/yyyy' }}
+          <strong>al</strong> {{ periodoActual.fechaFin | date:'dd/MM/yyyy' }}
+        </p>
+        <p class="estado-periodo">
+          Estado:
+          <strong [class.abierto]="periodoActual.estado === 'ABIERTO'"
+            [class.cerrado]="periodoActual.estado === 'CERRADO'" class="estado-badge">
+            {{ periodoActual.estado }}
+          </strong>
+        </p>
+      </div>
+
+      <!-- MENSAJE SI NO HAY PERÍODO ACTIVO -->
+      <div class="alert warning" *ngIf="!periodoActual">
+        <p>No hay período de nómina activo.</p>
+        <p>Debes crear uno desde "Períodos Nómina" o al pagar la anterior quincena.</p>
+      </div>
+
+      <!-- ACCIONES SEGÚN ESTADO -->
+      <div class="actions-container">
+
+        <!-- SI ESTÁ ABIERTO → MOSTRAR BOTÓN PAGAR -->
+        <div class="actions-top" *ngIf="periodoActual?.estado === 'ABIERTO'">
+          <button class="btn-pagar grande" (click)="pagarNomina()" [disabled]="cargando || pagoGenerado">
+            <i class="fas fa-credit-card"></i>
+            {{ cargando ? 'PROCESANDO PAGO...' : pagoGenerado ? 'NÓMINA YA PAGADA' : 'PAGAR Y CERRAR NÓMINA' }}
+          </button>
+
+          <button class="btn-imprimir" (click)="imprimirComprobante()" [disabled]="!pagoGenerado">
+            <i class="fas fa-print"></i> Imprimir Comprobante
+          </button>
+        </div>
+
+        <!-- SI YA SE PAGÓ → MOSTRAR ÉXITO Y BOTÓN SIGUIENTE QUINCENA -->
+        <div class="success-banner" *ngIf="pagoGenerado">
+          <h3>Nómina pagada y cerrada correctamente</h3>
+          <p>Se ha generado el comprobante de pago.</p>
+
+          <button class="btn-new-period grande" (click)="crearSiguienteQuincena()" [disabled]="cargando">
+            <i class="fas fa-calendar-plus"></i>
+            Crear Siguiente Quincena
+          </button>
+        </div>
+
+        <!-- SI YA ESTÁ CERRADO (pero entraste después) -->
+        <div class="info-closed" *ngIf="periodoActual?.estado === 'CERRADO' && !pagoGenerado">
+          <p>Esta quincena ya fue pagada y cerrada.</p>
+          <button class="btn-new-period" (click)="crearSiguienteQuincena()">
+            Crear siguiente quincena
+          </button>
+        </div>
+      </div>
+
+      <!-- TABLA DE NÓMINA -->
+      <div class="table-card" *ngIf="nominaData.length > 0">
+        <div class="table-header">
+          <div>Empleado</div>
+          <div>Sueldo Base</div>
+          <div>Devengos</div>
+          <div>Deducciones</div>
+          <div>Total a Pagar</div>
+        </div>
+
+        <div class="table-row" *ngFor="let item of nominaData; trackBy: trackById">
+          <div class="empleado-nombre">
+            {{ item.nombre }} {{ item.apellido }}
+          </div>
+
+          <div class="sueldo-base">
+            $ {{ item.sueldoBase | number:'1.0-0' }}
+          </div>
+
+          <div class="devengo-col">
+            <div class="valor-devengo" [class.positive]="item.devengos > 0">
+              $ {{ item.devengos | number:'1.0-0' }}
+            </div>
+            <small *ngIf="item.devengos > 0">+ Devengos</small>
+          </div>
+
+          <div class="deduccion-col">
+            <div class="valor-deduccion" [class.negative]="item.deducciones > 0">
+              $ {{ item.deducciones | number:'1.0-0' }}
+            </div>
+            <small *ngIf="item.deducciones > 0">- Deducciones</small>
+          </div>
+
+          <div class="total-col highlight">
+            <strong>$ {{ item.totalPagar | number:'1.0-0' }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESTADO DE CARGA O VACÍO -->
+      <div class="empty-state" *ngIf="cargando">
+        <p>Cargando nómina...</p>
+      </div>
+
+      <div class="empty-state" *ngIf="!cargando && nominaData.length === 0">
+        <p>No hay empleados registrados aún.</p>
+      </div>
+    </div>
+  </main>
+</div>

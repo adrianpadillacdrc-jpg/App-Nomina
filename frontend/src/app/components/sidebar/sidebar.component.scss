@@ -1,0 +1,78 @@
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 240px;
+  height: 100vh;
+  background: white;
+  box-shadow: 0 0 30px rgba(0,0,0,0.1);
+  z-index: 1000;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+  padding: 0 20px;
+}
+
+.logo {
+  width: 200px;
+  height: 50px;
+  object-fit: contain;
+}
+
+.numa {
+  font-size: 28px;
+  font-weight: 800;
+  color: #4a148c;
+}
+
+.nomina {
+  font-size: 13px;
+  color: #7c4dff;
+  font-weight: 600;
+}
+
+.menu a {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 20px;
+  margin: 0 16px 8px;
+  border-radius: 50px;
+  color: #4a148c; /* ← MORADO OSCURO */
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.menu a:hover {
+  background: #f3e8ff;
+  padding-left: 25px;
+}
+
+.menu a.active {
+  background: #e3d4ff;
+  color: #4a148c;
+  box-shadow: 0 5px 15px rgba(74, 20, 140, 0.3);
+}
+
+.menu i {
+  font-size: 20px;
+  color: #4a148c;
+}
+
+.logout {
+  margin-top: auto;
+  color: #c62828;
+}
+
+.logout:hover {
+  background: #ffebee;
+}

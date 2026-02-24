@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>NUMA NÓMINA - Dashboard</title>
+  <link rel="stylesheet" href="estilos.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo-container">
+      <img src="assets/logc.png" alt="Logo" class="logo">
+      <svg class="brand-logo" viewBox="0 0 340 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <style>
+            .g-text {
+              font-family: 'Segoe UI', Arial, sans-serif;
+              font-weight: 800;
+              font-size: 64px
+            }
+
+            .g-small {
+              font-family: 'Segoe UI', Arial, sans-serif;
+              font-weight: 700;
+              font-size: 16px
+            }
+          </style>
+        </defs>
+        <text x="6" y="66" class="g-text" fill="#4a4a4f">NUMA</text>
+        <g transform="translate(120,12) scale(1.6)">
+          <circle cx="12" cy="20" r="10" fill="#6d5aa8" />
+          <circle cx="30" cy="12" r="14" fill="#6d5aa8" />
+          <circle cx="52" cy="20" r="10" fill="#6d5aa8" />
+          <rect x="14" y="20" width="40" height="14" rx="7" fill="#6d5aa8" />
+        </g>
+        <text x="240" y="78" class="g-small" fill="#6d5aa8">nomina</text>
+      </svg>
+    </div>
+    <nav class="menu">
+      <a href="#" class="active"><i class="fa-solid fa-house"></i><span>Inicio</span></a>
+      <a href="registro-empleados.html"><i class="fa-solid fa-user-plus"></i><span>Registrar</span></a>
+      <a href="liquidacion-nomina.html"><i class="fa-solid fa-file-invoice-dollar"></i><span>Liquidar</span></a>
+      <a href="consulta.html"><i class="fa-solid fa-magnifying-glass"></i><span>Consultar</span></a>
+      <a href="novedades-empleado.html"><i class="fa-solid fa-clipboard-list"></i><span>Novedades</span></a>
+      <a href="pago-nomina.html"><i class="fa-solid fa-money-check-dollar"></i><span>Pago Nómina</span></a>
+      <a href="login.html" onclick="cerrarSesion()"><i class="fa-solid fa-right-from-bracket"></i><span>Salir</span></a>
+    </nav>
+  </aside>
+
+  <!-- Contenido -->
+  <main class="content">
+    <header>
+      <h1>Dashboard Administrador</h1>
+      <a href="registro-empleados.html" class="btn-primary">
+        <i class="fa-solid fa-plus"></i> Nuevo empleado
+      </a>
+    </header>
+
+    <!-- TARJETAS COMO EN LA IMAGEN -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div id="totalEmpleados" class="num kpi-total">0</div>
+        <p>Total Empleados</p>
+      </div>
+      <div class="kpi-card">
+        <div id="liquidados" class="num kpi-liquidados">0</div>
+        <p>Liquidados</p>
+      </div>
+      <div class="kpi-card">
+        <div id="porcentajeLiquidado" class="num kpi-porcentaje">0%</div>
+        <p>% Liquidado</p>
+      </div>
+      <div class="kpi-card">
+        <div id="nominaMes" class="num kpi-nomina">$ 0</div>
+        <p>Nómina Mes</p>
+      </div>
+    </div>
+
+    <!-- Buscador -->
+    <input type="text" class="search-box" id="searchBox" placeholder="Buscar por nombre, documento o cargo..."
+      onkeyup="filtrarTabla()" />
+
+    <!-- Tabla -->
+    <table class="table" id="tablaDashboard">
+      <thead>
+        <tr>
+          <th>Documento</th>
+          <th>Nombre</th>
+          <th>Apellido</th>
+          <th>Cargo</th>
+          <th>Salario</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyDashboard"></tbody>
+    </table>
+  </main>
+
+  <div id="mensaje" class="mensaje-flotante"></div>
+
+  <script src="js/api.js"></script>
+  <script>
+    async function cargarEmpleados() {
+      try {
+        const res = await fetch('http://localhost:8080/api/empleado');
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`HTTP ${res.status}: ${text}`);
+        }
+        return await res.json();
+      } catch (error) {
+        console.error('Error al cargar empleados:', error);
+        alert('Error del servidor: ' + error.message + '\n\n¿Spring Boot está corriendo?\n¿Hay datos en la BD?');
+        return [];
+      }
+    }
+
+    // === DASHBOARD ===
+    async function cargarDashboard() {
+      const empleados = await cargarEmpleados();
+      const tbody = document.getElementById('tbodyDashboard');
+      if (!tbody) return;
+
+      tbody.innerHTML = '';
+      if (empleados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;">No hay empleados registrados</td></tr>';
+        return;
+      }
+
+      empleados.forEach(e => {
+        const tr = document.createElement('tr');
+        const estadoClase = e.estado === 'Activo' ? 'activo' : e.estado === 'Inactivo' ? 'inactivo' : 'pendiente';
+        tr.innerHTML = `
+        <td>${e.numeroDocumento || '-'}</td>
+        <td>${e.nombre || '-'}</td>
+        <td>${e.apellido || '-'}</td>
+        <td>${e.cargo || '-'}</td>
+        <td>$ ${(e.salarioBase || 0).toLocaleString('es-CO')}</td>
+        <td><span class="status ${estadoClase}">${e.estado || 'Pendiente'}</span></td>
+      `;
+        tbody.appendChild(tr);
+      });
+
+      // KPIs
+      const total = empleados.length;
+      const liquidados = empleados.filter(e => e.estado === 'Liquidado').length;
+      const nomina = empleados.reduce((sum, e) => sum + (e.salarioBase || 0), 0);
+      document.getElementById('totalEmpleados').textContent = total;
+      document.getElementById('liquidados').textContent = liquidados;
+      document.getElementById('porcentajeLiquidado').textContent = total > 0 ? Math.round((liquidados / total) * 100) + '%' : '0%';
+      document.getElementById('nominaMes').textContent = '$ ' + nomina.toLocaleString('es-CO');
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarDashboard);
+  </script>

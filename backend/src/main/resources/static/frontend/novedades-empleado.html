@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NUMA NÓMINA - Novedades</title>
+  <link rel="stylesheet" href="estilos.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #4a4a4f;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .btn-primary {
+      background: #6d5aa8;
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 25px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 10px;
+    }
+
+    .btn-primary:hover {
+      background: #5a4890;
+    }
+
+    .btn-delete {
+      background: #f44336;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 1em;
+    }
+
+    .mensaje-flotante {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      background: #4CAF50;
+      color: white;
+      border-radius: 10px;
+      font-weight: bold;
+      opacity: 0;
+      transition: opacity 0.5s;
+      z-index: 1000;
+    }
+
+    .mensaje-flotante.mostrar {
+      opacity: 1;
+    }
+
+    .mensaje-flotante.error {
+      background: #f44336;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .table th,
+    .table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+
+    .table th {
+      background-color: #f0f0f5;
+      color: #4a4a4f;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo-container">
+      <img src="assets/logc.png" alt="Logo" class="logo">
+      <svg class="brand-logo" viewBox="0 0 340 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <style>
+            .g-text {
+              font-family: 'Segoe UI', Arial, sans-serif;
+              font-weight: 800;
+              font-size: 64px
+            }
+
+            .g-small {
+              font-family: 'Segoe UI', Arial, sans-serif;
+              font-weight: 700;
+              font-size: 16px
+            }
+          </style>
+        </defs>
+        <text x="6" y="66" class="g-text" fill="#4a4a4f">NUMA</text>
+        <g transform="translate(120,12) scale(1.6)">
+          <circle cx="12" cy="20" r="10" fill="#6d5aa8" />
+          <circle cx="30" cy="12" r="14" fill="#6d5aa8" />
+          <circle cx="52" cy="20" r="10" fill="#6d5aa8" />
+          <rect x="14" y="20" width="40" height="14" rx="7" fill="#6d5aa8" />
+        </g>
+        <text x="240" y="78" class="g-small" fill="#6d5aa8">nomina</text>
+      </svg>
+    </div>
+    <nav class="menu">
+      <a href="dashboard-admin.html"><i class="fa-solid fa-house"></i><span>Inicio</span></a>
+      <a href="registro-empleados.html"><i class="fa-solid fa-user-plus"></i><span>Registrar</span></a>
+      <a href="liquidacion-nomina.html"><i class="fa-solid fa-file-invoice-dollar"></i><span>Liquidar</span></a>
+      <a href="consulta.html"><i class="fa-solid fa-magnifying-glass"></i><span>Consultar</span></a>
+      <a href="novedades-empleado.html" class="active"><i
+          class="fa-solid fa-clipboard-list"></i><span>Novedades</span></a>
+      <a href="pago-nomina.html"><i class="fa-solid fa-money-check-dollar"></i><span>Pago Nómina</span></a>
+      <a href="login.html" onclick="cerrarSesion()"><i class="fa-solid fa-right-from-bracket"></i><span>Salir</span></a>
+    </nav>
+  </aside>
+
+  <!-- CONTENIDO -->
+  <main class="content">
+    <h1>Novedades del Empleado</h1>
+
+    <!-- BUSCADOR -->
+    <input type="text" id="searchEmpleado" class="search-box"
+      placeholder="Buscar empleado por nombre, apellido o documento..." />
+
+    <!-- INFO DEL EMPLEADO -->
+    <div id="infoEmpleado"
+      style="display:none; margin:20px 0; padding:15px; background:#f9f5ff; border-radius:10px; border:1px solid #6d5aa8;">
+      <h3 id="nombreEmpleado" style="margin:0 0 10px 0; color:#6d5aa8;"></h3>
+      <p><strong>Sueldo Base:</strong> <span id="sueldoBase"></span></p>
+      <p><strong>Período:</strong> <span id="periodoActual"></span></p>
+    </div>
+
+    <!-- FORMULARIO DE NOVEDAD -->
+    <div class="form-grid" id="formNovedad" style="display:none;">
+      <div class="form-group">
+        <label>Tipo de Novedad</label>
+        <select id="tipoNovedad" onchange="cargarCombo()">
+          <option value="DEVENGO">Devengo (+)</option>
+          <option value="DEDUCCION">Deducción (-)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Descripción</label>
+        <select id="descripcionNovedad">
+          <option value="">Seleccione...</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Valor ($)</label>
+        <input type="number" id="valorNovedad" placeholder="Ej: 250000" min="0" step="1000" />
+      </div>
+      <div class="form-group" style="grid-column: span 3;">
+        <button onclick="guardarNovedad()" class="btn-primary">Agregar Novedad</button>
+      </div>
+    </div>
+
+    <!-- TABLA DE NOVEDADES -->
+    <table class="table" id="tablaNovedades" style="display:none;">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Descripción</th>
+          <th>Valor</th>
+          <th>Fecha</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyNovedades"></tbody>
+    </table>
+
+    <!-- RESUMEN DEL MES (SIN BOTÓN PAGAR) -->
+    <div id="resumenMes" style="margin-top:30px; padding:20px; background:#e6d9ff; border-radius:10px; display:none;">
+      <h3>Resumen del Mes</h3>
+      <p><strong>Total Devengos:</strong> <span id="totalDevengos">$0</span></p>
+      <p><strong>Total Deducciones:</strong> <span id="totalDeducciones">$0</span></p>
+      <p><strong>Sueldo a Pagar:</strong> <span id="sueldoFinal"
+          style="font-size:1.5em; color:#6d5aa8; font-weight:bold;"></span></p>
+      <p style="color:#6d5aa8; font-style:italic; margin-top:15px; font-size:0.95em;">
+        El pago se realiza en <strong>Pago Nómina</strong>
+      </p>
+    </div>
+  </main>
+
+  <!-- MENSAJE FLOTANTE -->
+  <div id="mensaje" class="mensaje-flotante"></div>
+
+  <!-- SCRIPT -->
+  <script>
+    let empleadoActual = null;
+    const periodo = new Date().toISOString().slice(0, 7); // "2025-11"
+
+    const opciones = {
+      DEVENGOS: ["Bono", "Hora Extra", "Comisión", "Auxilio Transporte", "Otros Ingresos"],
+      DEDUCCIONES: ["Falta", "Llegada Tarde", "Salida Temprano", "Préstamo", "Multa", "Otros Descuentos"]
+    };
+
+    async function cargarEmpleados() {
+      try {
+        const res = await fetch('http://localhost:8080/api/empleado');
+        if (!res.ok) throw new Error('Error al cargar empleados');
+        return await res.json();
+      } catch (e) {
+        mostrarMensaje('Error de conexión con empleados', 'error');
+        return [];
+      }
+    }
+
+    function buscarEmpleado() {
+      const term = document.getElementById('searchEmpleado').value.trim().toLowerCase();
+      if (term.length < 3) return;
+
+      cargarEmpleados().then(empleados => {
+        const encontrado = empleados.find(e =>
+          e.nombre.toLowerCase().includes(term) ||
+          e.apellido.toLowerCase().includes(term) ||
+          e.numeroDocumento.includes(term)
+        );
+        if (encontrado) {
+          seleccionarEmpleado(encontrado);
+        } else {
+          mostrarMensaje('Empleado no encontrado', 'error');
+        }
+      });
+    }
+
+    function seleccionarEmpleado(emp) {
+      empleadoActual = emp;
+      document.getElementById('infoEmpleado').style.display = 'block';
+      document.getElementById('nombreEmpleado').textContent = `${emp.nombre} ${emp.apellido}`;
+      document.getElementById('sueldoBase').textContent = `$ ${Number(emp.salarioBase).toLocaleString('es-CO')}`;
+      document.getElementById('periodoActual').textContent = periodo;
+
+      cargarComboInicial();
+      cargarNovedades();
+      document.getElementById('formNovedad').style.display = 'grid';
+    }
+
+    function cargarComboInicial() {
+      const tipoSelect = document.getElementById('tipoNovedad');
+      tipoSelect.innerHTML = `
+        <option value="DEVENGO">Devengo (+)</option>
+        <option value="DEDUCCION">Deducción (-)</option>
+      `;
+      cargarCombo();
+    }
+
+    function cargarCombo() {
+      const tipo = document.getElementById('tipoNovedad').value;
+      const descSelect = document.getElementById('descripcionNovedad');
+      descSelect.innerHTML = '<option value="">Seleccione...</option>';
+      const lista = tipo === 'DEVENGO' ? opciones.DEVENGOS : opciones.DEDUCCIONES;
+      lista.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item;
+        opt.textContent = item;
+        descSelect.appendChild(opt);
+      });
+    }
+
+    async function cargarNovedades() {
+      try {
+        const res = await fetch(`http://localhost:8080/api/novedad/empleado/${empleadoActual.id}/${periodo}`);
+        const novedades = await res.json();
+        const tbody = document.getElementById('tbodyNovedades');
+        tbody.innerHTML = '';
+
+        let totalDev = 0, totalDed = 0;
+        novedades.forEach(n => {
+          const tr = document.createElement('tr');
+          const signo = n.tipo === 'DEVENGO' ? '+' : '-';
+          tr.innerHTML = `
+            <td><strong>${n.tipo}</strong></td>
+            <td>${n.descripcion}</td>
+            <td>${signo}$ ${Number(n.valor).toLocaleString('es-CO')}</td>
+            <td>${n.fecha}</td>
+            <td><button class="btn-delete" onclick="eliminarNovedad('${n.id}')">Eliminar</button></td>
+          `;
+          tbody.appendChild(tr);
+          if (n.tipo === 'DEVENGO') totalDev += n.valor;
+          else totalDed += n.valor;
+        });
+
+        const sueldoFinal = empleadoActual.salarioBase + totalDev - totalDed;
+        document.getElementById('totalDevengos').textContent = `$ ${totalDev.toLocaleString('es-CO')}`;
+        document.getElementById('totalDeducciones').textContent = `$ ${totalDed.toLocaleString('es-CO')}`;
+        document.getElementById('sueldoFinal').textContent = `$ ${sueldoFinal.toLocaleString('es-CO')}`;
+        document.getElementById('resumenMes').style.display = 'block';
+        document.getElementById('tablaNovedades').style.display = 'table';
+      } catch (e) {
+        mostrarMensaje('Error al cargar novedades', 'error');
+      }
+    }
+
+    function guardarNovedad() {
+      const valor = parseFloat(document.getElementById('valorNovedad').value);
+      if (!valor || valor <= 0) return mostrarMensaje('Ingresa un valor válido', 'error');
+
+      const novedad = {
+        empleadoId: empleadoActual.id,
+        tipo: document.getElementById('tipoNovedad').value,
+        descripcion: document.getElementById('descripcionNovedad').value,
+        valor: valor,
+        periodo: periodo
+      };
+
+      fetch('http://localhost:8080/api/novedad', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(novedad)
+      })
+        .then(() => {
+          mostrarMensaje('Novedad agregada', 'exito');
+          document.getElementById('valorNovedad').value = '';
+          cargarNovedades();
+        })
+        .catch(() => mostrarMensaje('Error al guardar', 'error'));
+    }
+
+    function eliminarNovedad(id) {
+      if (confirm('¿Eliminar esta novedad?')) {
+        fetch(`http://localhost:8080/api/novedad/${id}`, { method: 'DELETE' })
+          .then(() => {
+            mostrarMensaje('Novedad eliminada', 'exito');
+            cargarNovedades();
+          });
+      }
+    }
+
+    function mostrarMensaje(texto, tipo = 'exito') {
+      const msg = document.getElementById('mensaje');
+      msg.textContent = texto;
+      msg.className = `mensaje-flotante ${tipo} mostrar`;
+      setTimeout(() => msg.className = 'mensaje-flotante', 3000);
+    }
+
+    // EVENTOS
+    document.getElementById('searchEmpleado').addEventListener('keyup', buscarEmpleado);
+  </script>
+</body>
+
+</html>

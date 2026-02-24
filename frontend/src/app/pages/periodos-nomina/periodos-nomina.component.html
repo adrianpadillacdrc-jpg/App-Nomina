@@ -1,0 +1,57 @@
+<!-- src/app/pages/periodos-nomina/periodos-nomina.component.html -->
+<div class="page-wrapper">
+  <app-sidebar></app-sidebar>
+  <main class="main-content">
+    <div class="periodos-container">
+      <h1 class="page-title">Períodos de Nómina</h1>
+
+      <div class="periodos-grid">
+        <div class="periodo-card" *ngFor="let periodo of periodos">
+          <div class="info">
+            <h3>{{ periodo.descripcion }}</h3>
+            <p><strong>Del:</strong> {{ periodo.fechaInicio | date:'dd/MM/yyyy' }}</p>
+            <p><strong>Al:</strong> {{ periodo.fechaFin | date:'dd/MM/yyyy' }}</p>
+            <p><strong>Estado:</strong>
+              <span [class.cerrado]="periodo.estado === 'CERRADO'" 
+                    [class.abierto]="periodo.estado === 'ABIERTO'">
+                {{ periodo.estado }}
+              </span>
+            </p>
+          </div>
+          <button class="btn-ver" (click)="verNominaPeriodo(periodo)">
+            Ver Nómina
+          </button>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="periodos.length === 0">
+        No hay períodos registrados
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL NÓMINA HISTÓRICA -->
+<div class="modal" *ngIf="mostrarModalNomina">
+  <div class="modal-content large" (click)="$event.stopPropagation()">
+    <h2>Nómina - {{ periodoSeleccionado?.descripcion }}</h2>
+    <button class="btn-cerrar" (click)="cerrarModal()">X</button>
+
+    <div class="tabla-nomina">
+      <div class="header">
+        <div>Empleado</div>
+        <div>Sueldo Base</div>
+        <div>Devengos</div>
+        <div>Deducciones</div>
+        <div>Total Pagado</div>
+      </div>
+      <div class="row" *ngFor="let item of nominaHistorica">
+        <div>{{ item.nombre }} {{ item.apellido }}</div>
+        <div>$ {{ item.sueldoBase | number }}</div>
+        <div class="devengo">$ {{ item.devengos | number }}</div>
+        <div class="deduccion">$ {{ item.deducciones | number }}</div>
+        <div class="total">$ {{ item.totalPagar | number }}</div>
+      </div>
+    </div>
+  </div>
+</div>

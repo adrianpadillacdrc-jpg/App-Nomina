@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NUMA NÓMINA - Pago Nómina</title>
+  <link rel="stylesheet" href="estilos.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+
+    .table th,
+    .table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .table th {
+      background-color: #f0f0f5;
+      color: #4a4a4f;
+    }
+
+    .btn-primary {
+      background: #6d5aa8;
+      color: white;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 25px;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .btn-primary:hover {
+      background: #5a4890;
+    }
+
+    .btn-primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .mensaje-flotante {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      background: #4CAF50;
+      color: white;
+      border-radius: 10px;
+      font-weight: bold;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+
+    .mensaje-flotante.mostrar {
+      opacity: 1;
+    }
+
+    .mensaje-flotante.error {
+      background: #f44336;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo-container">
+      <img src="assets/logc.png" alt="Logo" class="logo">
+      <svg class="brand-logo" viewBox="0 0 340 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <style>
+            .g-text {
+              font-family: 'Segoe UI', Arial, sans-serif;
+              font-weight: 800;
+              font-size: 64px
+            }
+
+            .g-small {
+              font-family: 'Segoe UI', Arial, sans-serif;
+              font-weight: 700;
+              font-size: 16px
+            }
+          </style>
+        </defs>
+        <text x="6" y="66" class="g-text" fill="#4a4a4f">NUMA</text>
+        <g transform="translate(120,12) scale(1.6)">
+          <circle cx="12" cy="20" r="10" fill="#6d5aa8" />
+          <circle cx="30" cy="12" r="14" fill="#6d5aa8" />
+          <circle cx="52" cy="20" r="10" fill="#6d5aa8" />
+          <rect x="14" y="20" width="40" height="14" rx="7" fill="#6d5aa8" />
+        </g>
+        <text x="240" y="78" class="g-small" fill="#6d5aa8">nomina</text>
+      </svg>
+    </div>
+    <nav class="menu">
+      <a href="dashboard-admin.html"><i class="fa-solid fa-house"></i><span>Inicio</span></a>
+      <a href="registro-empleados.html"><i class="fa-solid fa-user-plus"></i><span>Registrar</span></a>
+      <a href="liquidacion-nomina.html"><i class="fa-solid fa-file-invoice-dollar"></i><span>Liquidar</span></a>
+      <a href="consulta.html"><i class="fa-solid fa-magnifying-glass"></i><span>Consultar</span></a>
+      <a href="novedades-empleado.html"><i class="fa-solid fa-clipboard-list"></i><span>Novedades</span></a>
+      <a href="pago-nomina.html" class="active"><i class="fa-solid fa-money-check-dollar"></i><span>Pago
+          Nómina</span></a>
+      <a href="login.html" onclick="cerrarSesion()"><i class="fa-solid fa-right-from-bracket"></i><span>Salir</span></a>
+    </nav>
+  </aside>
+
+  <!-- CONTENIDO -->
+  <main class="content">
+    <h1>Pago de Nómina</h1>
+
+    <!-- TÍTULO DEL PERÍODO -->
+    <div id="tituloPeriodo"
+      style="text-align:center; margin:20px 0; padding:20px; background:#6d5aa8; color:white; border-radius:15px;">
+      <h2>Cargando período...</h2>
+    </div>
+
+    <!-- TABLA DE EMPLEADOS -->
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Empleado</th>
+          <th>Sueldo Base</th>
+          <th>Devengos</th>
+          <th>Deducciones</th>
+          <th>Total a Pagar</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyNomina">
+        <tr>
+          <td colspan="5" style="text-align:center; color:#999;">Cargando empleados...</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- BOTÓN PAGAR -->
+    <div style="text-align:center; margin:30px 0;">
+      <button id="btnPagar" class="btn-primary" style="font-size:1.3em; padding:15px 50px;">
+        CARGANDO...
+      </button>
+    </div>
+  </main>
+
+  <!-- MENSAJE FLOTANTE -->
+  <div id="mensaje" class="mensaje-flotante"></div>
+
+  <!-- SCRIPT -->
+  <script>
+    let periodoActual = null;
+
+    async function cargarPeriodo() {
+      try {
+        const res = await fetch('http://localhost:8080/api/periodo/actual');
+        if (!res.ok) throw new Error('Error al cargar período');
+        periodoActual = await res.json();
+
+        document.getElementById('tituloPeriodo').innerHTML = `
+          <h2>Nómina - ${periodoActual.nombre}</h2>
+          <p style="margin:5px 0; font-size:1em; opacity:0.9;">
+            Estado: <strong>${periodoActual.estado}</strong>
+          </p>
+        `;
+
+        cargarNomina();
+      } catch (error) {
+        mostrarMensaje('Error: ' + error.message, 'error');
+      }
+    }
+
+    async function cargarNomina() {
+      try {
+        const [empleadosRes, novedadesRes] = await Promise.all([
+          fetch('http://localhost:8080/api/empleado'),
+          fetch(`http://localhost:8080/api/novedad/periodo/${periodoActual.periodoKey}`)
+        ]);
+
+        if (!empleadosRes.ok || !novedadesRes.ok) throw new Error('Error al cargar datos');
+
+        const empleados = await empleadosRes.json();
+        const novedades = await novedadesRes.json();
+        const tbody = document.getElementById('tbodyNomina');
+        tbody.innerHTML = '';
+
+        let totalGeneral = 0;
+
+        empleados.forEach(emp => {
+          const novEmp = novedades.filter(n => n.empleadoId === emp.id);
+          let devengos = 0, deducciones = 0;
+
+          novEmp.forEach(n => {
+            if (n.tipo === 'DEVENGO') devengos += n.valor;
+            else deducciones += n.valor;
+          });
+
+          const total = emp.salarioBase + devengos - deducciones;
+          totalGeneral += total;
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${emp.nombre} ${emp.apellido}</strong></td>
+            <td>$ ${emp.salarioBase.toLocaleString('es-CO')}</td>
+            <td style="color:green; font-weight:bold;">+ $ ${devengos.toLocaleString('es-CO')}</td>
+            <td style="color:red; font-weight:bold;">- $ ${deducciones.toLocaleString('es-CO')}</td>
+            <td style="font-weight:bold; color:#6d5aa8;">$ ${total.toLocaleString('es-CO')}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        // Total general
+        const footer = document.createElement('tr');
+        footer.style.backgroundColor = '#f0f0f5';
+        footer.innerHTML = `
+          <td colspan="4" style="text-align:right; font-weight:bold; font-size:1.1em;">
+            TOTAL GENERAL A PAGAR:
+          </td>
+          <td style="font-weight:bold; font-size:1.3em; color:#6d5aa8;">
+            $ ${totalGeneral.toLocaleString('es-CO')}
+          </td>
+        `;
+        tbody.appendChild(footer);
+
+        // Botón
+        const btn = document.getElementById('btnPagar');
+        btn.disabled = periodoActual.estado === 'PAGADO';
+        btn.textContent = periodoActual.estado === 'PAGADO'
+          ? 'NÓMINA YA PAGADA'
+          : 'PAGAR PERIODO NÓMINA';
+
+      } catch (error) {
+        mostrarMensaje('Error al cargar nómina: ' + error.message, 'error');
+      }
+    }
+
+    function pagarNomina() {
+      if (confirm(`¿Estás seguro de pagar la nómina de ${periodoActual.nombre}?\n\nEsta acción no se puede deshacer.`)) {
+        fetch(`http://localhost:8080/api/periodo/pagar/${periodoActual.id}`, {
+          method: 'POST'
+        })
+          .then(res => {
+            if (!res.ok) throw new Error('Error al pagar');
+            mostrarMensaje('¡Nómina pagada con éxito! Pasando al siguiente período...', 'exito');
+            setTimeout(() => location.reload(), 2000);
+          })
+          .catch(() => mostrarMensaje('Error al procesar el pago', 'error'));
+      }
+    }
+
+    function mostrarMensaje(texto, tipo = 'exito') {
+      const msg = document.getElementById('mensaje');
+      msg.textContent = texto;
+      msg.className = `mensaje-flotante ${tipo} mostrar`;
+      setTimeout(() => msg.className = 'mensaje-flotante', 3000);
+    }
+
+    // INICIAR
+    document.addEventListener('DOMContentLoaded', cargarPeriodo);
+  </script>
+</body>
+
+</html>

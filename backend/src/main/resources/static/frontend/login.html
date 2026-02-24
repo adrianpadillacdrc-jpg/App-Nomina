@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>NUMA NOMINA - Login</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-box">
+      <h1>NUMA NOMINA</h1>
+      <form onsubmit="login(); return false;">
+        <div class="form-group">
+          <label for="usuario">USUARIO</label>
+          <input type="text" id="usuario" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="contrasena">CONTRASEÑA</label>
+          <input type="password" id="contrasena" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="button">Iniciar Sesión</button>
+        <p><a href="#">¿Olvidó su contraseña?</a></p>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

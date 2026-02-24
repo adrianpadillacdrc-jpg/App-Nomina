@@ -1,0 +1,149 @@
+.main-content {
+  margin-left: 240px;
+  padding: 40px;
+  min-height: 100vh;
+  background: transparent;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 35px;
+}
+
+.header h1 {
+  color: white;
+  font-size: 28px;
+  font-weight: 700;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.btn-new {
+  background: linear-gradient(135deg, #9c27b0, #6a1b9a);
+  color: white;
+  border: none;
+  padding: 10px 28px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 5px 18px rgba(106, 27, 154, 0.4);
+  transition: all 0.3s;
+}
+
+.btn-new:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(106, 27, 154, 0.5);
+}
+
+/* KPIs */
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 35px;
+}
+
+.kpi-card {
+  background: white;
+  padding: 28px 20px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+.kpi-card:hover {
+  transform: translateY(-3px);
+}
+
+.kpi-card .num {
+  font-size: 42px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  display: block;
+  color: #4a148c; /* ← MORADO OSCURO */
+}
+
+.kpi-card .num.green { color: #27ae60; }
+.kpi-card .num.orange { color: #f39c12; }
+.kpi-card .num.red { color: #e74c3c; }
+
+/* Búsqueda */
+.search-bar {
+  margin-bottom: 25px;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 16px 24px;
+  border: none;
+  border-radius: 50px;
+  background: white;
+  font-size: 15px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+  outline: none;
+  transition: all 0.3s;
+}
+
+.search-bar input:focus {
+  box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+}
+
+/* Tabla */
+.table-container {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #f5f0ff;
+}
+
+th {
+  padding: 16px 20px;
+  text-align: left;
+  color: #6d5aa8;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+td {
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+.status {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.status.activo {
+  background: #d5f5e3;
+  color: #27ae60;
+}
+
+.empty, .loading {
+  text-align: center;
+  padding: 50px;
+  color: #bbb;
+  font-style: italic;
+  font-size: 15px;
+}
+
+.loading {
+  color: #999;
+}

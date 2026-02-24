@@ -1,0 +1,47 @@
+<!-- src/app/pages/consultar-empleados/actualizar-empleado/actualizar-empleado.component.html -->
+<div class="actualizar-container" *ngIf="empleado">
+    <div class="header">
+        <h1>Actualizar Datos del Empleado</h1>
+        <button class="btn-cerrar" (click)="cerrarFormulario()">X</button>
+    </div>
+
+    <div class="empleado-card">
+        <img [src]="empleado.foto || '/assets/user-default.png'" alt="Foto" class="foto-empleado">
+        <h2>{{ empleado.nombre }} {{ empleado.apellido }}</h2>
+        <p><strong>Documento:</strong> {{ empleado.documento }}</p>
+    </div>
+
+    <form (ngSubmit)="guardar()" class="form-actualizar">
+        <div class="form-grid">
+            <div class="input-group">
+                <label>Nombre</label>
+                <input type="text" [(ngModel)]="form.nombre" name="nombre" required>
+            </div>
+            <div class="input-group">
+                <label>Apellido</label>
+                <input type="text" [(ngModel)]="form.apellido" name="apellido" required>
+            </div>
+            <div class="input-group">
+                <label>Cargo</label>
+                <input type="text" [(ngModel)]="form.cargo" name="cargo" required>
+            </div>
+            <div class="input-group">
+                <label>Salario Base</label>
+                <input type="number" [(ngModel)]="form.salarioBase" name="salarioBase" required>
+            </div>
+            <div class="input-group full">
+                <label>Documento</label>
+                <input type="text" [(ngModel)]="form.numeroDocumento" name="numeroDocumento" required>
+            </div>
+        </div>
+
+        <div class="acciones">
+            <button type="button" class="btn-cancelar" (click)="cerrarFormulario()">
+                Cancelar
+            </button>
+            <button type="submit" class="btn-guardar">
+                Guardar Cambios
+            </button>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>NUMA NÓMINA - Registro Administrativo</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="estilos.css" />
+
+
+</head>
+
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo-container">
+      <img src="assets/logc.png" alt="Logo" class="logo">
+      <i class="fa-solid fa-user-tie logo-icon"></i>
+    </div>
+    <nav class="menu">
+      <a href="dashboard-admin.html"><i class="fa-solid fa-house"></i><span class="link-text">Inicio</span></a>
+      <a href="registro-empleados.html" class="active"><i class="fa-solid fa-user-plus"></i><span
+          class="link-text">Registrar</span></a>
+      <a href="liquidacion-nomina.html"><i class="fa-solid fa-file-invoice-dollar"></i><span
+          class="link-text">Liquidar</span></a>
+      <a href="consulta.html"><i class="fa-solid fa-magnifying-glass"></i><span class="link-text">Consultar</span></a>
+      <a href="novedades-empleado.html"><i class="fa-solid fa-clipboard-list"></i><span>Novedades</span></a>
+      <a href="seccion-finalizada.html" onclick="cerrarSesion()"><i class="fa-solid fa-right-from-bracket"></i><span class="link-text">Salir</span></a>
+      <a href="pago-nomina.html"><i class="fa-solid fa-money-check-dollar"></i><span>Pago Nómina</span></a>
+    </nav>
+    <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+  </aside>
+
+  <!-- Contenido -->
+  <main class="content">
+    <h1>Registro Administrativo</h1>
+
+    <!-- Datos Personales -->
+    <section class="form-section">
+      <h2><i class="fa-solid fa-id-card"></i> Datos Personales</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Tipo de Documento</label>
+          <select id="tipoDoc">
+            <option>Seleccione</option>
+            <option>C.C.</option>
+            <option>C.E.</option>
+            <option>Pasaporte</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Número de Identificación</label>
+          <input type="text" id="numId" placeholder="Ej: 12345678" />
+        </div>
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="nombres" placeholder="Ej: Juan Carlos" />
+        </div>
+        <div class="form-group">
+          <label>Apellido</label>
+          <input type="text" id="apellidos" placeholder="Ej: Pérez Rodríguez" />
+        </div>
+        <div class="form-group">
+          <label>Edad</label>
+          <input type="number" id="edad" placeholder="Ej: 32" />
+        </div>
+        <div class="form-group">
+          <label>Género</label>
+          <select id="genero">
+            <option>Masculino</option>
+            <option>Femenino</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="form-group full-width">
+          <label>Dirección</label>
+          <input type="text" id="direccion" placeholder="Calle, Carrera, Ciudad" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Datos Laborales -->
+    <section class="form-section">
+      <h2>Datos Laborales</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Cargo</label>
+          <select id="cargo">
+            <option value="" disabled selected>Seleccione un cargo</option>
+            <option value="Administrador">Administrador</option>
+            <option value="Ventas">Ventas</option>
+            <option value="Cajero">Cajero</option>
+            <option value="Auxiliar de Bodega">Auxiliar de Bodega</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tipo de Contrato</label>
+          <select id="tipo_contrato">
+            <option value="" disabled selected>Seleccione</option>
+            <option>Indefinido</option>
+            <option>Fijo</option>
+            <option>Por Obra</option>
+            <option>Aprendizaje</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Salario</label>
+          <input type="number" id="salario" placeholder="Ej: 2500000" />
+        </div>
+        <div class="form-group">
+          <label>Estado</label>
+          <select id="estado">
+            <option value="" disabled selected>Seleccione</option>
+            <option>Activo</option>
+            <option>Inactivo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Empresa</label>
+          <div class="fixed-value">NUMA STORE</div>
+          <input type="hidden" id="empresa" value="NUMA STORE">
+        </div>
+        <div class="form-group">
+          <label>Correo Empresarial</label>
+          <input type="email" id="correo" placeholder="usuario@empresa.com" />
+        </div>
+        <div class="form-group">
+          <label>Fecha de Inicio</label>
+          <input type="date" id="fechaInicio" />
+        </div>
+        <div class="form-group">
+          <label>Fecha de Fin</label>
+          <input type="date" id="fechaFin" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Campo oculto para ID -->
+    <input type="hidden" id="id">
+
+    <!-- Botones -->
+    <div class="form-buttons">
+      <button class="button" onclick="guardarRegistro()">
+        <i class="fa-solid fa-save"></i> Guardar Registro
+      </button>
+      <button class="button cancel" onclick="cancelarRegistro()">
+        <i class="fa-solid fa-times"></i> Cancelar Registro
+      </button>
+    </div>
+  </main>
+
+  <!-- Mensaje flotante -->
+  <div id="mensaje" class="mensaje-flotante"></div>
+  <script>
+    function guardarRegistro() {
+      // === RECOGER DATOS CON NOMBRES EXACTOS PARA JAVA ===
+      const empleado = {
+        tipoDocumento: document.getElementById('tipoDoc').value,
+        numeroDocumento: document.getElementById('numId').value,  // ← COINCIDE
+        nombre: document.getElementById('nombres').value,
+        apellido: document.getElementById('apellidos').value,
+        edad: document.getElementById('edad').value ? parseInt(document.getElementById('edad').value) : null,
+        genero: document.getElementById('genero').value || null,
+        direccion: document.getElementById('direccion').value || null,
+        correo: document.getElementById('correo').value || null,
+        cargo: document.getElementById('cargo').value,
+        tipoContrato: document.getElementById('tipo_contrato').value,
+        fechaInicioContrato: document.getElementById('fechaInicio').value,  // ← COINCIDE
+        fechaFinContrato: document.getElementById('fechaFin').value || null, // ← COINCIDE
+        salarioBase: document.getElementById('salario').value ? parseFloat(document.getElementById('salario').value) : null,
+        estado: document.getElementById('estado').value,
+        idEmpresa: 1  // ← POR DEFECTO
+      };
+
+      // === VALIDACIÓN ===
+      const required = ['tipoDocumento', 'numeroDocumento', 'nombre', 'apellido', 'cargo', 'tipoContrato', 'salarioBase', 'estado', 'fechaInicioContrato'];
+      for (let field of required) {
+        if (!empleado[field]) {
+          mostrarMensaje('Completa todos los campos obligatorios', 'error');
+          return;
+        }
+      }
+
+      // === ENVÍO AL BACKEND (RUTA CORRECTA) ===
+      fetch('http://localhost:8080/api/empleado', {  // ← RUTA CORRECTA
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(empleado)
+      })
+        .then(res => {
+          if (!res.ok) {
+            return res.text().then(text => { throw new Error(text || 'Error del servidor') });
+          }
+          return res.json();
+        })
+        .then(data => {
+          mostrarMensaje('Empleado registrado con éxito', 'exito');
+          setTimeout(() => window.location.href = 'dashboard-admin.html', 1500);
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          mostrarMensaje('Error: ' + err.message, 'error');
+        });
+    }
+
+    function cancelarRegistro() {
+      if (confirm('¿Cancelar el registro?')) {
+        document.querySelectorAll('input, select').forEach(el => {
+          if (el.type !== 'hidden') el.value = '';
+        });
+        mostrarMensaje('Registro cancelado', 'error');
+      }
+    }
+
+    function mostrarMensaje(texto, tipo) {
+      const msg = document.getElementById('mensaje');
+      msg.textContent = texto;
+      msg.className = `mensaje-flotante ${tipo} mostrar`;
+      setTimeout(() => msg.className = 'mensaje-flotante', 3000);
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    }
+  </script>

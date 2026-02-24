@@ -1,0 +1,292 @@
+/* FONDO Y TARJETA PRINCIPAL */
+.fondo {
+    min-height: 100vh;
+    background: url('/assets/numa.jpg') center/cover no-repeat fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border-radius: 30px;
+    padding: 40px;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+h2 {
+    color: #26004d;
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.salir {
+    background: #c62828;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.salir:hover {
+    background: #b71c1c;
+}
+
+.barra {
+    width: 100%;
+    padding: 18px;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.resultado {
+    background: rgba(255, 255, 255, 0.25);
+    padding: 30px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+}
+
+.ver-nomina {
+    margin-top: 25px;
+    background: #6a1b9a;
+    color: white;
+    border: none;
+    padding: 18px;
+    width: 100%;
+    border-radius: 50px;
+    font-size: 1.3rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.ver-nomina:hover {
+    background: #4a148c;
+    transform: translateY(-2px);
+}
+
+.no-encontrado {
+    color: #ff8a80;
+    margin-top: 20px;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+/* OVERLAY Y MODAL CORREGIDOS (AHORA SÍ SE VE TODO Y HAY SCROLL) */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    /* ← Cambiado para que empiece arriba */
+    padding: 20px 10px;
+    overflow-y: auto;
+    /* ← Permite scroll */
+    z-index: 9999;
+}
+
+.modal {
+    background: white;
+    color: #000;
+    border-radius: 20px;
+    width: 95%;
+    max-width: 900px;
+    margin: 20px auto;
+    position: relative;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+    max-height: 95vh;
+    overflow-y: auto;
+    /* ← Scroll interno */
+    padding: 30px;
+}
+
+.cerrar {
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    font-size: 2.8rem;
+    cursor: pointer;
+    color: #c62828;
+    font-weight: bold;
+    z-index: 10;
+}
+
+.cerrar:hover {
+    color: #b71c1c;
+}
+
+/* COMPROBANTE ESTILO COLOMBIA REAL - 100% PROFESIONAL */
+.comprobante-colombia {
+    font-family: 'Courier New', monospace;
+    background: white;
+    color: #000;
+    padding: 10px;
+    line-height: 1.6;
+}
+
+.header-comprobante {
+    text-align: center;
+    margin-bottom: 25px;
+    border-bottom: 3px double #000;
+    padding-bottom: 15px;
+}
+
+.header-comprobante h1 {
+    font-size: 1.8em;
+    margin: 0;
+    color: #6a1b9a;
+    font-weight: bold;
+}
+
+.header-comprobante h2 {
+    font-size: 1.5em;
+    margin: 8px 0;
+}
+
+.info-empleado {
+    margin: 25px 0;
+    font-size: 1.15em;
+    line-height: 2;
+}
+
+.tabla-nomina {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 30px 0;
+    font-size: 1.05em;
+    border: 2px solid #000;
+}
+
+.tabla-nomina th {
+    background: #6a1b9a;
+    color: white;
+    padding: 12px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.tabla-nomina th.devengo {
+    background: #2e7d32;
+}
+
+.tabla-nomina th.deduccion {
+    background: #c62828;
+}
+
+.tabla-nomina td {
+    border: 1px solid #000;
+    padding: 10px;
+    text-align: left;
+}
+
+.tabla-nomina td.valor {
+    text-align: right;
+    font-weight: bold;
+    font-family: monospace;
+}
+
+.totales {
+    background: #e8f5e8 !important;
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
+.liquido-final {
+    text-align: center;
+    margin: 40px 0;
+}
+
+.caja-liquido {
+    display: inline-block;
+    border: 5px double #000;
+    padding: 20px 60px;
+    background: #f9f9f9;
+    font-size: 1.4em;
+}
+
+.monto-grande {
+    font-size: 2.4em;
+    font-weight: bold;
+    color: #2e7d32;
+}
+
+.firma {
+    text-align: center;
+    margin-top: 60px;
+    font-size: 1.3em;
+}
+
+/* BOTÓN IMPRIMIR FIJO Y BONITO */
+.imprimir {
+    position: sticky;
+    bottom: 10px;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    background: #2e7d32;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.5em;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 30px;
+    box-shadow: 0 8px 20px rgba(46, 125, 50, 0.4);
+    transition: all 0.3s;
+}
+
+.imprimir:hover {
+    background: #1b5e20;
+    transform: translateY(-3px);
+}
+
+/* IMPRIMIR PERFECTO */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    #comprobante,
+    #comprobante * {
+        visibility: visible;
+    }
+
+    #comprobante {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .overlay,
+    .cerrar,
+    .imprimir {
+        display: none !important;
+    }
+}

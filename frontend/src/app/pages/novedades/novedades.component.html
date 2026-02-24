@@ -1,0 +1,102 @@
+<!-- src/app/pages/novedades/novedades.component.html -->
+<div class="page-wrapper">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+    <div class="novedades-container">
+      <h1 class="page-title">Novedades del Empleado</h1>
+
+      <!-- BUSCADOR -->
+      <div class="search-section">
+        <input type="text" placeholder="Buscar empleado por nombre, apellido o documento..." [(ngModel)]="busqueda"
+          (input)="filtrarEmpleados()" class="search-input" />
+      </div>
+
+      <!-- RESULTADOS -->
+      <div class="results-grid" *ngIf="empleadosFiltrados.length > 0">
+        <div class="empleado-card" *ngFor="let emp of empleadosFiltrados; trackBy: trackByDocumento">
+          <div class="info">
+            <h3>{{ emp.nombre }} {{ emp.apellido }}</h3>
+            <p><strong>Doc:</strong> {{ emp.numeroDocumento }} | <strong>Cargo:</strong> {{ emp.cargo || 'Sin cargo' }}
+            </p>
+          </div>
+          <button class="btn-agregar" (click)="abrirNovedad(emp)">
+            Agregar Novedad
+          </button>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="empleadosFiltrados.length === 0 && busqueda">
+        No se encontraron empleados
+      </div>
+      <div class="empty-state" *ngIf="empleados.length === 0 && !busqueda">
+        No hay empleados activos
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL NOVEDAD -->
+<div class="modal" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h2>Novedad - {{ empleadoSeleccionado?.nombre }} {{ empleadoSeleccionado?.apellido }}</h2>
+
+    <form #f="ngForm" (ngSubmit)="guardarNovedad()">
+      <div class="field">
+        <label>Tipo de Novedad</label>
+        <select [(ngModel)]="novedad.tipoNovedad" name="tipoNovedad" required (change)="onTipoChange()">
+          <option value="" disabled>Seleccionar tipo...</option>
+          <option value="INCAPACIDAD">Incapacidad (EPS/ARL)</option>
+          <option value="PERMISO_NO_REMUNERADO">Permiso no remunerado</option>
+          <option value="HORAS_EXTRAS">Horas extras</option>
+          <option value="BONIFICACION">Bonificación</option>
+          <option value="COMISION">Comisión</option>
+          <option value="AUXILIO_TRANSPORTE">Auxilio de transporte</option>
+          <option value="PRESTAMO">Préstamo / Anticipo</option>
+          <option value="EMBARGO">Embargo judicial</option>
+          <option value="VACACIONES">Vacaciones</option>
+        </select>
+      </div>
+
+      <!-- HORAS EXTRAS -->
+      <div class="field" *ngIf="novedad.tipoNovedad === 'HORAS_EXTRAS'">
+        <label>Cantidad de Horas Extras</label>
+        <input type="number" [(ngModel)]="novedad.horas" name="horas" min="1" max="24" placeholder="Ej: 3" required />
+      </div>
+
+      <!-- VALOR FIJO (bonificación, comisión, préstamo, embargo) -->
+      <div class="field" *ngIf="esTipoValor()">
+        <label>{{ labelValor() }}</label>
+        <input type="number" [(ngModel)]="novedad.valor" name="valor" min="0" step="1000" placeholder="Ej: 150000"
+          required />
+      </div>
+
+      <!-- FECHAS -->
+      <div class="field" *ngIf="usaFechas()">
+        <label>Fecha Inicio</label>
+        <input type="date" [(ngModel)]="novedad.fechaInicio" name="fechaInicio" required />
+      </div>
+
+      <div class="field" *ngIf="usaFechas()">
+        <label>Fecha Fin</label>
+        <input type="date" [(ngModel)]="novedad.fechaFin" name="fechaFin" required />
+      </div>
+
+      <!-- OBSERVACIONES -->
+      <div class="field">
+        <label>Observaciones</label>
+        <textarea [(ngModel)]="novedad.observaciones" name="observaciones" rows="3"
+          placeholder="Motivo detallado de la novedad..."></textarea>
+      </div>
+
+      <div class="actions">
+        <button type="submit" [disabled]="!f.valid" class="btn-guardar">
+          Guardar Novedad
+        </button>
+        <button type="button" (click)="cerrarModal()" class="btn-cancelar">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

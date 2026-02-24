@@ -1,0 +1,122 @@
+<div class="fondo">
+    <div class="card">
+        <div class="header">
+            <h2>Consulta tu Nómina</h2>
+            <button class="salir" (click)="salir()">Salir</button>
+        </div>
+
+        <input type="text" [(ngModel)]="busqueda" (input)="buscar()"
+            placeholder="Buscar por nombre, apellido o cédula..." class="barra" autofocus />
+
+        <!-- RESULTADO DE LA BÚSQUEDA -->
+        <div class="resultado" *ngIf="empleado">
+            <h3>{{ empleado.nombre }} {{ empleado.apellido }}</h3>
+            <p><strong>Cédula:</strong> {{ empleado.numeroDocumento }}</p>
+            <p><strong>Cargo:</strong> {{ empleado.cargo }}</p>
+            <p><strong>Salario Base:</strong> ${{ empleado.salarioBase | number:'1.0-0' }}</p>
+            <button class="ver-nomina" (click)="verNomina = true">
+                Ver Nómina Completa
+            </button>
+        </div>
+
+        <p class="no-encontrado" *ngIf="busqueda && !empleado">
+            No se encontró empleado con esa información.
+        </p>
+    </div>
+</div>
+
+<!-- AQUÍ VA EL MODAL QUE YA TIENES (pégalo debajo) -->
+<!-- MODAL NÓMINA COMPLETA - ESTILO COLOMBIA REAL (0 ERRORES) -->
+<div class="overlay" *ngIf="verNomina" (click)="verNomina = false">
+    <div class="modal" (click)="$event.stopPropagation()" id="comprobante">
+        <span class="cerrar" (click)="verNomina = false">×</span>
+
+        <div class="comprobante-colombia">
+            <!-- ENCABEZADO -->
+            <div class="header-comprobante">
+                <h1>COMPROBANTE DE PAGO DE NÓMINA</h1>
+                <h2>NUMA S.A.S</h2>
+                <p>NIT: 901.234.567-8 | Periodo: Noviembre 2025</p>
+            </div>
+
+            <!-- DATOS DEL EMPLEADO -->
+            <div class="info-empleado">
+                <div><strong>Empleado:</strong> {{ empleado?.nombre }} {{ empleado?.apellido }}</div>
+                <div><strong>Cédula:</strong> {{ empleado?.numeroDocumento }}</div>
+                <div><strong>Cargo:</strong> {{ empleado?.cargo }}</div>
+                <div><strong>Días trabajados:</strong> 30</div>
+            </div>
+
+            <!-- TABLA DE DEVENGOS Y DEDUCCIONES -->
+            <table class="tabla-nomina">
+                <thead>
+                    <tr>
+                        <th class="devengo" colspan="3">DEVENGOS</th>
+                        <th class="deduccion" colspan="2">DEDUCCIONES</th>
+                    </tr>
+                    <tr>
+                        <th>Cód.</th>
+                        <th>Concepto</th>
+                        <th>Valor</th>
+                        <th>Concepto</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>001</td>
+                        <td>Salario Base</td>
+                        <td class="valor">${{ empleado?.salarioBase | number:'1.0-0' }}</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr *ngFor="let n of novedades; let i = index">
+                        <td *ngIf="n.tipo === 'DEVENGO'">{{ '00' + (i + 2) }}</td>
+                        <td *ngIf="n.tipo === 'DEVENGO'">{{ n.descripcion }}</td>
+                        <td *ngIf="n.tipo === 'DEVENGO'" class="valor">${{ n.valor | number:'1.0-0' }}</td>
+                        <td *ngIf="n.tipo === 'DEVENGO'"></td>
+                        <td *ngIf="n.tipo === 'DEVENGO'"></td>
+                    </tr>
+
+                    <tr *ngFor="let n of novedades">
+                        <td *ngIf="n.tipo === 'DEDUCCION'"></td>
+                        <td *ngIf="n.tipo === 'DEDUCCION'"></td>
+                        <td *ngIf="n.tipo === 'DEDUCCION'"></td>
+                        <td *ngIf="n.tipo === 'DEDUCCION'">{{ n.descripcion }}</td>
+                        <td *ngIf="n.tipo === 'DEDUCCION'" class="valor">${{ n.valor | number:'1.0-0' }}</td>
+                    </tr>
+
+                    <tr *ngFor="let _ of [].constructor(getEmptyRowsCount())">
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <tr class="totales">
+                        <td colspan="2"><strong>TOTAL DEVENGADO</strong></td>
+                        <td class="valor"><strong>${{ totalDevengado | number:'1.0-0' }}</strong></td>
+                        <td><strong>TOTAL DEDUCIDO</strong></td>
+                        <td class="valor"><strong>${{ totalDeducciones | number:'1.0-0' }}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="liquido-final">
+                <div class="caja-liquido">
+                    <strong>LIQUIDO A PERCIBIR</strong><br>
+                    <span class="monto-grande">${{ netoAPagar | number:'1.0-0' }}</span>
+                </div>
+            </div>
+
+            <div class="firma">
+                <p>_________________________</p>
+                <p>Firma del Empleado</p>
+            </div>
+
+            <button class="imprimir" (click)="imprimir()">Imprimir Comprobante</button>
+        </div>
+    </div>
+</div>

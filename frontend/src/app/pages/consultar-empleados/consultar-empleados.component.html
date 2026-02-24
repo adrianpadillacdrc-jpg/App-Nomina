@@ -1,0 +1,126 @@
+<!-- src/app/pages/consultar-empleados/consultar-empleados.component.html -->
+<div class="page-wrapper">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+    <div class="consultar-container">
+      <h1 class="page-title">Consultar Empleados</h1>
+
+      <div class="search-container">
+        <input type="text" class="search-input" placeholder="Buscar por documento, nombre o cargo..."
+          [(ngModel)]="busqueda" (input)="filtrar()">
+      </div>
+
+      <div class="tabla-empleados">
+        <div class="header-row">
+          <div>Documento</div>
+          <div>Nombre Completo</div>
+          <div>Cargo</div>
+          <div>Salario Base</div>
+          <div>Acciones</div>
+        </div>
+
+        <div class="empleado-row" *ngFor="let emp of empleadosFiltrados; trackBy: trackByEmpleadoId">
+          <div>{{ emp.documento }}</div>
+          <div class="nombre">{{ emp.nombre }} {{ emp.apellido }}</div>
+          <div>{{ emp.cargo }}</div>
+          <div>$ {{ emp.salarioBase | number:'1.0-0' }}</div>
+          <div class="acciones">
+            <button class="btn-actualizar" (click)="abrirActualizar(emp)">
+              Actualizar
+            </button>
+            <button class="btn-nomina" (click)="verNominaCompleta(emp)">
+              Ver Nómina
+            </button>
+          </div>
+        </div>
+
+        <div class="empty-state" *ngIf="empleadosFiltrados.length === 0">
+          No se encontraron empleados
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL DE ACTUALIZAR -->
+<app-actualizar-empleado *ngIf="mostrarActualizar" [empleado]="empleadoEditando" (cerrar)="mostrarActualizar = false"
+  (actualizado)="cargarEmpleados()">
+</app-actualizar-empleado>
+
+<!-- MODAL NÓMINA - FUERA DEL *ngFor (ESTO ES LA CLAVE) -->
+<div class="overlay-nomina" *ngIf="mostrarModalNomina" (click)="mostrarModalNomina = false">
+  <div class="modal-comprobante" (click)="$event.stopPropagation()">
+    <span class="cerrar" (click)="mostrarModalNomina = false">×</span>
+
+    <div class="comprobante-colombia">
+      <div class="header-comprobante">
+        <h1>COMPROBANTE DE PAGO DE NÓMINA</h1>
+        <h2>NUMA S.A.S</h2>
+        <p>NIT: 901.234.567-8 | Periodo: Noviembre 2025</p>
+      </div>
+
+      <div class="info-empleado">
+        <div><strong>Empleado:</strong> {{ empleadoSeleccionado?.nombre }} {{ empleadoSeleccionado?.apellido }}</div>
+        <div><strong>Cédula:</strong> {{ empleadoSeleccionado?.documento }}</div>
+        <div><strong>Cargo:</strong> {{ empleadoSeleccionado?.cargo }}</div>
+        <div><strong>Días trabajados:</strong> 30</div>
+      </div>
+
+      <table class="tabla-nomina">
+        <thead>
+          <tr>
+            <th class="devengo" colspan="3">DEVENGOS</th>
+            <th class="deduccion" colspan="2">DEDUCCIONES</th>
+          </tr>
+          <tr>
+            <th>Cód.</th>
+            <th>Concepto</th>
+            <th>Valor</th>
+            <th>Concepto</th>
+            <th>Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>001</td>
+            <td>Salario Base</td>
+            <td class="valor">$ {{ empleadoSeleccionado?.salarioBase | number:'1.0-0' }}</td>
+            <td></td>
+            <td></td>
+          </tr>
+
+          <tr *ngFor="let n of novedadesEmpleado; let i = index">
+            <td *ngIf="n.tipo === 'DEVENGO'">{{ '00' + (i + 2) }}</td>
+            <td *ngIf="n.tipo === 'DEVENGO'">{{ n.descripcion }}</td>
+            <td *ngIf="n.tipo === 'DEVENGO'" class="valor">$ {{ n.valor | number:'1.0-0' }}</td>
+            <td *ngIf="n.tipo === 'DEDUCCION'">{{ n.descripcion }}</td>
+            <td *ngIf="n.tipo === 'DEDUCCION'" class="valor">$ {{ n.valor | number:'1.0-0' }}</td>
+            <td *ngIf="n.tipo !== 'DEVENGO' && n.tipo !== 'DEDUCCION'"></td>
+          </tr>
+
+          <tr class="totales">
+            <td colspan="2"><strong>TOTAL DEVENGADO</strong></td>
+            <td class="valor"><strong>$ {{ totalDevengos | number:'1.0-0' }}</strong></td>
+            <td><strong>TOTAL DEDUCIDO</strong></td>
+            <td class="valor"><strong>$ {{ totalDeducciones | number:'1.0-0' }}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="liquido-final">
+        <div class="caja-liquido">
+          <strong>LÍQUIDO A PERCIBIR</strong><br>
+          <span class="monto-grande">$ {{ netoPagar | number:'1.0-0' }}</span>
+        </div>
+      </div>
+
+      <div class="firma">
+        <p>_________________________</p>
+        <p>Firma del Empleado</p>
+      </div>
+
+      <button class="imprimir" (click)="imprimirNomina()">Imprimir Comprobante</button>
+    </div>
+  </div>
+</div>

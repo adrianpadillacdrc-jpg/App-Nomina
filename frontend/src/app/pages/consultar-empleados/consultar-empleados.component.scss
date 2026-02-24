@@ -1,0 +1,459 @@
+/* src/app/pages/consultar-empleados/consultar-empleados.component.scss */
+
+.page-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  margin-left: 240px;
+  padding: 40px;
+  flex: 1;
+  background: transparent;
+}
+
+.consultar-container {
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.page-title {
+  color: #fff;
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.search-container {
+  margin-bottom: 30px;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 600px;
+  padding: 16px 24px;
+  border: none;
+  border-radius: 50px;
+  font-size: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  background: white;
+  outline: none;
+}
+
+.tabla-empleados {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+}
+
+.header-row {
+  background: #6f42c1;
+  color: white;
+  font-weight: 600;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1.5fr 1.2fr 1.4fr;
+  padding: 20px;
+  text-align: center;
+}
+
+.empleado-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1.5fr 1.2fr 1.4fr;
+  padding: 18px 20px;
+  border-bottom: 1px solid #eee;
+  align-items: center;
+  transition: all 0.3s;
+}
+
+.empleado-row:hover {
+  background: #f8f9ff;
+  transform: translateY(-2px);
+}
+
+.nombre {
+  font-weight: 600;
+  color: #333;
+}
+
+/* BOTONES DE ACCIONES */
+.acciones {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-actualizar {
+  background: #ff9800;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.btn-actualizar:hover {
+  background: #e68900;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(255, 152, 0, 0.4);
+}
+
+.btn-nomina {
+  background: linear-gradient(135deg, #6f42c1, #8e44ad);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.btn-nomina:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(111, 66, 193, 0.4);
+}
+
+/* MODAL DE NÓMINA - z-index 9000 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9000;
+  backdrop-filter: blur(8px);
+}
+
+.modal-nomina {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  max-width: 1000px;
+  width: 95%;
+  max-height: 95vh;
+  overflow-y: auto;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.cerrar-modal {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: #dc3545;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 10;
+}
+
+/* ESTILOS DEL MODAL NÓMINA */
+.header-nomina {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 4px solid #6f42c1;
+}
+
+.foto-empleado {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 6px solid #6f42c1;
+  box-shadow: 0 10px 30px rgba(111, 66, 193, 0.3);
+}
+
+.info-empleado h2 {
+  margin: 0;
+  font-size: 28px;
+  color: #333;
+}
+
+.info-empleado p {
+  margin: 8px 0;
+  font-size: 18px;
+}
+
+.titulo-periodo {
+  text-align: center;
+  color: #6f42c1;
+  font-size: 26px;
+  font-weight: 700;
+  margin: 30px 0;
+}
+
+.estado-periodo {
+  font-size: 18px;
+}
+
+.abierto {
+  color: #28a745;
+}
+
+.tabla-nomina-detallada {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 30px 0;
+  font-size: 17px;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.tabla-nomina-detallada th {
+  background: #6f42c1;
+  color: white;
+  padding: 18px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.tabla-nomina-detallada td {
+  padding: 16px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+
+.devengo {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.deduccion {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.total-row {
+  background: #f8f9fa;
+  font-size: 20px;
+}
+
+.neto-row {
+  background: #e8f5e8;
+}
+
+.neto {
+  color: #155724;
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.footer-modal {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.btn-imprimir {
+  background: #28a745;
+  color: white;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-imprimir:hover {
+  background: #218838;
+  transform: scale(1.05);
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+  .main-content {
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .header-row,
+  .empleado-row {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .acciones {
+    justify-content: center;
+  }
+
+  .header-nomina {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .foto-empleado {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+/* === MODAL NÓMINA DEL ADMIN (EL MISMO QUE EL EMPLEADO) === */
+.overlay-nomina {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+  overflow-y: auto;
+  z-index: 9999;
+}
+
+.modal-comprobante {
+  background: white;
+  border-radius: 20px;
+  width: 95%;
+  max-width: 900px;
+  position: relative;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+  max-height: 95vh;
+  overflow-y: auto;
+  padding: 30px;
+}
+
+.cerrar {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 3rem;
+  color: #c62828;
+  cursor: pointer;
+  z-index: 10;
+}
+
+/* REUTILIZAMOS EL MISMO ESTILO DEL EMPLEADO */
+.comprobante-colombia {
+  font-family: 'Courier New', monospace;
+  background: white;
+  color: #000;
+}
+
+.header-comprobante {
+  text-align: center;
+  margin-bottom: 25px;
+  border-bottom: 3px double #000;
+  padding-bottom: 15px;
+}
+
+.header-comprobante h1 {
+  font-size: 1.8em;
+  margin: 0;
+  color: #6a1b9a;
+}
+
+.header-comprobante h2 {
+  font-size: 1.5em;
+  margin: 8px 0;
+}
+
+.info-empleado {
+  margin: 25px 0;
+  font-size: 1.15em;
+  line-height: 2;
+}
+
+.tabla-nomina {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 30px 0;
+  font-size: 1.05em;
+  border: 2px solid #000;
+}
+
+.tabla-nomina th {
+  background: #6a1b9a;
+  color: white;
+  padding: 12px;
+  text-align: center;
+}
+
+.tabla-nomina th.devengo {
+  background: #2e7d32;
+}
+
+.tabla-nomina th.deduccion {
+  background: #c62828;
+}
+
+.tabla-nomina td {
+  border: 1px solid #000;
+  padding: 10px;
+}
+
+.tabla-nomina td.valor {
+  text-align: right;
+  font-weight: bold;
+  font-family: monospace;
+}
+
+.totales {
+  background: #e8f5e8 !important;
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+.Liquido-final {
+  text-align: center;
+  margin: 40px 0;
+}
+
+.caja-liquido {
+  display: inline-block;
+  border: 5px double #000;
+  padding: 20px 60px;
+  background: #f9f9f9;
+}
+
+.monto-grande {
+  font-size: 2.4em;
+  font-weight: bold;
+  color: #2e7d32;
+}
+
+.firma {
+  text-align: center;
+  margin-top: 60px;
+  font-size: 1.3em;
+}
+
+.imprimir {
+  position: sticky;
+  bottom: 10px;
+  width: 100%;
+  padding: 20px;
+  background: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.5em;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 30px;
+}
+
+.imprimir:hover {
+  background: #1b5e20;
+}

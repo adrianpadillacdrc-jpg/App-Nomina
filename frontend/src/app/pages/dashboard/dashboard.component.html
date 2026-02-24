@@ -1,0 +1,72 @@
+<app-sidebar></app-sidebar>
+
+<main class="main-content">
+  <header class="header">
+    <h1>Dashboard Administrador</h1>
+    <button class="btn-new" routerLink="/registro">+ Nuevo empleado</button>
+  </header>
+
+  <!-- KPIs -->
+  <div class="kpis">
+    <div class="kpi-card">
+      <span class="num">{{ totalEmpleados }}</span>
+      <p>Total Empleados</p>
+    </div>
+    <div class="kpi-card">
+      <span class="num green">{{ liquidados }}</span>
+      <p>Liquidados</p>
+    </div>
+    <div class="kpi-card">
+      <span class="num orange">{{ porcentajeLiquidado }}%</span>
+      <p>% Liquidado</p>
+    </div>
+    <div class="kpi-card">
+      <span class="num red">$ {{ nominaMes | number:'1.0-0' }}</span>
+      <p>Nómina Mes</p>
+    </div>
+  </div>
+
+  <!-- Búsqueda -->
+  <div class="search-bar">
+    <input 
+      type="text" 
+      placeholder="Buscar por nombre, documento o cargo..." 
+      (input)="onFiltroChange($event)" />
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Documento</th>
+          <th>Nombre</th>
+          <th>Apellido</th>
+          <th>Cargo</th>
+          <th>Salario</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let e of empleadosFiltrados; trackBy: trackByDocumento">
+          <td>{{ e.numeroDocumento }}</td>
+          <td>{{ e.nombre }}</td>
+          <td>{{ e.apellido }}</td>
+          <td>{{ e.cargo }}</td>
+          <td>$ {{ e.salarioBase | number:'1.0-0' }}</td>
+          <td>
+            <span class="status" [class.activo]="e.estado === 'Activo'">
+              {{ e.estado }}
+            </span>
+          </td>
+        </tr>
+        <tr *ngIf="!empleadosFiltrados.length && !loading">
+          <td colspan="6" class="empty">No hay empleados registrados</td>
+        </tr>
+        <tr *ngIf="loading">
+          <td colspan="6" class="loading">Cargando empleados...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>

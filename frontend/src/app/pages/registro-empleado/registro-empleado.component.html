@@ -1,0 +1,135 @@
+<!-- src/app/pages/registro-empleado/registro-empleado.component.html -->
+<div class="page-wrapper">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+    <div class="registro-container">
+      <h1 class="page-title">Registro Administrativo</h1>
+
+      <form (ngSubmit)="registrar()" #form="ngForm" class="registro-form">
+        <!-- DATOS PERSONALES -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Datos Personales</h2>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Tipo de Documento</label>
+              <select [(ngModel)]="empleado.tipoDocumento" name="tipoDocumento" required>
+                <option value="C.C.">Cédula de Ciudadanía</option>
+                <option value="C.E.">Cédula de Extranjería</option>
+                <option value="Pasaporte">Pasaporte</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Número de Identificación</label>
+              <input type="text" placeholder="Ej: 12345678" [(ngModel)]="empleado.numeroDocumento" name="numeroDocumento" required />
+            </div>
+
+            <div class="form-group">
+              <label>Nombre</label>
+              <input type="text" placeholder="Ej: Juan Carlos" [(ngModel)]="empleado.nombre" name="nombre" required />
+            </div>
+
+            <div class="form-group">
+              <label>Apellido</label>
+              <input type="text" placeholder="Ej: Pérez Rodríguez" [(ngModel)]="empleado.apellido" name="apellido" required />
+            </div>
+
+            <div class="form-group">
+              <label>Edad</label>
+              <input type="number" placeholder="Ej: 32" [(ngModel)]="empleado.edad" name="edad" min="18" />
+            </div>
+
+            <div class="form-group">
+              <label>Género</label>
+              <select [(ngModel)]="empleado.genero" name="genero">
+                <option *ngFor="let g of generos">{{ g }}</option>
+              </select>
+            </div>
+
+            <div class="form-group full">
+              <label>Dirección</label>
+              <input type="text" placeholder="Calle, Carrera, Ciudad" [(ngModel)]="empleado.direccion" name="direccion" />
+            </div>
+          </div>
+        </div>
+
+        <!-- DATOS LABORALES -->
+        <div class="card">
+          <div class="card-header">
+            <h2>Datos Laborales</h2>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Cargo</label>
+              <select [(ngModel)]="empleado.cargo" name="cargo" required>
+                <option value="">Seleccione un cargo</option>
+                <option *ngFor="let c of cargos">{{ c }}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Tipo de Contrato</label>
+              <select [(ngModel)]="empleado.tipoContrato" name="tipoContrato">
+                <option value="">Seleccione</option>
+                <option *ngFor="let t of tiposContrato">{{ t }}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Salario</label>
+              <input type="number" placeholder="Ej: 2500000" [(ngModel)]="empleado.salarioBase" name="salarioBase" required min="1300000" />
+            </div>
+
+            <div class="form-group">
+              <label>Estado</label>
+              <select [value]="'Activo'" disabled>
+                <option>Activo</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Empresa</label>
+              <input type="text" value="NUMA STORE" readonly />
+            </div>
+
+            <div class="form-group">
+              <label>Correo Empresarial</label>
+              <input type="email" placeholder="usuario@empresa.com" [(ngModel)]="empleado.correoEmpresarial" name="correoEmpresarial" />
+            </div>
+
+            <div class="form-group">
+              <label>Fecha de Inicio</label>
+              <input type="date" [(ngModel)]="empleado.fechaInicioContrato" name="fechaInicioContrato" />
+            </div>
+
+            <div class="form-group">
+              <label>Fecha de Fin</label>
+              <input type="date" [(ngModel)]="empleado.fechaFinContrato" name="fechaFinContrato" />
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTONES -->
+        <div class="actions">
+          <button type="submit" [disabled]="form.invalid || loading" class="btn-primary">
+            <span *ngIf="!loading">Guardar Registro</span>
+            <span *ngIf="loading">Guardando...</span>
+          </button>
+          <button type="button" (click)="cancelar()" class="btn-secondary">
+            Cancelar Registro
+          </button>
+        </div>
+      </form>
+
+      <!-- ÉXITO -->
+      <div class="success" *ngIf="exito">
+        ¡Empleado registrado con éxito! Redirigiendo...
+      </div>
+    </div>
+  </main>
+</div>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>NUMA NÓMINA - Liquidar</title>
+  <link rel="stylesheet" href="estilos.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="logo-container">
+      <img src="assets/logc.png" alt="Logo" class="logo">
+      <svg class="brand-logo" viewBox="0 0 340 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <style>
+            .g-text {
+              font-family: 'Segoe UI', Arial, sans-serif;
+              font-weight: 800;
+              font-size: 64px
+            }
+
+            .g-small {
+              font-family: 'Segoe UI', Arial, sans-serif;
+              font-weight: 700;
+              font-size: 16px
+            }
+          </style>
+        </defs>
+        <text x="6" y="66" class="g-text" fill="#4a4a4f">NUMA</text>
+        <g transform="translate(120,12) scale(1.6)">
+          <circle cx="12" cy="20" r="10" fill="#6d5aa8" />
+          <circle cx="30" cy="12" r="14" fill="#6d5aa8" />
+          <circle cx="52" cy="20" r="10" fill="#6d5aa8" />
+          <rect x="14" y="20" width="40" height="14" rx="7" fill="#6d5aa8" />
+        </g>
+        <text x="240" y="78" class="g-small" fill="#6d5aa8">nomina</text>
+      </svg>
+    </div>
+    <nav class="menu">
+      <a href="dashboard-admin.html"><i class="fa-solid fa-house"></i><span>Inicio</span></a>
+      <a href="registro-empleados.html"><i class="fa-solid fa-user-plus"></i><span>Registrar</span></a>
+      <a href="#" class="active"><i class="fa-solid fa-file-invoice-dollar"></i><span>Liquidar</span></a>
+      <a href="consulta.html"><i class="fa-solid fa-magnifying-glass"></i><span>Consultar</span></a>
+      <a href="novedades-empleado.html"><i class="fa-solid fa-clipboard-list"></i><span>Novedades</span></a>
+      <a href="pago-nomina.html"><i class="fa-solid fa-money-check-dollar"></i><span>Pago Nómina</span></a>
+      <a href="login.html" onclick="cerrarSesion()"><i class="fa-solid fa-right-from-bracket"></i><span>Salir</span></a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <header>
+      <h1>Liquidar Empleado</h1>
+      <a href="registro-empleados.html" class="btn-primary">
+        <i class="fa-solid fa-plus"></i> Nueva liquidación
+      </a>
+    </header>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Cargo</th>
+          <th>Documento</th>
+          <th>Área</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tbodyLiquidar"></tbody>
+    </table>
+  </main>
+
+  <div id="mensaje" class="mensaje-flotante"></div>
+
+  <script src="js/api.js"></script>
+  <script>
+    async function cargarEmpleados() {
+      try {
+        const res = await fetch('http://localhost:8080/api/empleado');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+      } catch (error) {
+        console.error('Error:', error);
+        mostrarMensaje('Error de conexión con el servidor', 'error');
+        return [];
+      }
+    }
+
+    async function cargarLiquidacion() {
+      const empleados = await cargarEmpleados();
+      const tbody = document.getElementById('tbodyLiquidar'); // ← ID CORRECTO
+      tbody.innerHTML = '';
+
+      const activos = empleados.filter(e => e.estado === 'Activo');
+      if (activos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">No hay empleados activos para liquidar</td></tr>';
+        return;
+      }
+
+      activos.forEach(e => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+        <td>${e.nombre} ${e.apellido}</td>
+        <td>${e.cargo}</td>
+        <td>${e.numeroDocumento}</td>
+        <td>General</td>
+        <td><span class="status activo">Activo</span></td>
+        <td>
+          <button class="btn-primary" onclick="liquidarEmpleado(${e.id})">
+            Liquidar
+          </button>
+        </td>
+      `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function liquidarEmpleado(id) {
+      if (confirm('¿Liquidar este empleado?')) {
+        fetch(`http://localhost:8080/api/empleado/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ estado: 'Liquidado' })
+        })
+          .then(() => {
+            mostrarMensaje('Empleado liquidado con éxito', 'exito');
+            cargarLiquidacion();
+          })
+          .catch(() => mostrarMensaje('Error al liquidar', 'error'));
+      }
+    }
+
+    function mostrarMensaje(texto, tipo = 'exito') {
+      const msg = document.getElementById('mensaje');
+      msg.textContent = texto;
+      msg.className = `mensaje-flotante ${tipo} mostrar`;
+      setTimeout(() => msg.className = 'mensaje-flotante', 3000);
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarLiquidacion);
+  </script>

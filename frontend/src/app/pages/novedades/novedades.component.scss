@@ -1,0 +1,246 @@
+/* src/app/pages/novedades/novedades.component.scss */
+.page-wrapper {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+.main-content {
+  margin-left: 240px;
+  padding: 40px;
+  flex: 1;
+  z-index: 2;
+  overflow-y: auto;
+  background: transparent;
+}
+
+.novedades-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.page-title {
+  color: #ffffff;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.search-section {
+  margin-bottom: 30px;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 600px;
+  padding: 14px 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 50px;
+  font-size: 16px;
+  background: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.search-input::placeholder {
+  color: #aaa;
+  font-style: italic;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #7c4dff;
+  box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* RESULTADOS */
+.results-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+}
+
+.empleado-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 5px solid #7c4dff;
+  transition: transform 0.2s;
+}
+
+.empleado-card:hover {
+  transform: translateY(-2px);
+}
+
+.empleado-card h3 {
+  margin: 0;
+  color: #4a148c;
+  font-size: 18px;
+}
+
+.empleado-card p {
+  margin: 8px 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.btn-agregar {
+  background: #6a1b9a;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-agregar:hover {
+  background: #8e24aa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(106, 27, 154, 0.4);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px;
+  color: #999;
+  font-style: italic;
+  font-size: 16px;
+}
+
+/* MODAL */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+}
+
+.modal-content {
+  background: white;
+  padding: 32px;
+  border-radius: 20px;
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-content h2 {
+  margin: 0 0 24px;
+  color: #4a148c;
+  font-size: 24px;
+}
+
+.field {
+  margin-bottom: 20px;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.field select,
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 15px;
+  transition: all 0.3s;
+}
+
+.field select:focus,
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: #7c4dff;
+  box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.15);
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn-guardar,
+.btn-cancelar {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-guardar {
+  background: #4caf50;
+  color: white;
+}
+
+.btn-guardar:disabled {
+  background: #a5d6a7;
+  cursor: not-allowed;
+}
+
+.btn-cancelar {
+  background: #f44336;
+  color: white;
+}
+
+.btn-guardar:hover:not(:disabled) {
+  background: #43a047;
+}
+
+.btn-cancelar:hover {
+  background: #e53935;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .results-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .empleado-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+}

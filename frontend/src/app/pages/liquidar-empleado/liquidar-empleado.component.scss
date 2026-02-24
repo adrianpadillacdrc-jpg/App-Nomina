@@ -1,0 +1,118 @@
+.page-wrapper { display: flex; min-height: 100vh; }
+.main-content { margin-left: 240px; padding: 50px 40px; flex: 1; background: transparent; }
+
+.liquidar-container { max-width: 1300px; margin: 0 auto; }
+
+.top-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+  gap: 25px;
+}
+
+.page-title {
+  color: #ffffff;
+  font-size: 42px;
+  font-weight: 800;
+  margin: 0;
+  text-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  letter-spacing: 1px;
+}
+
+.search-box {
+  position: relative;
+  width: 100%;
+  max-width: 750px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 18px 60px 18px 24px;
+  font-size: 18px;
+  border: 3px solid #9c27b0;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.95);
+  outline: none;
+  box-shadow: 0 10px 30px rgba(156, 39, 176, 0.3);
+  transition: all 0.4s ease;
+  backdrop-filter: blur(10px);
+}
+
+.search-input:focus {
+  border-color: #6a1b9a;
+  box-shadow: 0 15px 40px rgba(156, 39, 176, 0.5);
+  transform: translateY(-2px);
+  background: white;
+}
+
+.search-icon {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 24px;
+  color: #9c27b0;
+  pointer-events: none;
+}
+
+.table-card {
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.18);
+  border-left: 6px solid #9c27b0;
+}
+
+.table-header, .table-row {
+  display: grid;
+  grid-template-columns: 2.5fr 1.5fr 1.2fr 1fr 1.2fr;
+  padding: 20px 24px;
+  align-items: center;
+  font-size: 15.5px;
+}
+
+.table-header {
+  background: linear-gradient(135deg, #f3e8ff, #e8daf5);
+  color: #6a1b9a;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.table-row:hover {
+  background: #f8f4ff;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(156,39,176,0.1);
+  transition: all 0.3s;
+}
+
+.nombre { font-weight: 600; color: #4a148c; }
+
+.btn-liquidar {
+  background: linear-gradient(135deg, #e91e63, #c2185b);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 6px 15px rgba(233,30,99,0.4);
+}
+
+.btn-liquidar:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(233,30,99,0.5);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: #999;
+  font-size: 18px;
+  background: #faf7ff;
+}
+
+.empty-state strong { color: #9c27b0; }

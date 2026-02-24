@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <link rel="stylesheet" href="menu.css">
+    <meta charset="UTF-8">
+    <title>Registro de Empleados</title>
+</head>
+
+<body>
+
+    <nav>
+        <a href="dashboard.html">Inicio</a>
+        <a href="registrarEmpleado.html">Registrar Empleado</a>
+        <a href="liquidarNomina.html">Liquidar Nómina</a>
+        <a href="novedades-empleado.html">
+            <i class="fa-solid fa-clipboard-list"></i>
+            <span>Novedades</span>
+        </a>
+        <a href="login.html">Salir</a>
+    </nav>
+
+
+
+    <div class="container">
+        <h1>Registro de Empleados</h1>
+
+        <input type="text" id="buscar" placeholder="Buscar...">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Ingreso</th>
+                    <th>Usuario</th>
+                    <th>Documento</th>
+                    <th>Área</th>
+                    <th>Estado</th>
+                    <th>Contacto</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Aquí van los registros -->
+            </tbody>
+        </table>
+
+    </div>
+
+    <div class="sidebar">
+        <h2>Menú</h2>
+        <a href="dashboard.html">Inicio</a>
+
+        <div id="adminLinks" style="display:none;">
+            <a href="registro-empleados.html">Registrar Empleado</a>
+            <a href="liquidacion-nomina.html">Liquidar Nómina</a>
+        </div>
+
+        <div id="empleadoLinks" style="display:none;">
+            <a href="consulta.html">Consultar</a>
+        </div>
+
+        <a href="#" onclick="cerrarSesion()">Salir</a>
+    </div>
+
+
+</body>
+
+</html>

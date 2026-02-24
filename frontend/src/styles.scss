@@ -1,0 +1,22 @@
+/* src/styles.scss */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background: url('/assets/numa.jpg') center/cover no-repeat fixed;
+  overflow: auto !important;
+  scroll-behavior: smooth;
+}
+
+app-root {
+  display: block;
+  min-height: 100vh;
+}
+
+/* BARRA LATERAL DERECHA ESTILO YOUTUBE */
+::-webkit-scrollbar { width: 12px; }
+::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: #c1a8ff; border-radius: 10px; border: 3px solid #f1f1f1; }
+::-webkit-scrollbar-thumb:hover { background: #9c27b0; }
+* { scrollbar-width: thin; scrollbar-color: #c1a8ff #f1f1f1; }
