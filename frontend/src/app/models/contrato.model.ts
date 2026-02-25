@@ -1,7 +1,7 @@
 // src/app/models/contrato.model.ts
 export interface Contrato {
     id?: string;
-    idEmpleado: number;
+    idEmpleado: number ;
     idTipoContrato: string;
     fechaInicio: Date;
     fechaFin: Date;
