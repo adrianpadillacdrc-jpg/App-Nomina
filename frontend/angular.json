@@ -4,7 +4,7 @@
   "newProjectRoot": "projects",
   "projects": {
     "frontend": {
-      "projectType": "application",
+      "projectType": "application"
       "schematics": {
         "@schematics/angular:component": {
           "style": "scss"
