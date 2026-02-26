@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { Empleado } from '../../models/empleado.model';
 import { EmpleadosService } from '../../services/empleados.service';
+import { AuthService } from '../../services/auth.service';  // ← Inyección del servicio de autenticación JWT
 
 @Component({
   selector: 'app-dashboard',
@@ -24,19 +25,22 @@ export class DashboardComponent implements OnInit {
 
   totalEmpleados = 0;
   liquidados = 0;
-  porcentajeLiquidado = 0;  // <-- CAMBIADO
-  nominaMes = 0;            // <-- CAMBIADO
+  porcentajeLiquidado = 0;
+  nominaMes = 0;
 
   constructor(
     private router: Router,
-    private empleadosService: EmpleadosService
+    private empleadosService: EmpleadosService,
+    private authService: AuthService   // ← Inyectado aquí
   ) { }
 
   ngOnInit() {
-    if (!localStorage.getItem('loggedIn')) {
+    // Verificación moderna con JWT (reemplaza el viejo loggedIn)
+    if (!this.authService.isLoggedIn()) {
+      console.log('No hay token válido → redirigiendo a login');
       this.router.navigate(['/login']);
     } else {
-      console.log('Iniciando carga de empleados...');
+      console.log('Usuario autenticado con token → cargando datos del dashboard');
       this.cargarEmpleados();
     }
   }
@@ -47,7 +51,7 @@ export class DashboardComponent implements OnInit {
 
     this.empleadosService.getEmpleados().subscribe({
       next: (data: any[]) => {
-        console.log('RAW DATA FROM API:', data); // ← CLAVE
+        console.log('RAW DATA FROM API:', data);
 
         if (!Array.isArray(data)) {
           console.error('La API no devolvió un array:', data);
@@ -106,8 +110,7 @@ export class DashboardComponent implements OnInit {
   }
 
   cerrarSesion() {
-    localStorage.removeItem('loggedIn');
-    this.router.navigate(['/login']);
+    this.authService.logout();  // ← Usa el logout del AuthService (elimina token y redirige)
   }
 
   trackByDocumento(index: number, empleado: Empleado): string {

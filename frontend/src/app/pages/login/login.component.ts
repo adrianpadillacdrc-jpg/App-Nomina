@@ -1,12 +1,17 @@
 // src/app/pages/login/login.component.ts
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, ChangeDetectorRef, NgZone } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule
+  ],
   template: `
     <div class="login-wrapper">
       <div class="login-card">
@@ -20,14 +25,17 @@ import { Router } from '@angular/router';
             <label>CONTRASEÑA</label>
             <input [(ngModel)]="password" name="password" type="password" placeholder="Ingrese su contraseña" required />
           </div>
-          <button type="submit" [disabled]="!f.valid">Iniciar Sesión</button>
+          <button type="submit" [disabled]="!f.valid || loading">
+            {{ loading ? 'Cargando...' : 'Iniciar Sesión' }}
+          </button>
+          <p *ngIf="error" class="error">{{ error }}</p>
           <a href="#" class="link">¿Olvidó su contraseña?</a>
         </form>
       </div>
     </div>
   `,
   styles: [`
-    /* === ELIMINA BORDES BLANCOS === */
+    /* Tu CSS completo intacto */
     *, *::before, *::after { box-sizing: border-box; }
     html, body, :host {
       margin: 0 !important;
@@ -37,7 +45,6 @@ import { Router } from '@angular/router';
       overflow: hidden !important;
     }
 
-    /* === FONDO === */
     .login-wrapper {
       min-height: 100vh;
       min-height: 100dvh;
@@ -51,7 +58,6 @@ import { Router } from '@angular/router';
       font-family: 'Segoe UI', sans-serif;
     }
 
-    /* === TARJETA: GRANDE Y ESPACIOSA === */
     .login-card {
       background: rgba(255, 255, 255, 0.14);
       backdrop-filter: blur(24px);
@@ -69,7 +75,6 @@ import { Router } from '@angular/router';
       gap: 20px;
     }
 
-    /* === TÍTULO EN UNA SOLA LÍNEA + MORADO === */
     h1 {
       color: #26222aff;
       font-size: 2.2rem;
@@ -85,9 +90,8 @@ import { Router } from '@angular/router';
       text-align: left;
     }
 
-    /* === ESPACIO ENTRE CONTRASEÑA Y BOTÓN === */
     .field:last-of-type {
-      margin-bottom: 26px; /* Ajusta este valor para más/menos espacio */
+      margin-bottom: 26px;
     }
 
     label {
@@ -133,7 +137,7 @@ import { Router } from '@angular/router';
       box-shadow: 0 5px 16px rgba(106, 27, 154, 0.5);
     }
 
-    button:hover {
+    button:hover:not(:disabled) {
       background: #8e24aa;
       transform: translateY(-2px);
     }
@@ -141,6 +145,13 @@ import { Router } from '@angular/router';
     button:disabled {
       background: #4a148c;
       cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .error {
+      color: #ff6b6b;
+      font-size: 0.95rem;
+      margin-top: 8px;
     }
 
     .link {
@@ -155,7 +166,6 @@ import { Router } from '@angular/router';
       text-decoration: underline;
     }
 
-    /* === RESPONSIVE === */
     @media (max-width: 480px) {
       .login-card {
         width: 340px;
@@ -171,26 +181,57 @@ import { Router } from '@angular/router';
 export class LoginComponent {
   usuario = '';
   password = '';
+  error = '';
+  loading = false;
 
-  constructor(private router: Router) { }
-
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone
+  ) { }
   ingresar() {
-    // ADMIN → funciona exactamente igual que antes
-    if (this.usuario === 'admin' && this.password === 'numa2025') {
-      localStorage.setItem('role', 'admin');
-      localStorage.setItem('loggedIn', 'true');
-      this.router.navigate(['/dashboard']);
-      return;
-    }
+    this.error = '';
+    this.loading = true;
+    this.cdr.detectChanges();
 
-    // EMPLEADO → NUEVO USUARIO (sin pistas en pantalla)  
-    if (this.usuario === 'empleado' && this.password === 'empleado2025') {
-      localStorage.setItem('role', 'empleado');
-      localStorage.setItem('loggedIn', 'true');
-      this.router.navigate(['/consulta-empleado']);
-      return;
-    }
+    this.authService.login(this.usuario.trim(), this.password.trim()).subscribe({
+      next: () => {
+        this.loading = false;
+        console.log('Login exitoso');
 
-    alert('Credenciales incorrectas');
+        const role = this.authService.getUserRole();
+        console.log('Rol detectado:', role);
+
+        let targetRoute = '/dashboard';
+        if (role?.toUpperCase() === 'EMPLEADO') {
+          targetRoute = '/consulta-empleado';
+        }
+
+        console.log('Forzando navegación a:', targetRoute);
+
+        // 1. Navegación normal
+        this.router.navigateByUrl(targetRoute, { replaceUrl: true });
+
+        // 2. Forzado extra con delay y reload si falla
+        setTimeout(() => {
+          if (this.router.url !== targetRoute) {
+            console.warn('Router no cambió - forzando reload completo');
+            window.location.href = targetRoute;
+          } else {
+            console.log('Router cambió correctamente - forzando múltiples detecciones');
+            this.cdr.detectChanges();
+            setTimeout(() => this.cdr.detectChanges(), 0);
+            setTimeout(() => this.cdr.detectChanges(), 200);
+          }
+        }, 100);
+      },
+      error: (err) => {
+        this.loading = false;
+        this.cdr.detectChanges();
+        console.error('Error login:', err);
+        this.error = err.status === 401 ? 'Credenciales inválidas' : 'Error de conexión';
+      }
+    });
   }
 }
