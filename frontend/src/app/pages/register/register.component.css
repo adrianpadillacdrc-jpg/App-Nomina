@@ -1,0 +1,52 @@
+.register-wrapper {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: url('/assets/numa.jpg') center/cover no-repeat fixed;
+}
+
+.register-card {
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(24px);
+  border-radius: 40px;
+  width: 400px;
+  padding: 50px;
+  text-align: center;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.18);
+}
+
+.field {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+label {
+  color: #f0f0f0;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+}
+
+input, select {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.9);
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  background: #6a1b9a;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.success { color: #27ae60; margin-top: 15px; }
+.error { color: #e74c3c; margin-top: 15px; }

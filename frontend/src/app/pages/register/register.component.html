@@ -1,0 +1,44 @@
+<div class="register-wrapper">
+  <div class="register-card">
+    <h1>Registro de Usuario</h1>
+
+    <form (ngSubmit)="registrar()">
+      <div class="field">
+        <label>Nombre de usuario</label>
+        <input [(ngModel)]="nombre" name="nombre" placeholder="Ej: juanperez" required />
+      </div>
+
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input [(ngModel)]="correo" name="correo" type="email" placeholder="ejemplo@email.com" required />
+      </div>
+
+      <div class="field">
+        <label>Contraseña</label>
+        <input [(ngModel)]="contrasena" name="contrasena" type="password" placeholder="Mínimo 6 caracteres" required />
+      </div>
+
+      <div class="field">
+        <label>Confirmar contraseña</label>
+        <input [(ngModel)]="confirmarContrasena" name="confirmarContrasena" type="password" required />
+      </div>
+
+      <div class="field">
+        <label>Rol</label>
+        <select [(ngModel)]="rol" name="rol">
+          <option value="EMPLEADO">Empleado</option>
+          <option value="ADMIN">Administrador</option>
+        </select>
+      </div>
+
+      <button type="submit" [disabled]="loading || !nombre || !correo || !contrasena">
+        {{ loading ? 'Registrando...' : 'Registrarse' }}
+      </button>
+
+      <p *ngIf="success" class="success">{{ success }}</p>
+      <p *ngIf="error" class="error">{{ error }}</p>
+    </form>
+
+    <p>¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+  </div>
+</div>

@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';   // ← Agregado
 
 interface Empleado {
     id: number;
@@ -38,29 +39,47 @@ export class ConsultaEmpleadoComponent implements OnInit {
     totalDeducciones = 0;
     netoAPagar = 0;
 
-    // DATOS DE PRUEBA (para que funcione aunque el backend esté caído)
+    // Datos de prueba por si el backend falla
     datosPrueba: Empleado[] = [
         { id: 1, nombre: 'ADRIAN ANDRES', apellido: 'PADILLA ROQUEME', numeroDocumento: '1063076355', cargo: 'Administrador', salarioBase: 4576458 },
         { id: 2, nombre: 'JUAN DAVID', apellido: 'GOMEZ', numeroDocumento: '123456789', cargo: 'Desarrollador', salarioBase: 3500000 },
         { id: 3, nombre: 'MARIA CAMILA', apellido: 'RODRIGUEZ', numeroDocumento: '987654321', cargo: 'Analista', salarioBase: 4200000 }
     ];
 
-    constructor(private http: HttpClient, private router: Router) { }
+    constructor(
+        private http: HttpClient,
+        private router: Router,
+        private authService: AuthService   // ← Inyectado
+    ) { }
 
     ngOnInit(): void {
-        if (localStorage.getItem('role') !== 'empleado') {
+        // Verificación correcta usando el AuthService
+        if (!this.authService.isLoggedIn()) {
+            console.log('No hay token válido → redirigiendo a login');
             this.router.navigate(['/login']);
             return;
         }
 
-        // PRIMERO intenta cargar del backend
+        const role = this.authService.getUserRole();
+        console.log('Rol en consulta-empleado:', role);
+
+        if (role?.toUpperCase() !== 'EMPLEADO') {
+            console.log('Usuario no es EMPLEADO → redirigiendo a dashboard');
+            this.router.navigate(['/dashboard']);
+            return;
+        }
+
+        console.log('Usuario EMPLEADO autenticado correctamente');
+
+        // Cargar empleados (usa datos reales o de prueba)
         this.http.get<Empleado[]>('http://localhost:8080/api/empleados').subscribe({
             next: (data) => {
                 this.empleados = data.length > 0 ? data : this.datosPrueba;
+                console.log('Empleados cargados:', this.empleados);
             },
             error: (err) => {
                 console.log('Backend no responde, usando datos de prueba');
-                this.empleados = this.datosPrueba; // ← SIEMPRE CARGA ALGO
+                this.empleados = this.datosPrueba;
             }
         });
     }
@@ -84,8 +103,6 @@ export class ConsultaEmpleadoComponent implements OnInit {
     }
 
     cargarNovedades(empleadoId: number): void {
-        // Aquí puedes conectar al backend real cuando funcione
-        // Por ahora datos de prueba
         this.novedades = [
             { tipo: 'DEVENGO', descripcion: 'Horas extras nocturnas', valor: 350000 },
             { tipo: 'DEVENGO', descripcion: 'Bonificación por cumplimiento', valor: 200000 },
@@ -114,8 +131,8 @@ export class ConsultaEmpleadoComponent implements OnInit {
     }
 
     imprimir(): void { window.print(); }
+
     salir(): void {
-        localStorage.clear();
-        this.router.navigate(['/login']);
+        this.authService.logout();  // Usa el logout correcto
     }
 }

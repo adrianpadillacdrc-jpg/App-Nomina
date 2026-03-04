@@ -1,3 +1,4 @@
+/* src/app/pages/dashboard/dashboard.component.scss */
 .main-content {
   margin-left: 240px;
   padding: 40px;
@@ -16,9 +17,10 @@
   color: white;
   font-size: 28px;
   font-weight: 700;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
+/* Botón Nuevo Empleado */
 .btn-new {
   background: linear-gradient(135deg, #9c27b0, #6a1b9a);
   color: white;
@@ -37,6 +39,26 @@
   box-shadow: 0 8px 25px rgba(106, 27, 154, 0.5);
 }
 
+/* Botón Cerrar Sesión (rojo) */
+.btn-logout {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 5px 18px rgba(231, 76, 60, 0.4);
+  transition: all 0.3s;
+}
+
+.btn-logout:hover {
+  background: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(231, 76, 60, 0.5);
+}
+
 /* KPIs */
 .kpis {
   display: grid;
@@ -50,7 +72,7 @@
   padding: 28px 20px;
   border-radius: 20px;
   text-align: center;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s;
 }
 
@@ -63,12 +85,20 @@
   font-weight: 800;
   margin-bottom: 8px;
   display: block;
-  color: #4a148c; /* ← MORADO OSCURO */
+  color: #4a148c;
 }
 
-.kpi-card .num.green { color: #27ae60; }
-.kpi-card .num.orange { color: #f39c12; }
-.kpi-card .num.red { color: #e74c3c; }
+.kpi-card .num.green {
+  color: #27ae60;
+}
+
+.kpi-card .num.orange {
+  color: #f39c12;
+}
+
+.kpi-card .num.red {
+  color: #e74c3c;
+}
 
 /* Búsqueda */
 .search-bar {
@@ -82,13 +112,13 @@
   border-radius: 50px;
   background: white;
   font-size: 15px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
   outline: none;
   transition: all 0.3s;
 }
 
 .search-bar input:focus {
-  box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
 }
 
 /* Tabla */
@@ -96,7 +126,7 @@
   background: white;
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
 }
 
 table {
@@ -136,7 +166,8 @@ td {
   color: #27ae60;
 }
 
-.empty, .loading {
+.empty,
+.loading {
   text-align: center;
   padding: 50px;
   color: #bbb;

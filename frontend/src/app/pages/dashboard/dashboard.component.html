@@ -1,9 +1,16 @@
+<!-- src/app/pages/dashboard/dashboard.component.html -->
 <app-sidebar></app-sidebar>
 
 <main class="main-content">
   <header class="header">
     <h1>Dashboard Administrador</h1>
-    <button class="btn-new" routerLink="/registro">+ Nuevo empleado</button>
+    <div style="display: flex; align-items: center; gap: 15px;">
+      <button class="btn-new" routerLink="/registro">+ Nuevo empleado</button>
+      <!-- Botón de Cerrar Sesión con confirmación -->
+      <button class="btn-logout" (click)="cerrarSesion()">
+        Cerrar Sesión
+      </button>
+    </div>
   </header>
 
   <!-- KPIs -->
@@ -28,10 +35,7 @@
 
   <!-- Búsqueda -->
   <div class="search-bar">
-    <input 
-      type="text" 
-      placeholder="Buscar por nombre, documento o cargo..." 
-      (input)="onFiltroChange($event)" />
+    <input type="text" placeholder="Buscar por nombre, documento o cargo..." (input)="onFiltroChange($event)" />
   </div>
 
   <!-- Tabla -->

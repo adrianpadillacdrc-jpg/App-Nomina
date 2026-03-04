@@ -29,7 +29,25 @@ export class AuthService {
     }
 
     isLoggedIn(): boolean {
-        return !!this.getToken();
+        const token = this.getToken();
+        if (!token) return false;
+
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const exp = payload.exp * 1000;
+            const now = Date.now();
+
+            if (now >= exp) {
+                console.log('Token expirado');
+                this.logout();
+                return false;
+            }
+            return true;
+        } catch (e) {
+            console.error('Token inválido o corrupto:', e);
+            this.logout();
+            return false;
+        }
     }
 
     logout(): void {
@@ -39,12 +57,17 @@ export class AuthService {
 
     getUserRole(): string | null {
         const token = this.getToken();
-        if (!token) return null;
+        if (!token) {
+            console.log('No hay token → rol: null');
+            return null;
+        }
 
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            console.log('Payload del token:', payload);
-            return payload.role || null;
+            console.log('Payload del token después de login:', payload); // ← LOG CLAVE
+            const role = payload.role || null;
+            console.log('Rol extraído del payload:', role);
+            return role;
         } catch (e) {
             console.error('Error decodificando token:', e);
             return null;

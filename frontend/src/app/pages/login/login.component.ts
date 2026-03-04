@@ -2,7 +2,7 @@
 import { Component, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -10,7 +10,8 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    RouterLink
   ],
   template: `
     <div class="login-wrapper">
@@ -29,13 +30,18 @@ import { AuthService } from '../../services/auth.service';
             {{ loading ? 'Cargando...' : 'Iniciar Sesión' }}
           </button>
           <p *ngIf="error" class="error">{{ error }}</p>
+
+          <p class="register-link">
+            ¿No tienes cuenta? 
+            <a routerLink="/register" class="link">Regístrate aquí</a>
+          </p>
+
           <a href="#" class="link">¿Olvidó su contraseña?</a>
         </form>
       </div>
     </div>
   `,
-  styles: [`
-    /* Tu CSS completo intacto */
+  styles: [` /* Tu CSS completo intacto */ 
     *, *::before, *::after { box-sizing: border-box; }
     html, body, :host {
       margin: 0 !important;
@@ -166,6 +172,23 @@ import { AuthService } from '../../services/auth.service';
       text-decoration: underline;
     }
 
+    .register-link {
+      margin-top: 15px;
+      color: #d1c4e9;
+      font-size: 0.95rem;
+    }
+
+    .register-link a {
+      color: #9c27b0;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .register-link a:hover {
+      color: white;
+      text-decoration: underline;
+    }
+
     @media (max-width: 480px) {
       .login-card {
         width: 340px;
@@ -190,6 +213,7 @@ export class LoginComponent {
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone
   ) { }
+
   ingresar() {
     this.error = '';
     this.loading = true;
@@ -198,39 +222,33 @@ export class LoginComponent {
     this.authService.login(this.usuario.trim(), this.password.trim()).subscribe({
       next: () => {
         this.loading = false;
-        console.log('Login exitoso');
+        console.log('Login exitoso - token guardado');
 
         const role = this.authService.getUserRole();
         console.log('Rol detectado:', role);
 
         let targetRoute = '/dashboard';
+
         if (role?.toUpperCase() === 'EMPLEADO') {
           targetRoute = '/consulta-empleado';
         }
 
-        console.log('Forzando navegación a:', targetRoute);
+        console.log('Redirigiendo a:', targetRoute);
 
-        // 1. Navegación normal
-        this.router.navigateByUrl(targetRoute, { replaceUrl: true });
-
-        // 2. Forzado extra con delay y reload si falla
-        setTimeout(() => {
-          if (this.router.url !== targetRoute) {
-            console.warn('Router no cambió - forzando reload completo');
-            window.location.href = targetRoute;
-          } else {
-            console.log('Router cambió correctamente - forzando múltiples detecciones');
-            this.cdr.detectChanges();
-            setTimeout(() => this.cdr.detectChanges(), 0);
-            setTimeout(() => this.cdr.detectChanges(), 200);
-          }
-        }, 100);
+        this.ngZone.run(() => {
+          setTimeout(() => {
+            this.router.navigateByUrl(targetRoute, { replaceUrl: true }).then(success => {
+              console.log('Navegación exitosa:', success ? 'SÍ' : 'NO');
+              this.cdr.detectChanges();
+            });
+          }, 300);
+        });
       },
       error: (err) => {
         this.loading = false;
         this.cdr.detectChanges();
-        console.error('Error login:', err);
-        this.error = err.status === 401 ? 'Credenciales inválidas' : 'Error de conexión';
+        console.error('Error en login:', err);
+        this.error = err.status === 401 ? 'Usuario o contraseña incorrectos' : 'Error al conectar';
       }
     });
   }

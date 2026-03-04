@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { Empleado } from '../../models/empleado.model';
 import { EmpleadosService } from '../../services/empleados.service';
-import { AuthService } from '../../services/auth.service';  // ← Inyección del servicio de autenticación JWT
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,11 +31,10 @@ export class DashboardComponent implements OnInit {
   constructor(
     private router: Router,
     private empleadosService: EmpleadosService,
-    private authService: AuthService   // ← Inyectado aquí
+    private authService: AuthService
   ) { }
 
   ngOnInit() {
-    // Verificación moderna con JWT (reemplaza el viejo loggedIn)
     if (!this.authService.isLoggedIn()) {
       console.log('No hay token válido → redirigiendo a login');
       this.router.navigate(['/login']);
@@ -109,8 +108,13 @@ export class DashboardComponent implements OnInit {
       .reduce((s, e) => s + e.salarioBase, 0);
   }
 
+  // Logout con confirmación
   cerrarSesion() {
-    this.authService.logout();  // ← Usa el logout del AuthService (elimina token y redirige)
+    const confirmar = confirm('¿Seguro que quieres cerrar sesión?');
+    if (confirmar) {
+      console.log('Cerrando sesión...');
+      this.authService.logout();
+    }
   }
 
   trackByDocumento(index: number, empleado: Empleado): string {
