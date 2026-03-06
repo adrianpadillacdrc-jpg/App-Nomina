@@ -28,37 +28,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // Deshabilitamos CSRF completamente (necesario para POST sin token)
                 .csrf(csrf -> csrf.disable())
-
-                // CORS primero
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                // Autorización de rutas - más explícita y corregida
                 .authorizeHttpRequests(auth -> auth
-                        // Rutas públicas
                         .requestMatchers("/api/auth/**").permitAll()
-                        // Swagger y docs abiertos
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**")
                         .permitAll()
-
-                        // Rutas GET de empleados → permitidas para ADMIN y EMPLEADO
                         .requestMatchers(HttpMethod.GET, "/api/empleados/**").hasAnyRole("ADMIN", "EMPLEADO")
-
-                        // Rutas sensibles (POST, PUT, DELETE) → solo ADMIN
                         .requestMatchers("/api/empleados/**", "/api/admin/**", "/api/liquidar/**", "/api/registro/**")
                         .hasRole("ADMIN")
-
-                        // Rutas EMPLEADO específicas
                         .requestMatchers("/api/consulta-empleado/**").hasRole("EMPLEADO")
-
-                        // Todo lo demás requiere autenticación
                         .anyRequest().authenticated())
 
-                // Sesión stateless
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // Filtro JWT
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

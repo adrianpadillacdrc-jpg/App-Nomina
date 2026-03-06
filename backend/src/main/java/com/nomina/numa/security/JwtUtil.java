@@ -9,14 +9,11 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
-
-    // Clave secreta (en producción guárdala en application.properties o variables
-    // de entorno)
     private final Key SECRET_KEY = Keys.hmacShaKeyFor(
             "tu_clave_secreta_super_larga_numero_uno_de_tu_proyecto_epico_2025_adrian_crack_no_la_compartas_nunca"
                     .getBytes());
 
-    private final long EXPIRATION_TIME = 86400000; // 24 horas
+    private final long EXPIRATION_TIME = 86400000;
 
     public String generateToken(String username, String role) {
         return Jwts.builder()
@@ -54,7 +51,6 @@ public class JwtUtil {
                     .parseClaimsJws(token);
             return true;
         } catch (Exception e) {
-            // Puedes loggear el error aquí si quieres
             return false;
         }
     }
