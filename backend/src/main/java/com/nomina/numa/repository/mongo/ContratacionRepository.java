@@ -5,5 +5,5 @@ import com.nomina.numa.model.mongo.Contratacion;
 import java.util.List;
 
 public interface ContratacionRepository extends MongoRepository<Contratacion, String> {
-    List<Contratacion> findByIdEmpleado(Long idEmpleado);
+    List<Contratacion> findByIdEmpleado(Long idEmpleado); // ← Cambiar a Long
 }

@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';   // ← Agregado
+import { AuthService } from '../../services/auth.service';
 
 interface Empleado {
     id: number;
@@ -49,7 +49,7 @@ export class ConsultaEmpleadoComponent implements OnInit {
     constructor(
         private http: HttpClient,
         private router: Router,
-        private authService: AuthService   // ← Inyectado
+        private authService: AuthService
     ) { }
 
     ngOnInit(): void {
@@ -63,7 +63,8 @@ export class ConsultaEmpleadoComponent implements OnInit {
         const role = this.authService.getUserRole();
         console.log('Rol en consulta-empleado:', role);
 
-        if (role?.toUpperCase() !== 'EMPLEADO') {
+        // CORREGIDO: Permitir acceso si es EMPLEADO o ROLE_EMPLEADO
+        if (role !== 'EMPLEADO' && role !== 'ROLE_EMPLEADO') {
             console.log('Usuario no es EMPLEADO → redirigiendo a dashboard');
             this.router.navigate(['/dashboard']);
             return;
@@ -72,10 +73,13 @@ export class ConsultaEmpleadoComponent implements OnInit {
         console.log('Usuario EMPLEADO autenticado correctamente');
 
         // Cargar empleados (usa datos reales o de prueba)
-        this.http.get<Empleado[]>('http://localhost:8080/api/empleados').subscribe({
+        const token = this.authService.getToken();
+        this.http.get<Empleado[]>('http://localhost:8080/api/empleados', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).subscribe({
             next: (data) => {
                 this.empleados = data.length > 0 ? data : this.datosPrueba;
-                console.log('Empleados cargados:', this.empleados);
+                console.log('Empleados cargados:', this.empleados.length);
             },
             error: (err) => {
                 console.log('Backend no responde, usando datos de prueba');
@@ -99,11 +103,15 @@ export class ConsultaEmpleadoComponent implements OnInit {
 
         if (this.empleado) {
             this.cargarNovedades(this.empleado.id);
+        } else {
+            this.novedades = [];
         }
     }
 
     cargarNovedades(empleadoId: number): void {
+        // Aquí deberías cargar novedades reales desde el backend
         this.novedades = [
+            { tipo: 'DEVENGO', descripcion: 'Salario base', valor: this.empleado!.salarioBase },
             { tipo: 'DEVENGO', descripcion: 'Horas extras nocturnas', valor: 350000 },
             { tipo: 'DEVENGO', descripcion: 'Bonificación por cumplimiento', valor: 200000 },
             { tipo: 'DEDUCCION', descripcion: 'Salud (4%)', valor: this.empleado!.salarioBase * 0.04 },
@@ -114,7 +122,7 @@ export class ConsultaEmpleadoComponent implements OnInit {
     }
 
     calcularTotales(): void {
-        this.totalDevengado = this.empleado!.salarioBase;
+        this.totalDevengado = 0;
         this.totalDeducciones = 0;
 
         this.novedades.forEach(n => {
@@ -130,9 +138,11 @@ export class ConsultaEmpleadoComponent implements OnInit {
         return Math.max(0, 12 - used);
     }
 
-    imprimir(): void { window.print(); }
+    imprimir(): void {
+        window.print();
+    }
 
     salir(): void {
-        this.authService.logout();  // Usa el logout correcto
+        this.authService.logout();
     }
 }

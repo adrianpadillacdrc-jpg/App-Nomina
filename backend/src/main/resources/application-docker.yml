@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/nomina_db}
+    username: ${SPRING_DATASOURCE_USERNAME:nomina_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:nomina_password}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        '[format_sql]': true
+    show-sql: false
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+logging:
+  level:
+    '[com.nomina.numa]': DEBUG
+    '[org.springframework.security]': DEBUG
+    '[org.hibernate]': INFO

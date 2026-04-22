@@ -1,4 +1,3 @@
-// src/main/java/com/nomina/numa/service/NovedadService.java
 package com.nomina.numa.service;
 
 import com.nomina.numa.model.mongo.Novedad;
@@ -7,16 +6,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
-
 @Service
 @RequiredArgsConstructor
 public class NovedadService {
 
     private final NovedadRepository repository;
 
-    // PARA EL ENDPOINT QUE USA EL FRONTEND
-    public List<Novedad> findByEmpleadoId(String empleadoId) {
-        return repository.findByIdEmpleado(empleadoId); // ← Asegúrate que el repo tenga este método
+    public List<Novedad> findByEmpleadoId(Long empleadoId) {
+        return repository.findByIdEmpleado(empleadoId);
+    }
+
+    public List<Novedad> findByCedula(String cedula) { // ← NUEVO
+        return repository.findByCedula(cedula);
     }
 
     public List<Novedad> findByPeriodoId(String periodoId) {
@@ -31,8 +32,7 @@ public class NovedadService {
         return repository.findAll();
     }
 
-    // Puedes dejar este si lo usas en otro lado
     public List<Novedad> findByEmpleado(Long id) {
-        return repository.findByIdEmpleado(id.toString());
+        return repository.findByIdEmpleado(id);
     }
 }

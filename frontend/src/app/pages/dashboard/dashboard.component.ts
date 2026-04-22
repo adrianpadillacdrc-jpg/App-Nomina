@@ -22,6 +22,7 @@ export class DashboardComponent implements OnInit {
   empleados: Empleado[] = [];
   empleadosFiltrados: Empleado[] = [];
   loading = true;
+  periodoActual: any = null;
 
   totalEmpleados = 0;
   liquidados = 0;
@@ -31,7 +32,7 @@ export class DashboardComponent implements OnInit {
   constructor(
     private router: Router,
     private empleadosService: EmpleadosService,
-    private authService: AuthService
+    private authService: AuthService,
   ) { }
 
   ngOnInit() {
@@ -81,6 +82,7 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+
   capitalizar(texto: string): string {
     if (!texto) return '';
     return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
@@ -108,7 +110,6 @@ export class DashboardComponent implements OnInit {
       .reduce((s, e) => s + e.salarioBase, 0);
   }
 
-  // Logout con confirmación
   cerrarSesion() {
     const confirmar = confirm('¿Seguro que quieres cerrar sesión?');
     if (confirmar) {

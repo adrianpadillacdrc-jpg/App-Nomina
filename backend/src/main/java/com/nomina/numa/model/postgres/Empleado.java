@@ -2,6 +2,7 @@ package com.nomina.numa.model.postgres;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "empleado")
@@ -26,8 +27,20 @@ public class Empleado {
     private Long idCargo;
     private String cargo;
     private Double salarioBase;
+
     @Builder.Default
     private Long idEmpresa = 1L;
+
     @Builder.Default
     private String estado = "ACTIVO";
+
+    // ✅ NUEVOS CAMPOS (agregar estos)
+    @Column(name = "fecha_inicio_contrato")
+    private LocalDate fechaInicioContrato;
+
+    @Column(name = "fecha_fin_contrato")
+    private LocalDate fechaFinContrato;
+
+    @Column(name = "fecha_creacion")
+    private LocalDate fechaCreacion;
 }

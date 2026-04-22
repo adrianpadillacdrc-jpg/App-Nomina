@@ -1,147 +1,133 @@
 package com.nomina.numa.controller;
 
+import com.nomina.numa.dto.LoginRequest;
+import com.nomina.numa.dto.LoginResponse;
+import com.nomina.numa.dto.RegisterRequest;
 import com.nomina.numa.model.postgres.Usuario;
 import com.nomina.numa.repository.jpa.UsuarioRepository;
-import com.nomina.numa.security.JwtUtil;
+import com.nomina.numa.security.JwtService;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import lombok.RequiredArgsConstructor;
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 public class AuthController {
 
-    private final JwtUtil jwtUtil;
-    private final UsuarioRepository usuarioRepository;
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
-    // ====================== LOGIN ======================
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        Optional<Usuario> opt = usuarioRepository.findByNombre(request.getUsername());
+        try {
+            System.err.println("========== LOGIN INICIADO ==========");
+            System.err.println("Username recibido: " + request.getUsername());
+            
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()));
 
-        if (opt.isPresent() && passwordEncoder.matches(request.getPassword(), opt.get().getContrasena())) {
-            Usuario user = opt.get();
-            String token = jwtUtil.generateToken(user.getNombre(), user.getRol());
-            return ResponseEntity.ok(new LoginResponse(token));
+            UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
+            System.err.println("UserDetails cargado: " + userDetails.getUsername());
+
+            Usuario usuario = usuarioRepository.findByCorreo(request.getUsername())
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            
+            System.err.println("Usuario encontrado en BD:");
+            System.err.println("  - Nombre: " + usuario.getNombre());
+            System.err.println("  - Correo: " + usuario.getCorreo());
+            System.err.println("  - Rol: " + usuario.getRol());
+
+            String userRole = usuario.getRol();
+            
+            // Asegurar que el rol tenga el formato correcto
+            if (userRole == null || userRole.isEmpty()) {
+                userRole = "ROLE_USER";
+                System.err.println("Rol era nulo, asignando ROLE_USER");
+            } else if (!userRole.startsWith("ROLE_")) {
+                userRole = "ROLE_" + userRole;
+                System.err.println("Rol sin prefijo, agregando: " + userRole);
+            }
+            
+            System.err.println("Rol final para token: '" + userRole + "'");
+            
+            String token = jwtService.generateToken(userDetails.getUsername(), userRole);
+            System.err.println("Token generado. Longitud: " + token.length());
+            
+            LoginResponse response = new LoginResponse(
+                    token,
+                    usuario.getNombre(),
+                    usuario.getCorreo(),
+                    userRole
+            );
+            
+            System.err.println("========== LOGIN EXITOSO ==========");
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("ERROR EN LOGIN: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(401).body("Credenciales invalidas: " + e.getMessage());
         }
-
-        return ResponseEntity.status(401).body("Credenciales inválidas");
     }
 
-    // ====================== REGISTRO NUEVO ======================
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-
-        // Validaciones
-        if (request.getNombre() == null || request.getNombre().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("El nombre de usuario es obligatorio");
-        }
-        if (request.getCorreo() == null || request.getCorreo().trim().isEmpty()) {
-            return ResponseEntity.badRequest().body("El correo es obligatorio");
-        }
-        if (request.getContrasena() == null || request.getContrasena().length() < 6) {
-            return ResponseEntity.badRequest().body("La contraseña debe tener mínimo 6 caracteres");
-        }
-        if (!"ADMIN".equalsIgnoreCase(request.getRol()) && !"EMPLEADO".equalsIgnoreCase(request.getRol())) {
-            return ResponseEntity.badRequest().body("Rol inválido. Solo ADMIN o EMPLEADO");
+        if (usuarioRepository.existsByCorreo(request.getCorreo())) {
+            return ResponseEntity.badRequest().body("El correo ya esta registrado");
         }
 
-        // Verificar duplicados
-        if (usuarioRepository.findByNombre(request.getNombre().trim()).isPresent()) {
-            return ResponseEntity.badRequest().body("El nombre de usuario ya existe");
-        }
-        if (usuarioRepository.findByCorreo(request.getCorreo().trim()).isPresent()) {
-            return ResponseEntity.badRequest().body("El correo ya está registrado");
-        }
+        Usuario usuario = new Usuario();
+        usuario.setNombre(request.getNombre());
+        usuario.setCorreo(request.getCorreo());
+        usuario.setContrasena(passwordEncoder.encode(request.getPassword()));
+        usuario.setRol("ROLE_USER");
+        usuario.setActivo(true);
 
-        // Crear usuario
-        Usuario nuevo = new Usuario();
-        nuevo.setNombre(request.getNombre().trim());
-        nuevo.setCorreo(request.getCorreo().trim());
-        nuevo.setContrasena(passwordEncoder.encode(request.getContrasena()));
-        nuevo.setRol(request.getRol().toUpperCase());
-        nuevo.setActivo(true);
+        usuarioRepository.save(usuario);
 
-        usuarioRepository.save(nuevo);
-
-        return ResponseEntity.ok("Usuario registrado correctamente. Ahora puedes iniciar sesión.");
+        return ResponseEntity.ok("Usuario registrado exitosamente");
     }
 
-    // ====================== DTOs ======================
-    static class LoginRequest {
-        private String username;
-        private String password;
-
-        public String getUsername() {
-            return username;
-        }
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("Backend funcionando correctamente");
     }
 
-    static class LoginResponse {
-        private String token;
-
-        public LoginResponse(String token) {
-            this.token = token;
-        }
-
-        public String getToken() {
-            return token;
-        }
+    @GetMapping("/ping")
+    public ResponseEntity<String> ping() {
+        return ResponseEntity.ok("pong");
     }
 
-    static class RegisterRequest {
-        private String nombre;
-        private String correo;
-        private String contrasena;
-        private String rol;
-
-        public String getNombre() {
-            return nombre;
-        }
-
-        public void setNombre(String nombre) {
-            this.nombre = nombre;
-        }
-
-        public String getCorreo() {
-            return correo;
-        }
-
-        public void setCorreo(String correo) {
-            this.correo = correo;
-        }
-
-        public String getContrasena() {
-            return contrasena;
-        }
-
-        public void setContrasena(String contrasena) {
-            this.contrasena = contrasena;
-        }
-
-        public String getRol() {
-            return rol;
-        }
-
-        public void setRol(String rol) {
-            this.rol = rol;
-        }
+    @GetMapping("/health")
+    public ResponseEntity<Map<String, Object>> health() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "UP");
+        response.put("service", "Nomina API");
+        response.put("timestamp", System.currentTimeMillis());
+        return ResponseEntity.ok(response);
     }
 }

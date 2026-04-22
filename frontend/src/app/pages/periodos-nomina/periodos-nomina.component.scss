@@ -1,16 +1,4 @@
-// src/styles.scss o src/app/app.component.scss
-body,
-html {
-    height: 100%;
-    margin: 0;
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url('/assets/images/numa.jpg') no-repeat center center fixed;
-    background-size: cover;
-    font-family: 'Segoe UI', sans-serif;
-}
-
-.main-content {
-    background: transparent !important;
-}
+// src/app/pages/periodos-nomina/periodos-nomina.component.scss
 
 .page-wrapper {
     display: flex;
@@ -21,7 +9,7 @@ html {
     margin-left: 240px;
     padding: 40px;
     flex: 1;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4e9fd 100%);
+    background: url('/assets/images/numa.jpg') no-repeat center center fixed;
 }
 
 .periodos-container {
@@ -93,6 +81,7 @@ html {
     border-radius: 50px;
     font-size: 13px;
     font-weight: 600;
+    display: inline-block;
 }
 
 .periodo-card .abierto {
@@ -103,6 +92,28 @@ html {
 .periodo-card .cerrado {
     background: #f8d7da;
     color: #721c24;
+}
+
+.periodo-card .pendiente {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.costo-periodo {
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px dashed #e0e0e0;
+}
+
+.costo-periodo strong {
+    color: #2c3e50;
+}
+
+.costo-valor {
+    font-weight: 700;
+    color: #27ae60;
+    font-size: 16px;
+    margin-left: 8px;
 }
 
 .btn-ver {
@@ -214,6 +225,15 @@ html {
 .total {
     color: #9c27b0;
     font-weight: 800;
+    font-size: 18px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px;
+    background: white;
+    border-radius: 20px;
+    color: #999;
     font-size: 18px;
 }
 

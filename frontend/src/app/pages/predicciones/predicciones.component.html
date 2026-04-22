@@ -1,0 +1,134 @@
+<!-- src/app/pages/predicciones/predicciones.component.html -->
+<app-sidebar></app-sidebar>
+
+<main class="main-content">
+  <header class="header">
+    <h1>📈 Predicciones de Nómina</h1>
+    <button class="btn-logout" (click)="cerrarSesion()">
+      <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+    </button>
+  </header>
+
+  <div class="content">
+    <div class="info-card">
+      <h3>🔮 Predicción de Quincenas 2026</h3>
+      <p>Base: <strong>{{ ultimaQuincenaReal }}</strong> - Costo: {{ formatearCOP(costoBaseQuincena * 1_000_000) }}</p>
+      <p>📈 Crecimiento aplicado: <strong>{{ tasaCrecimiento }}%</strong> por quincena</p>
+    </div>
+
+    <!-- Formulario de predicción -->
+    <div class="form-card">
+      <h3>📊 Configurar Predicción</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>📅 Mes a predecir</label>
+          <select [(ngModel)]="mesSeleccionado" class="form-control">
+            <option *ngFor="let mes of mesesRestantes" [value]="mes">{{ mes }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>📆 Quincena</label>
+          <select [(ngModel)]="quincenaSeleccionada" class="form-control">
+            <option value="1ra">1ra Quincena</option>
+            <option value="2da">2da Quincena</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>📈 Crecimiento por quincena (%)</label>
+          <input type="range" [(ngModel)]="tasaCrecimiento" min="0" max="5" step="0.1" class="slider">
+          <div class="rango-valor">{{ tasaCrecimiento }}%</div>
+        </div>
+
+        <div class="form-group">
+          <button class="btn-prediccion" (click)="predecir()" [disabled]="loading">
+            <i class="fas fa-chart-line"></i> PREDECIR
+          </button>
+        </div>
+
+        <div class="form-group">
+          <button class="btn-todo" (click)="predecirTodo()" [disabled]="loading">
+            <i class="fas fa-calendar-alt"></i> Predecir Todo 2026
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resultado individual -->
+    <div *ngIf="prediccionActual && !loading" class="resultado-card">
+      <h3>🎯 Resultado de la Predicción</h3>
+      <div class="resultado-detalle">
+        <div class="resultado-item">
+          <span class="label">{{ prediccionActual.quincena }} Quincena</span>
+          <span class="valor">{{ prediccionActual.mes }} {{ prediccionActual.anio }}</span>
+        </div>
+        <div class="resultado-item">
+          <span class="label">Costo Estimado</span>
+          <span class="valor cop">{{ formatearCOP(prediccionActual.costoCOP) }}</span>
+        </div>
+        <div class="resultado-item">
+          <span class="label">Crecimiento</span>
+          <span class="valor positivo">+{{ prediccionActual.crecimiento }}%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla completa -->
+    <div *ngIf="predicciones.length > 0 && !loading" class="resultados-card">
+      <div class="resultados-header">
+        <h3>📋 Predicción Completa 2026</h3>
+        <div class="total-general">
+          Total: {{ formatearCOP(getTotalGeneral()) }}
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Mes</th>
+              <th>1ra Quincena</th>
+              <th>2da Quincena</th>
+              <th>Total Mes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let mes of mesesRestantes">
+              <td class="mes-nombre">{{ mes }}</td>
+              <td class="moneda">
+                {{ formatearCOP(getQuincenaPorMes(mes, '1ra')?.costoCOP || 0) }}
+                <span class="crecimiento" *ngIf="getQuincenaPorMes(mes, '1ra')?.crecimiento">
+                  (+{{ getQuincenaPorMes(mes, '1ra')?.crecimiento }}%)
+                </span>
+              </td>
+              <td class="moneda">
+                {{ formatearCOP(getQuincenaPorMes(mes, '2da')?.costoCOP || 0) }}
+                <span class="crecimiento" *ngIf="getQuincenaPorMes(mes, '2da')?.crecimiento">
+                  (+{{ getQuincenaPorMes(mes, '2da')?.crecimiento }}%)
+                </span>
+              </td>
+              <td class="moneda total-mes">
+                {{ formatearCOP(getTotalMensual(mes)) }}
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="total-general-row">
+              <td colspan="3"><strong>TOTAL GENERAL</strong></td>
+              <td class="moneda"><strong>{{ formatearCOP(getTotalGeneral()) }}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="loading">
+      <i class="fas fa-spinner fa-spin"></i> Calculando predicciones...
+    </div>
+
+    <div *ngIf="error" class="error-message">
+      <i class="fas fa-exclamation-triangle"></i> {{ error }}
+    </div>
+  </div>
+</main>

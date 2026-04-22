@@ -1,0 +1,37 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+
+# Backend
+backend/target/
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+backend/*.log
+backend/dependencies.txt
+backend/jjwt.txt
+
+# Frontend
+frontend/node_modules/
+frontend/.angular/
+frontend/dist/
+frontend/*.log
+
+# OS
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Database
+*.sql
+*.dump
+!backend/numadb.sql
+!backend/init-mongo.js

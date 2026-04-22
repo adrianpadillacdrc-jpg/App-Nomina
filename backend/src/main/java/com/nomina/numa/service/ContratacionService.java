@@ -12,7 +12,7 @@ import java.util.Optional;
 public class ContratacionService {
     private final ContratacionRepository repo;
 
-    public List<Contratacion> findByEmpleado(Long idEmpleado) {
+    public List<Contratacion> findByEmpleado(Long idEmpleado) {  // ← Cambiar a Long
         return repo.findByIdEmpleado(idEmpleado);
     }
 
@@ -21,7 +21,6 @@ public class ContratacionService {
     }
 
     public Contratacion save(Contratacion contratacion) {
-        // Establecer estado por defecto si no viene
         if (contratacion.getEstado() == null) {
             contratacion.setEstado("VIGENTE");
         }

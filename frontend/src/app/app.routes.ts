@@ -1,4 +1,4 @@
-// src/app/app.routes.ts
+﻿// src/app/app.routes.ts
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
@@ -48,7 +48,6 @@ export const routes: Routes = [
     path: 'consulta-empleado',
     loadComponent: () => import('./pages/consulta-empleado/consulta-empleado.component').then(m => m.ConsultaEmpleadoComponent),
     canActivate: [authGuard, empleadoGuard]
-    
   },
 
   // Rutas para ambos roles (solo autenticación)
@@ -65,6 +64,12 @@ export const routes: Routes = [
   },
 
   {
+    path: 'nueva-novedad',  // ← NUEVA RUTA AGREGADA
+    loadComponent: () => import('./pages/nueva-novedad/nueva-novedad.component').then(m => m.NuevaNovedadComponent),
+    canActivate: [authGuard, adminGuard]
+  },
+
+  {
     path: 'pago-nomina',
     loadComponent: () => import('./pages/pago-nomina/pago-nomina.component').then(m => m.PagoNominaComponent),
     canActivate: [authGuard]
@@ -74,6 +79,13 @@ export const routes: Routes = [
     path: 'periodos-nomina',
     loadComponent: () => import('./pages/periodos-nomina/periodos-nomina.component').then(m => m.PeriodosNominaComponent),
     canActivate: [authGuard]
+  },
+
+  // NUEVA RUTA: PREDICCIONES
+  {
+    path: 'predicciones',
+    loadComponent: () => import('./pages/predicciones/predicciones.component').then(m => m.PrediccionesComponent),
+    canActivate: [authGuard, adminGuard]
   },
 
   // Ruta comodín

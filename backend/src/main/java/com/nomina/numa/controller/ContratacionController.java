@@ -1,29 +1,28 @@
 package com.nomina.numa.controller;
 
-import java.util.List;
-
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.nomina.numa.model.mongo.Contratacion;
 import com.nomina.numa.service.ContratacionService;
-
+import com.nomina.numa.service.ContratacionDirectService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/contrataciones")
-@CrossOrigin(origins = "http://localhost:4200")
+@PreAuthorize("hasAnyRole('ADMIN', 'EMPLEADO')")
 @RequiredArgsConstructor
 public class ContratacionController {
     private final ContratacionService service;
+    private final ContratacionDirectService directService;
 
     @GetMapping("/empleado/{idEmpleado}")
-    public List<Contratacion> getByEmpleado(@PathVariable Long idEmpleado) {
+    public List<Contratacion> getByEmpleado(@PathVariable Long idEmpleado) {  // ← Cambiar a Long
         return service.findByEmpleado(idEmpleado);
     }
 
@@ -32,13 +31,35 @@ public class ContratacionController {
         return service.save(contratacion);
     }
 
-    // Nuevo endpoint para obtener todos los contratos
     @GetMapping
     public List<Contratacion> getAll() {
-        return service.findAll();
+        log.info("GET /api/contrataciones - Iniciando");
+        List<Document> docs = directService.findAllAsDocuments();
+        log.info("Documentos obtenidos: {}", docs.size());
+        
+        List<Contratacion> contratos = docs.stream().map(doc -> {
+            Contratacion c = new Contratacion();
+            c.setId(doc.getObjectId("_id").toString());
+            c.setIdEmpleado(doc.getLong("idEmpleado"));  // ← Cambiar a getLong
+            c.setIdTipoContrato(doc.getString("idTipoContrato"));
+            
+            if (doc.getDate("fechaInicio") != null) {
+                c.setFechaInicio(doc.getDate("fechaInicio").toInstant()
+                    .atZone(ZoneId.systemDefault()).toLocalDate());
+            }
+            if (doc.getDate("fechaFin") != null) {
+                c.setFechaFin(doc.getDate("fechaFin").toInstant()
+                    .atZone(ZoneId.systemDefault()).toLocalDate());
+            }
+            
+            c.setEstado(doc.getString("estado"));
+            return c;
+        }).collect(Collectors.toList());
+        
+        log.info("Contratos convertidos: {}", contratos.size());
+        return contratos;
     }
 
-    // Nuevo endpoint para actualizar estado
     @PostMapping("/{id}/estado")
     public Contratacion updateEstado(@PathVariable String id, @RequestBody String estado) {
         return service.updateEstado(id, estado);

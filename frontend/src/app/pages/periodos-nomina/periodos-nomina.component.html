@@ -8,14 +8,21 @@
       <div class="periodos-grid">
         <div class="periodo-card" *ngFor="let periodo of periodos">
           <div class="info">
-            <h3>{{ periodo.descripcion }}</h3>
+            <h3>{{ periodo.description }}</h3>
             <p><strong>Del:</strong> {{ periodo.fechaInicio | date:'dd/MM/yyyy' }}</p>
             <p><strong>Al:</strong> {{ periodo.fechaFin | date:'dd/MM/yyyy' }}</p>
             <p><strong>Estado:</strong>
-              <span [class.cerrado]="periodo.estado === 'CERRADO'" 
-                    [class.abierto]="periodo.estado === 'ABIERTO'">
+              <span [class.cerrado]="periodo.estado === 'CERRADO'" [class.abierto]="periodo.estado === 'ABIERTO'"
+                [class.pendiente]="periodo.estado === 'PENDIENTE'">
                 {{ periodo.estado }}
               </span>
+            </p>
+            <p *ngIf="periodo.costoCOP" class="costo-periodo">
+              <strong>Costo Nómina:</strong>
+              <span class="costo-valor">{{ formatearCosto(periodo.costoCOP) }}</span>
+            </p>
+            <p *ngIf="!periodo.costoCOP && periodo.estado === 'CERRADO'" class="costo-periodo">
+              <strong>Costo:</strong> No calculado
             </p>
           </div>
           <button class="btn-ver" (click)="verNominaPeriodo(periodo)">
@@ -34,7 +41,7 @@
 <!-- MODAL NÓMINA HISTÓRICA -->
 <div class="modal" *ngIf="mostrarModalNomina">
   <div class="modal-content large" (click)="$event.stopPropagation()">
-    <h2>Nómina - {{ periodoSeleccionado?.descripcion }}</h2>
+    <h2>Nómina - {{ periodoSeleccionado?.description }}</h2>
     <button class="btn-cerrar" (click)="cerrarModal()">X</button>
 
     <div class="tabla-nomina">

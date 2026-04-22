@@ -1,4 +1,4 @@
-// src/app/interceptors/auth.interceptor.ts
+﻿// src/app/interceptors/auth.interceptor.ts
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
@@ -11,34 +11,43 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const router = inject(Router);
     const token = authService.getToken();
 
+    // Rutas que NO necesitan token (públicas)
+    const publicUrls = [
+        '/api/periodo-nomina/todos',
+        '/api/periodo-nomina/test',
+        '/api/periodo-nomina/actual',
+        '/api/periodo-nomina/actual-con-costo',
+        '/api/prediccion/'
+    ];
+
+    // Verificar si la URL actual es pública
+    const isPublicUrl = publicUrls.some(url => req.url.includes(url));
+
     let authReq = req;
-    if (token) {
+    if (token && !isPublicUrl) {
         authReq = req.clone({
             setHeaders: {
                 Authorization: `Bearer ${token}`
             }
         });
+        console.log('🔐 Token agregado a:', req.url);
+    } else if (isPublicUrl) {
+        console.log('🔓 Endpoint público, sin token:', req.url);
     }
 
     return next(authReq).pipe(
         catchError(err => {
-            // Solo hacemos logout automático en 401 real (token inválido/expirado)
-            // NO en 403 de rutas de consulta (como /api/empleados)
-            if (err.status === 401) {
-                console.warn('401 → Token inválido/expirado → logout automático');
-                authService.logout();
-            } else if (err.status === 403) {
-                // Excepción para rutas de consulta
-                if (req.url.includes('/api/empleados') || req.url.includes('/consulta-empleado')) {
-                    console.log('403 en ruta de consulta → no hacemos logout automático');
-                    // Dejamos que el componente maneje el error (p.ej. mostrar mensaje o datos de prueba)
-                } else {
-                    console.warn('403 en ruta protegida → logout automático');
-                    authService.logout();
-                }
-            }
+            console.log('⚠️ Error en petición:', err.status, req.url);
 
-            // Propaga el error para que el componente lo maneje si quiere
+            // Solo hacer logout en 401 (no autenticado)
+            if (err.status === 401) {
+                console.warn('401 → Token inválido/expirado → logout');
+                authService.logout();
+                router.navigate(['/login']);
+            } else if (err.status === 403) {
+                console.warn('403 → Acceso denegado a:', req.url);
+                // No hacer logout para 403, solo mostrar el error
+            }
             return throwError(() => err);
         })
     );

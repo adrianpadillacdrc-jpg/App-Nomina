@@ -6,12 +6,14 @@ import { EmpleadosService } from '../../services/empleados.service';
 
 interface Periodo {
     id: string;
-    descripcion: string;
+    description: string;
     fechaInicio: string;
     fechaFin: string;
     estado: string;
     anio?: number;
     tipo?: string;
+    costoMillones?: number;
+    costoCOP?: number;
 }
 
 interface NominaItem {
@@ -67,10 +69,8 @@ export class PeriodosNominaComponent implements OnInit {
         this.periodoSeleccionado = periodo;
         this.cargando = true;
 
-        // CAMBIO CLAVE: usar el método correcto del service
         this.empleadosService.getNovedadesPorPeriodo(periodo.id).subscribe({
             next: (novedades: any[]) => {
-                // Aquí reutilizamos la misma lógica que en pago-nomina para calcular la nómina
                 this.calcularNominaDesdeNovedades(novedades);
                 this.mostrarModalNomina = true;
                 this.cargando = false;
@@ -85,7 +85,6 @@ export class PeriodosNominaComponent implements OnInit {
         });
     }
 
-    // Método que convierte novedades en nómina (igual que en pago-nomina)
     private calcularNominaDesdeNovedades(novedades: any[]): void {
         this.empleadosService.getEmpleados().subscribe({
             next: (empleados: any[]) => {
@@ -151,5 +150,15 @@ export class PeriodosNominaComponent implements OnInit {
         this.mostrarModalNomina = false;
         this.periodoSeleccionado = null;
         this.nominaHistorica = [];
+    }
+
+    formatearCosto(costoCOP: number): string {
+        if (!costoCOP) return 'No calculado';
+        return new Intl.NumberFormat('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(costoCOP);
     }
 }

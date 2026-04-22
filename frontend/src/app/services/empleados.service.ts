@@ -5,7 +5,6 @@ import { Empleado } from '../models/empleado.model';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
-
 export class EmpleadosService {
   private api = 'http://localhost:8080';
   private apiUrl = 'http://localhost:8080/api';
@@ -25,6 +24,7 @@ export class EmpleadosService {
       responseType: 'text'
     });
   }
+
   getEmpleados(): Observable<Empleado[]> {
     return this.http.get<Empleado[]>(`${this.api}/api/empleados`);
   }
@@ -45,9 +45,16 @@ export class EmpleadosService {
     return this.http.get<any[]>(`${this.api}/api/novedades/periodo-actual`);
   }
 
+  // ✅ Método para obtener todos los períodos (público, sin token)
   getPeriodos(): Observable<any[]> {
-    return this.http.get<any[]>('http://localhost:8080/api/periodo-nomina/todos');
+    return this.http.get<any[]>(`${this.api}/api/periodo-nomina/todos`);
   }
+
+  // ✅ Método de prueba para verificar conexión
+  getPeriodosTest(): Observable<any> {
+    return this.http.get<any>(`${this.api}/api/periodo-nomina/test`);
+  }
+
   cerrarPeriodoActual(): Observable<any> {
     return this.http.patch('http://localhost:8080/api/periodo-nomina/cerrar-actual', {});
   }
@@ -55,6 +62,7 @@ export class EmpleadosService {
   crearPeriodo(periodo: any): Observable<any> {
     return this.http.post('http://localhost:8080/api/periodo-nomina', periodo);
   }
+
   getNovedadesPorEmpleado(empleadoId: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/novedades/empleado/${empleadoId}`);
   }

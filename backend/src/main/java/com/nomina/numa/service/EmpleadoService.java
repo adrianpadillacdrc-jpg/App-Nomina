@@ -1,4 +1,3 @@
-// src/main/java/com/nomina/numa/service/EmpleadoService.java
 package com.nomina.numa.service;
 
 import com.nomina.numa.model.postgres.Empleado;
@@ -12,30 +11,34 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EmpleadoService {
 
-    private final EmpleadoRepository repo;
+    private final EmpleadoRepository repository;
 
     public List<Empleado> findAll() {
-        return repo.findAll();
+        return repository.findAll();
     }
 
     public List<Empleado> findActivos() {
-        return repo.findByEstado("ACTIVO");
+        return repository.findByEstado("ACTIVO");
     }
 
     public Empleado findById(Long id) {
-        return repo.findById(id).orElse(null);
+        return repository.findById(id).orElse(null);
     }
 
-    public Empleado save(Empleado e) {
-        return repo.save(e);
+    public Empleado save(Empleado empleado) {
+        return repository.save(empleado);
     }
 
     public void deleteById(Long id) {
-        repo.deleteById(id);
+        repository.deleteById(id);
     }
 
-    // MÉTODO AUXILIAR PARA VERIFICAR SI EXISTE
     public boolean existsById(Long id) {
-        return repo.existsById(id);
+        return repository.existsById(id);
+    }
+
+    // ✅ NUEVO MÉTODO: Contar empleados por estado
+    public long countByEstado(String estado) {
+        return repository.countByEstado(estado);
     }
 }

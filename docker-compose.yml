@@ -1,0 +1,59 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: nomina_postgres
+    environment:
+      POSTGRES_DB: numadb
+      POSTGRES_USER: nomina_user
+      POSTGRES_PASSWORD: nomina_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+  mongodb:
+    image: mongo:6
+    container_name: nomina_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app_network
+
+  backend:
+    build: ./backend
+    container_name: nomina_backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/numadb
+      SPRING_DATASOURCE_USERNAME: nomina_user
+      SPRING_DATASOURCE_PASSWORD: nomina_password
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/numa_mongo
+    depends_on:
+      - postgres
+      - mongodb
+    networks:
+      - app_network
+
+  frontend:
+    build: ./frontend
+    container_name: numa-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mongodb_data:
