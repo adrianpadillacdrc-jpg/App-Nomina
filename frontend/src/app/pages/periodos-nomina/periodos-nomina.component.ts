@@ -1,7 +1,7 @@
-// src/app/pages/periodos-nomina/periodos-nomina.component.ts
+﻿// src/app/pages/periodos-nomina/periodos-nomina.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { SidebarComponent } from '../../guards/components/sidebar/sidebar.component';
 import { EmpleadosService } from '../../services/empleados.service';
 
 interface Periodo {
@@ -57,10 +57,10 @@ export class PeriodosNominaComponent implements OnInit {
                 this.cargando = false;
             },
             error: (err) => {
-                console.error('Error al cargar períodos:', err);
+                console.error('Error al cargar perÃ­odos:', err);
                 this.periodos = [];
                 this.cargando = false;
-                alert('No se pudieron cargar los períodos.\n\nVerifica que el backend esté corriendo en http://localhost:8080');
+                alert('No se pudieron cargar los perÃ­odos.\n\nVerifica que el backend estÃ© corriendo en http://localhost:8080');
             }
         });
     }
@@ -76,11 +76,11 @@ export class PeriodosNominaComponent implements OnInit {
                 this.cargando = false;
             },
             error: (err) => {
-                console.error('Error al cargar nómina del período:', err);
+                console.error('Error al cargar nÃ³mina del perÃ­odo:', err);
                 this.nominaHistorica = [];
                 this.mostrarModalNomina = true;
                 this.cargando = false;
-                alert('Este período aún no tiene nómina generada o no hay empleados registrados.');
+                alert('Este perÃ­odo aÃºn no tiene nÃ³mina generada o no hay empleados registrados.');
             }
         });
     }

@@ -1,10 +1,10 @@
-// src/app/pages/novedades/novedades.component.ts
+﻿// src/app/pages/novedades/novedades.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { SidebarComponent } from '../../guards/components/sidebar/sidebar.component';
 import { AuthService } from '../../services/auth.service';
 
 interface Empleado {

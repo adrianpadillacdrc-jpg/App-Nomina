@@ -3,7 +3,7 @@ package com.nomina.numa.model.mongo;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.time.LocalDate;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "periodonomina")
 @Data
@@ -11,16 +11,38 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PeriodoNomina {
+    
     @Id
     private String id;
-    private LocalDate fechaInicio;
-    private LocalDate fechaFin;
+    
+    @Field("fechaInicio")
+    private String fechaInicio;
+    
+    @Field("fechaFin")
+    private String fechaFin;
+    
     private String description;
-    private String estado; // "CERRADO", "ABIERTO", "PENDIENTE"
+    
+    private String estado;
+    
     private Integer anio;
-    private String tipo; // "QUINCENAL"
-
-    // ✅ NUEVO CAMPO
-    private Double costoMillones; // Costo de nómina en millones COP
-    private Double costoCOP; // Costo de nómina en COP
+    
+    private String tipo;
+    
+    private Double costoMillones;
+    
+    private Double costoCOP;
+    
+    // Método helper para obtener descripción formateada
+    public String getDescription() {
+        if (description != null && !description.isEmpty()) {
+            return description;
+        }
+        return "Período sin descripción";
+    }
+    
+    // Método para validar si el período está activo
+    public boolean isActivo() {
+        return "ABIERTO".equalsIgnoreCase(estado);
+    }
 }

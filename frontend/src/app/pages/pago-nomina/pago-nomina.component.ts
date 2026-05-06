@@ -1,7 +1,7 @@
-// src/app/pages/pago-nomina/pago-nomina.component.ts
+﻿// src/app/pages/pago-nomina/pago-nomina.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { SidebarComponent } from '../../guards/components/sidebar/sidebar.component';
 import { EmpleadosService } from '../../services/empleados.service';
 import { jsPDF } from 'jspdf';
 
@@ -39,10 +39,10 @@ export class PagoNominaComponent implements OnInit {
     this.empleadosService.getPeriodoActual().subscribe({
       next: (data) => {
         this.periodoActual = data;
-        this.cargarNomina(); // Recargar nómina cada vez que cambie el período
+        this.cargarNomina(); // Recargar nÃ³mina cada vez que cambie el perÃ­odo
       },
       error: (err) => {
-        console.log('No hay período activo, usando uno por defecto');
+        console.log('No hay perÃ­odo activo, usando uno por defecto');
         this.periodoActual = {
           id: "temp-001",
           descripcion: "1ra Quincena Noviembre 2025",
@@ -62,7 +62,7 @@ export class PagoNominaComponent implements OnInit {
         const periodoId = this.periodoActual?.id;
 
         if (!periodoId || periodoId === 'temp-001') {
-          // Si no hay período real, mostrar solo sueldo base
+          // Si no hay perÃ­odo real, mostrar solo sueldo base
           this.nominaData = empleados.map(emp => ({
             id: emp.id,
             nombre: this.cap(emp.nombre || ''),
@@ -122,7 +122,7 @@ export class PagoNominaComponent implements OnInit {
                     break;
 
                   case 'VACACIONES':
-                    // No afecta nómina (ya se pagó antes)
+                    // No afecta nÃ³mina (ya se pagÃ³ antes)
                     break;
                 }
               });
@@ -155,7 +155,7 @@ export class PagoNominaComponent implements OnInit {
     });
   }
 
-  // MÉTODOS AUXILIARES
+  // MÃ‰TODOS AUXILIARES
   cap(t: string): string {
     return t ? t.charAt(0).toUpperCase() + t.slice(1).toLowerCase() : '';
   }
@@ -173,16 +173,16 @@ export class PagoNominaComponent implements OnInit {
 
     this.cargando = true;
 
-    // 1. Cierra el período actual
+    // 1. Cierra el perÃ­odo actual
     this.empleadosService.cerrarPeriodoActual().subscribe({
       next: () => {
-        // 2. Crea el siguiente período
+        // 2. Crea el siguiente perÃ­odo
         this.crearSiguienteQuincena();
         this.pagoGenerado = true;
         this.cargando = false;
       },
       error: () => {
-        alert('Error al cerrar el período');
+        alert('Error al cerrar el perÃ­odo');
         this.cargando = false;
       }
     });
@@ -191,9 +191,9 @@ export class PagoNominaComponent implements OnInit {
   imprimirComprobante() {
     const doc = new jsPDF();
     doc.setFontSize(16);
-    doc.text('COMPROBANTE DE PAGO - NÓMINA', 105, 20, { align: 'center' });
+    doc.text('COMPROBANTE DE PAGO - NÃ“MINA', 105, 20, { align: 'center' });
     doc.setFontSize(12);
-    doc.text(`Período: ${this.periodoActual?.descripcion}`, 20, 40);
+    doc.text(`PerÃ­odo: ${this.periodoActual?.descripcion}`, 20, 40);
     doc.text(`Fecha: ${new Date().toLocaleDateString('es-CO')}`, 20, 50);
 
     let y = 70;
@@ -213,13 +213,13 @@ export class PagoNominaComponent implements OnInit {
     let nuevoFin: Date;
     let nuevaDescripcion: string;
 
-    // SI LA QUINCENA ACTUAL TERMINA EL 15 → es 1ra quincena → siguiente es 2da
+    // SI LA QUINCENA ACTUAL TERMINA EL 15 â†’ es 1ra quincena â†’ siguiente es 2da
     if (fechaFin.getDate() === 15) {
       nuevoInicio = new Date(fechaFin.getFullYear(), fechaFin.getMonth(), 16);
-      nuevoFin = new Date(fechaFin.getFullYear(), fechaFin.getMonth() + 1, 0); // último día del mes
+      nuevoFin = new Date(fechaFin.getFullYear(), fechaFin.getMonth() + 1, 0); // Ãºltimo dÃ­a del mes
       nuevaDescripcion = `2da Quincena ${this.obtenerNombreMes(nuevoInicio.getMonth())} ${nuevoInicio.getFullYear()}`;
     } else {
-      // SI TERMINA EL ÚLTIMO DÍA DEL MES → es 2da quincena → siguiente es 1ra del mes siguiente
+      // SI TERMINA EL ÃšLTIMO DÃA DEL MES â†’ es 2da quincena â†’ siguiente es 1ra del mes siguiente
       nuevoInicio = new Date(fechaFin.getFullYear(), fechaFin.getMonth() + 1, 1);
       nuevoFin = new Date(fechaFin.getFullYear(), fechaFin.getMonth() + 1, 15);
       nuevaDescripcion = `1ra Quincena ${this.obtenerNombreMes(nuevoInicio.getMonth())} ${nuevoInicio.getFullYear()}`;
@@ -236,7 +236,7 @@ export class PagoNominaComponent implements OnInit {
 
     this.empleadosService.crearPeriodo(nuevoPeriodo).subscribe({
       next: (res) => {
-        alert(`¡Nómina pagada y cerrada!\n\nSe creó automáticamente:\n${nuevaDescripcion}`);
+        alert(`Â¡NÃ³mina pagada y cerrada!\n\nSe creÃ³ automÃ¡ticamente:\n${nuevaDescripcion}`);
         this.cargarPeriodoActual();
         this.pagoGenerado = false;
       },

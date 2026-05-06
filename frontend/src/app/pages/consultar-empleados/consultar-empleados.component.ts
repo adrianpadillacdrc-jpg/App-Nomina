@@ -1,8 +1,8 @@
-// src/app/pages/consultar-empleados/consultar-empleados.component.ts
+﻿// src/app/pages/consultar-empleados/consultar-empleados.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { SidebarComponent } from '../../guards/components/sidebar/sidebar.component';
 import { ActualizarEmpleadoComponent } from './actualizar-empleado/actualizar-empleado.component';
 import { EmpleadosService } from '../../services/empleados.service';
 
@@ -24,7 +24,7 @@ export class ConsultarEmpleadosComponent implements OnInit {
   empleadosFiltrados: any[] = [];
   busqueda = '';
 
-  // Modal Nómina (EL MISMO QUE EL EMPLEADO)
+  // Modal NÃ³mina (EL MISMO QUE EL EMPLEADO)
   mostrarModalNomina = false;
   empleadoSeleccionado: any = null;
   periodoActual: any = null;
@@ -78,7 +78,7 @@ export class ConsultarEmpleadosComponent implements OnInit {
     );
   }
 
-  // FUNCIÓN CLAVE: ABRE EL COMPROBANTE ÉPICO
+  // FUNCIÃ“N CLAVE: ABRE EL COMPROBANTE Ã‰PICO
   verNominaCompleta(empleado: any) {
     this.empleadoSeleccionado = empleado;
     this.novedadesEmpleado = [];
@@ -107,12 +107,12 @@ export class ConsultarEmpleadosComponent implements OnInit {
         this.novedadesEmpleado = [];
       },
       complete: () => {
-        this.mostrarModalNomina = true; // Abre el modal con el diseño brutal
+        this.mostrarModalNomina = true; // Abre el modal con el diseÃ±o brutal
       }
     });
   }
 
-  // Helper: ¿es devengo?
+  // Helper: Â¿es devengo?
   esDevengo(tipo: string): boolean {
     return ['HORAS_EXTRAS', 'BONIFICACION', 'COMISION', 'AUXILIO_TRANSPORTE'].includes(tipo);
   }
@@ -121,13 +121,13 @@ export class ConsultarEmpleadosComponent implements OnInit {
   getConcepto(tipo: string): string {
     const mapa: any = {
       HORAS_EXTRAS: 'Horas extras',
-      BONIFICACION: 'Bonificación',
-      COMISION: 'Comisión',
+      BONIFICACION: 'BonificaciÃ³n',
+      COMISION: 'ComisiÃ³n',
       AUXILIO_TRANSPORTE: 'Auxilio de transporte',
-      PRESTAMO: 'Préstamo',
+      PRESTAMO: 'PrÃ©stamo',
       EMBARGO: 'Embargo',
       SALUD: 'Salud (4%)',
-      PENSION: 'Pensión (4%)'
+      PENSION: 'PensiÃ³n (4%)'
     };
     return mapa[tipo] || tipo;
   }
@@ -143,7 +143,7 @@ export class ConsultarEmpleadosComponent implements OnInit {
     this.mostrarActualizar = true;
   }
 
-  // IMPRIMIR EL COMPROBANTE ÉPICO (el mismo que el empleado)
+  // IMPRIMIR EL COMPROBANTE Ã‰PICO (el mismo que el empleado)
   imprimirNomina() {
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
@@ -176,15 +176,15 @@ export class ConsultarEmpleadosComponent implements OnInit {
       </head>
       <body>
         <div class="header-comprobante">
-          <h1>COMPROBANTE DE PAGO DE NÓMINA</h1>
+          <h1>COMPROBANTE DE PAGO DE NÃ“MINA</h1>
           <h2>NUMA S.A.S</h2>
           <p>NIT: 901.234.567-8 | Periodo: Noviembre 2025</p>
         </div>
         <div class="info-empleado">
           <div><strong>Empleado:</strong> ${this.empleadoSeleccionado?.nombre} ${this.empleadoSeleccionado?.apellido}</div>
-          <div><strong>Cédula:</strong> ${this.empleadoSeleccionado?.documento}</div>
+          <div><strong>CÃ©dula:</strong> ${this.empleadoSeleccionado?.documento}</div>
           <div><strong>Cargo:</strong> ${this.empleadoSeleccionado?.cargo}</div>
-          <div><strong>Días trabajados:</strong> 30</div>
+          <div><strong>DÃ­as trabajados:</strong> 30</div>
         </div>
         <table>
           <tr>
@@ -192,7 +192,7 @@ export class ConsultarEmpleadosComponent implements OnInit {
             <th class="deduccion" colspan="2">DEDUCCIONES</th>
           </tr>
           <tr>
-            <th>Cód.</th><th>Concepto</th><th>Valor</th><th>Concepto</th><th>Valor</th>
+            <th>CÃ³d.</th><th>Concepto</th><th>Valor</th><th>Concepto</th><th>Valor</th>
           </tr>
           <tr>
             <td>001</td>
@@ -222,7 +222,7 @@ export class ConsultarEmpleadosComponent implements OnInit {
         </table>
         <div style="text-align:center;margin:40px 0">
           <div class="caja-liquido">
-            <strong>LÍQUIDO A PERCIBIR</strong><br>
+            <strong>LÃQUIDO A PERCIBIR</strong><br>
             <span class="monto-grande">$ ${this.netoPagar.toLocaleString('es-CO')}</span>
           </div>
         </div>

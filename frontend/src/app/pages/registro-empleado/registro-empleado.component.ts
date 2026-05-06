@@ -1,16 +1,16 @@
-// src/app/pages/registro-empleado/registro-empleado.component.ts
+﻿// src/app/pages/registro-empleado/registro-empleado.component.ts
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { SidebarComponent } from '../../guards/components/sidebar/sidebar.component';
 import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-registro-empleado',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent], // ← AGREGA SidebarComponent
+  imports: [CommonModule, FormsModule, SidebarComponent], // â† AGREGA SidebarComponent
   templateUrl: './registro-empleado.component.html',
   styleUrls: ['./registro-empleado.component.scss']
 })
@@ -47,7 +47,7 @@ export class RegistroEmpleadoComponent {
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  // MÉTODO REGISTRAR
+  // MÃ‰TODO REGISTRAR
   registrar() {
     this.loading = true;
 

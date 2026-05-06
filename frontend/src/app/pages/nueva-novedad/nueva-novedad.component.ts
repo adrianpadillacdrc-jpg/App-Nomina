@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
-import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { SidebarComponent } from '../../guards/components/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-nueva-novedad',
@@ -39,7 +39,7 @@ import { SidebarComponent } from '../../components/sidebar/sidebar.component';
             </button>
           </div>
 
-          <!-- Información del empleado -->
+          <!-- InformaciÃ³n del empleado -->
           <div class="empleado-card" *ngIf="nombreEmpleado">
             <div class="empleado-avatar">
               <mat-icon>person</mat-icon>
@@ -64,7 +64,7 @@ import { SidebarComponent } from '../../components/sidebar/sidebar.component';
                 <select class="input-select" [(ngModel)]="novedad.tipo" name="tipo" (change)="onTipoChange()" required>
                   <option value="" disabled selected>Seleccione un tipo...</option>
                   <option value="AUXILIO_TRANSPORTE"> Auxilio de Transporte</option>
-                  <option value="BONO"> Bono / Bonificación</option>
+                  <option value="BONO"> Bono / BonificaciÃ³n</option>
                   <option value="HORAS_EXTRAS"> Horas Extras</option>
                   <option value="INCAPACIDAD"> Incapacidad</option>
                   <option value="VACACIONES"> Vacaciones</option>
@@ -74,7 +74,7 @@ import { SidebarComponent } from '../../components/sidebar/sidebar.component';
                 </select>
               </div>
 
-              <!-- Campos específicos según tipo -->
+              <!-- Campos especÃ­ficos segÃºn tipo -->
               <div *ngIf="novedad.tipo === 'AUXILIO_TRANSPORTE'" class="subseccion">
                 <div class="subseccion-titulo">
                   <mat-icon>directions_bus</mat-icon>
@@ -139,10 +139,10 @@ import { SidebarComponent } from '../../components/sidebar/sidebar.component';
                 </div>
               </div>
 
-              <!-- Período de la novedad -->
+              <!-- PerÃ­odo de la novedad -->
               <div class="seccion-titulo">
                 <mat-icon>calendar_today</mat-icon>
-                Período de la novedad
+                PerÃ­odo de la novedad
               </div>
 
               <div class="fila">
@@ -714,14 +714,14 @@ export class NuevaNovedadComponent implements OnInit {
 
   getTipoLabel(): string {
     const tipos: any = {
-      'AUXILIO_TRANSPORTE': '🚌 Auxilio de Transporte',
-      'BONO': '🎁 Bono / Bonificación',
-      'HORAS_EXTRAS': '⏰ Horas Extras',
-      'INCAPACIDAD': '🏥 Incapacidad',
-      'VACACIONES': '🌴 Vacaciones',
-      'PERMISO': '📋 Permiso',
-      'LICENCIA': '📄 Licencia',
-      'OTRO': '📌 Otro'
+      'AUXILIO_TRANSPORTE': 'ðŸšŒ Auxilio de Transporte',
+      'BONO': 'ðŸŽ Bono / BonificaciÃ³n',
+      'HORAS_EXTRAS': 'â° Horas Extras',
+      'INCAPACIDAD': 'ðŸ¥ Incapacidad',
+      'VACACIONES': 'ðŸŒ´ Vacaciones',
+      'PERMISO': 'ðŸ“‹ Permiso',
+      'LICENCIA': 'ðŸ“„ Licencia',
+      'OTRO': 'ðŸ“Œ Otro'
     };
     return tipos[this.novedad.tipo] || this.novedad.tipo;
   }
@@ -766,11 +766,11 @@ export class NuevaNovedadComponent implements OnInit {
     this.http.post('http://localhost:8080/api/novedades', datosEnviar)
       .subscribe({
         next: () => {
-          alert('✅ ¡Novedad guardada exitosamente!');
+          alert('âœ… Â¡Novedad guardada exitosamente!');
           this.router.navigate(['/novedades']);
         },
         error: (err) => {
-          alert('❌ Error al guardar: ' + err.message);
+          alert('âŒ Error al guardar: ' + err.message);
         }
       });
   }

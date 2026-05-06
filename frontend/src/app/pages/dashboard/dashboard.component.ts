@@ -1,8 +1,8 @@
-// src/app/pages/dashboard/dashboard.component.ts
+﻿// src/app/pages/dashboard/dashboard.component.ts
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { SidebarComponent } from '../../guards/components/sidebar/sidebar.component';
 import { Empleado } from '../../models/empleado.model';
 import { EmpleadosService } from '../../services/empleados.service';
 import { AuthService } from '../../services/auth.service';
@@ -37,10 +37,10 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit() {
     if (!this.authService.isLoggedIn()) {
-      console.log('No hay token válido → redirigiendo a login');
+      console.log('No hay token vÃ¡lido â†’ redirigiendo a login');
       this.router.navigate(['/login']);
     } else {
-      console.log('Usuario autenticado con token → cargando datos del dashboard');
+      console.log('Usuario autenticado con token â†’ cargando datos del dashboard');
       this.cargarEmpleados();
     }
   }
@@ -54,7 +54,7 @@ export class DashboardComponent implements OnInit {
         console.log('RAW DATA FROM API:', data);
 
         if (!Array.isArray(data)) {
-          console.error('La API no devolvió un array:', data);
+          console.error('La API no devolviÃ³ un array:', data);
           this.loading = false;
           return;
         }
@@ -111,9 +111,9 @@ export class DashboardComponent implements OnInit {
   }
 
   cerrarSesion() {
-    const confirmar = confirm('¿Seguro que quieres cerrar sesión?');
+    const confirmar = confirm('Â¿Seguro que quieres cerrar sesiÃ³n?');
     if (confirmar) {
-      console.log('Cerrando sesión...');
+      console.log('Cerrando sesiÃ³n...');
       this.authService.logout();
     }
   }

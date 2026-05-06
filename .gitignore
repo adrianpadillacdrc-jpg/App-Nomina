@@ -1,8 +1,37 @@
-*.tar
-*.tar.gz
+# Dependencias
+node_modules/
+frontend/node_modules/
+backend/target/
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.class
+
+# Logs
+*.log
+logs/
+
+# Docker volumes
+volumes/
+
+# Archivos de entorno
+.env
+.env.local
+
+# Base de datos local
+*.db
+*.sqlite
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Build de Angular
+frontend/dist/
+
+# Build de Maven
 *.jar
-BOOT-INF/
-backend_full.txt
-backend_logs.txt
-login_debug.txt
-logs.txt
+*.war
+*.nar
+*.ear

@@ -1,10 +1,10 @@
-// src/app/pages/predicciones/predicciones.component.ts
+﻿// src/app/pages/predicciones/predicciones.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HttpClient, HttpHeaders } from '@angular/common/http';
-import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { SidebarComponent } from '../../guards/components/sidebar/sidebar.component';
 import { AuthService } from '../../services/auth.service';
 
 interface QuincenaPredicha {
@@ -41,7 +41,7 @@ export class PrediccionesComponent implements OnInit {
     costoBaseQuincena: number = 12294.24; // millones COP
     ultimaQuincenaReal: string = '2da Quincena Abril 2026';
 
-    private apiUrl = 'http://localhost:8080/api/prediccion';
+    private apiUrl = 'http://localhost:8080/api';
 
     constructor(
         private authService: AuthService,
@@ -63,22 +63,45 @@ export class PrediccionesComponent implements OnInit {
             'Content-Type': 'application/json'
         });
 
-        // Obtener el costo real de la última quincena desde MongoDB
-        this.http.get<any>(`${this.apiUrl}/ultima-quincena`, { headers })
+        // ✅ Usar el endpoint correcto de período actual
+        this.http.get<any>(`${this.apiUrl}/periodo-nomina/actual-con-costo`, { headers })
             .subscribe({
                 next: (response) => {
                     if (response && response.costoMillones) {
                         this.costoBaseQuincena = response.costoMillones;
-                        this.ultimaQuincenaReal = response.description;
+                        // Formatear la descripción de la quincena
+                        const quincenaTexto = response.quincena === '1ra' ? '1ra Quincena' : '2da Quincena';
+                        this.ultimaQuincenaReal = `${quincenaTexto} ${response.mes} ${response.anio}`;
+                        console.log(`💰 Costo base cargado: ${this.costoBaseQuincena} millones (${this.ultimaQuincenaReal})`);
+                    } else {
+                        console.warn('Respuesta sin datos de costo, usando valor por defecto');
+                        this.usarValorDefecto();
                     }
-                    console.log(`💰 Costo base: ${this.costoBaseQuincena} millones (${this.ultimaQuincenaReal})`);
                 },
                 error: (err) => {
                     console.error('Error al cargar costo base:', err);
-                    // Usar valor por defecto
-                    this.costoBaseQuincena = 12294.24;
+                    if (err.status === 404) {
+                        console.warn('No hay período activo en el sistema');
+                        this.error = 'No hay un período de nómina activo. Usando valores de ejemplo.';
+                    } else if (err.status === 403) {
+                        console.warn('Acceso denegado al endpoint');
+                        this.error = 'No tienes permisos para acceder a los costos reales. Usando valores de ejemplo.';
+                    }
+                    this.usarValorDefecto();
                 }
             });
+    }
+
+    usarValorDefecto() {
+        // Usar valores por defecto si no se puede obtener del backend
+        this.costoBaseQuincena = 12294.24;
+        this.ultimaQuincenaReal = '2da Quincena Abril 2026';
+        console.log(`💰 Usando costo base por defecto: ${this.costoBaseQuincena} millones`);
+
+        // Mostrar mensaje temporal (desaparece después de 3 segundos)
+        setTimeout(() => {
+            this.error = null;
+        }, 3000);
     }
 
     predecir() {
@@ -121,6 +144,7 @@ export class PrediccionesComponent implements OnInit {
 
     predecirTodo() {
         this.loading = true;
+        this.error = null;
         this.predicciones = [];
 
         const meses = ['Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -179,11 +203,17 @@ export class PrediccionesComponent implements OnInit {
     getTotalGeneral(): number {
         return this.predicciones.reduce((sum, q) => sum + q.costoCOP, 0);
     }
+
     getQuincenaPorMes(mes: string, quincena: string): QuincenaPredicha | undefined {
         return this.predicciones.find(q => q.mes === mes && q.quincena === quincena);
     }
 
     cerrarSesion() {
         this.authService.logout();
+    }
+
+    // Método para refrescar manualmente el costo base
+    refrescarCostoBase() {
+        this.cargarCostoBase();
     }
 }

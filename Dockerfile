@@ -1,25 +1,12 @@
-# Etapa 1: Compilación
-FROM maven:3.8-openjdk-17 AS build
-
+FROM node:20-alpine AS builder
 WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build --prod
 
-# Copiar archivos del backend
-COPY backend/pom.xml .
-COPY backend/src ./src
-
-# Compilar la aplicación
-RUN mvn clean package -DskipTests
-
-# Etapa 2: Ejecución
-FROM eclipse-temurin:17-jdk-alpine
-
-WORKDIR /app
-
-# Copiar el JAR desde la etapa de compilación
-COPY --from=build /app/target/*.jar app.jar
-
-EXPOSE 8080
-
-ENV SPRING_PROFILES_ACTIVE=docker
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
+FROM nginx:alpine
+COPY --from=builder /app/dist/frontend/browser /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

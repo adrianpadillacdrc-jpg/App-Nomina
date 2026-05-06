@@ -1,9 +1,9 @@
-// src/app/pages/contratos-empleados/contratos-empleados.component.ts
+﻿// src/app/pages/contratos-empleados/contratos-empleados.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { SidebarComponent } from '../../guards/components/sidebar/sidebar.component';
 import { EmpleadosService } from '../../services/empleados.service';
 import { ContratosService, Contrato } from '../../services/contratos.service';
 import { jsPDF } from 'jspdf';
@@ -70,19 +70,19 @@ export class ContratosEmpleadosComponent implements OnInit {
 
     verContrato(emp: any) {
         this.empleadoSeleccionado = emp;
-        console.log('🔍 Buscando contratos para empleado ID:', emp.id);
+        console.log('ðŸ” Buscando contratos para empleado ID:', emp.id);
 
         this.contratosService.getContratosPorEmpleado(emp.id).subscribe({
             next: (contratosEmpleado: Contrato[]) => {
-                console.log('✅ Contratos encontrados:', contratosEmpleado);
+                console.log('âœ… Contratos encontrados:', contratosEmpleado);
                 const contratoVigente = contratosEmpleado.find(c => c.estado === 'VIGENTE');
                 this.contratoSeleccionado = contratoVigente || null;
                 this.mostrarContrato = true;
             },
             error: (error) => {
-                console.error('❌ Error al buscar contratos:', error);
-                console.log('📋 Detalles del error:', error.status, error.url);
-                // Mostrar contrato vacío aunque falle
+                console.error('âŒ Error al buscar contratos:', error);
+                console.log('ðŸ“‹ Detalles del error:', error.status, error.url);
+                // Mostrar contrato vacÃ­o aunque falle
                 this.contratoSeleccionado = null;
                 this.mostrarContrato = true;
             }
@@ -100,19 +100,19 @@ export class ContratosEmpleadosComponent implements OnInit {
             estado: 'VIGENTE'
         };
 
-        console.log('🚀 Intentando crear contrato:', contrato);
+        console.log('ðŸš€ Intentando crear contrato:', contrato);
 
         this.contratosService.crearContrato(contrato).subscribe({
             next: (nuevoContrato) => {
-                console.log('✅ Contrato creado:', nuevoContrato);
+                console.log('âœ… Contrato creado:', nuevoContrato);
                 this.contratoSeleccionado = nuevoContrato;
                 alert('Contrato creado exitosamente');
             },
             error: (error) => {
-                console.error('❌ Error al crear contrato:', error);
-                console.log('📋 URL llamada:', error.url);
-                console.log('📋 Status:', error.status);
-                alert('Error al crear contrato. Verifica la consola para más detalles.');
+                console.error('âŒ Error al crear contrato:', error);
+                console.log('ðŸ“‹ URL llamada:', error.url);
+                console.log('ðŸ“‹ Status:', error.status);
+                alert('Error al crear contrato. Verifica la consola para mÃ¡s detalles.');
             }
         });
     }
@@ -245,14 +245,14 @@ export class ContratosEmpleadosComponent implements OnInit {
             doc.setFontSize(16);
             doc.text('NUMA S.A.S', 20, y);
             doc.setFontSize(10);
-            doc.text('Soluciones Integrales de Nómina', 20, y + 6);
+            doc.text('Soluciones Integrales de NÃ³mina', 20, y + 6);
             doc.text('NIT: 901.234.567-8 - Cartagena, Colombia', 20, y + 12);
 
             y += 25;
 
-            // Título
+            // TÃ­tulo
             doc.setFontSize(14);
-            doc.text('CONTRATO INDIVIDUAL DE TRABAJO A TÉRMINO FIJO', 105, y, { align: 'center' });
+            doc.text('CONTRATO INDIVIDUAL DE TRABAJO A TÃ‰RMINO FIJO', 105, y, { align: 'center' });
             y += 15;
 
             // Datos del contrato
@@ -263,7 +263,7 @@ export class ContratosEmpleadosComponent implements OnInit {
                 `NOMBRE DEL EMPLEADO(A): ${this.empleadoSeleccionado?.nombre?.toUpperCase()} ${this.empleadoSeleccionado?.apellido?.toUpperCase()}`,
                 `IDENTIFICADO(A) CON: C.C. ${this.empleadoSeleccionado?.documento}`,
                 `LUGAR DE RESIDENCIA: CARTAGENA`,
-                `TELÉFONO: ${this.empleadoSeleccionado?.telefono || 'No registrado'}`,
+                `TELÃ‰FONO: ${this.empleadoSeleccionado?.telefono || 'No registrado'}`,
                 `CARGO: ${this.empleadoSeleccionado?.cargo?.toUpperCase()}`,
                 `SALARIO MENSUAL: $ ${this.formatearSalario(this.empleadoSeleccionado?.salarioBase || 0)}`,
                 `FECHA DE INICIO: ${this.formatearFecha(this.contratoSeleccionado?.fechaInicio || this.nuevoContrato.fechaInicio)}`,
@@ -282,26 +282,26 @@ export class ContratosEmpleadosComponent implements OnInit {
 
             y += 10;
 
-            // Cláusulas
+            // ClÃ¡usulas
             const clausulas = [
                 'Conste por el presente documento que entre NUMA S.A.S, representada legalmente por',
                 'el ING. ADRIAN PADILLA ROQUEME, y el(la) trabajador(a) arriba identificado(a), se',
-                'celebra un CONTRATO INDIVIDUAL DE TRABAJO A TÉRMINO FIJO conforme a las siguientes',
-                'cláusulas:',
+                'celebra un CONTRATO INDIVIDUAL DE TRABAJO A TÃ‰RMINO FIJO conforme a las siguientes',
+                'clÃ¡usulas:',
                 '',
                 'PRIMERA - OBJETO: El trabajador se obliga a prestar sus servicios personales bajo',
-                'dependencia y subordinación al empleador, desempeñando el cargo de ' + (this.empleadoSeleccionado?.cargo?.toUpperCase() || '') + '.',
+                'dependencia y subordinaciÃ³n al empleador, desempeÃ±ando el cargo de ' + (this.empleadoSeleccionado?.cargo?.toUpperCase() || '') + '.',
                 '',
-                'SEGUNDA - DURACIÓN: El presente contrato tendrá una duración de UN (1) AÑO contado',
+                'SEGUNDA - DURACIÃ“N: El presente contrato tendrÃ¡ una duraciÃ³n de UN (1) AÃ‘O contado',
                 'a partir de la fecha de ingreso, pudiendo ser renovado por mutuo acuerdo.',
                 '',
-                'TERCERA - JORNADA: La jornada laboral será de 48 horas semanales, distribuidas según',
+                'TERCERA - JORNADA: La jornada laboral serÃ¡ de 48 horas semanales, distribuidas segÃºn',
                 'las necesidades de la empresa, cumpliendo con la normatividad laboral vigente.',
                 '',
-                'CUARTA - REMUNERACIÓN: El trabajador devengará un salario mensual de',
+                'CUARTA - REMUNERACIÃ“N: El trabajador devengarÃ¡ un salario mensual de',
                 '$ ' + this.formatearSalario(this.empleadoSeleccionado?.salarioBase || 0) + ' pesos colombianos, pagadero quincenalmente.',
                 '',
-                'QUINTA - LUGAR DE TRABAJO: Las labores se desarrollarán en las instalaciones de',
+                'QUINTA - LUGAR DE TRABAJO: Las labores se desarrollarÃ¡n en las instalaciones de',
                 'NUMA S.A.S ubicadas en la ciudad de Cartagena o en el lugar que la empresa determine.'
             ];
 
@@ -324,7 +324,7 @@ export class ContratosEmpleadosComponent implements OnInit {
             }
 
             doc.setFontSize(10);
-            doc.text('Fecha de generación: ' + new Date().toLocaleDateString('es-CO'), 105, y, { align: 'center' });
+            doc.text('Fecha de generaciÃ³n: ' + new Date().toLocaleDateString('es-CO'), 105, y, { align: 'center' });
             y += 20;
 
             doc.setFontSize(9);
@@ -376,7 +376,7 @@ export class ContratosEmpleadosComponent implements OnInit {
         });
     }
 
-    // Métodos auxiliares
+    // MÃ©todos auxiliares
     private calcularFechaFin(fechaInicio: Date, dias: number): string {
         const fechaFin = new Date(fechaInicio);
         fechaFin.setDate(fechaFin.getDate() + dias);

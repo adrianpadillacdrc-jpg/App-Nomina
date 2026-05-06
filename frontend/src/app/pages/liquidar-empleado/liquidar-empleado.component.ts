@@ -1,8 +1,8 @@
-// src/app/pages/liquidar-empleado/liquidar-empleado.component.ts
+﻿// src/app/pages/liquidar-empleado/liquidar-empleado.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SidebarComponent } from '../../components/sidebar/sidebar.component';
+import { SidebarComponent } from '../../guards/components/sidebar/sidebar.component';
 import { EmpleadosService } from '../../services/empleados.service';
 import { jsPDF } from 'jspdf';
 
@@ -50,14 +50,14 @@ export class LiquidarEmpleadoComponent implements OnInit {
   }
 
   liquidarEmpleado(emp: any) {
-    if (!confirm(`¿Liquidar contrato de ${emp.nombre} ${emp.apellido}?\nDocumento: ${emp.numeroDocumento}`)) return;
+    if (!confirm(`Â¿Liquidar contrato de ${emp.nombre} ${emp.apellido}?\nDocumento: ${emp.numeroDocumento}`)) return;
 
     const salarioBase = Number(emp.salarioBase) || 0;
     const fechaIngreso = new Date(emp.fechaIngreso || '2024-01-01');
     const fechaLiquidacion = new Date();
     const diasTrabajados = Math.floor((fechaLiquidacion.getTime() - fechaIngreso.getTime()) / (1000 * 60 * 60 * 24));
 
-    // Cálculos reales según ley colombiana
+    // CÃ¡lculos reales segÃºn ley colombiana
     const cesantias = Math.round(salarioBase * (diasTrabajados / 360));
     const interesesCesantias = Math.round(cesantias * 0.12 * (diasTrabajados / 360));
     const primaServicios = Math.round(salarioBase * (diasTrabajados / 360));
@@ -72,7 +72,7 @@ export class LiquidarEmpleadoComponent implements OnInit {
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
-    doc.text('LIQUIDACIÓN DEFINITIVA DE PRESTACIONES SOCIALES', 105, y, { align: 'center' });
+    doc.text('LIQUIDACIÃ“N DEFINITIVA DE PRESTACIONES SOCIALES', 105, y, { align: 'center' });
     y += 10;
     doc.setFontSize(14);
     doc.text('NUMA S.A.S - NIT: 901.234.567-8', 105, y, { align: 'center' });
@@ -91,15 +91,15 @@ export class LiquidarEmpleadoComponent implements OnInit {
     doc.setFillColor(220, 220, 220);
     doc.rect(20, y, 170, 8, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.text('PERIODO DE LIQUIDACIÓN', 25, y + 6);
+    doc.text('PERIODO DE LIQUIDACIÃ“N', 25, y + 6);
     y += 12;
 
     doc.setFont('helvetica', 'normal');
-    doc.text(`FECHA DE TERMINACIÓN DE CONTRATO: ${fechaLiquidacion.toLocaleDateString('es-CO')}`, 25, y);
+    doc.text(`FECHA DE TERMINACIÃ“N DE CONTRATO: ${fechaLiquidacion.toLocaleDateString('es-CO')}`, 25, y);
     y += 8;
     doc.text(`FECHA INICIO: ${fechaIngreso.toLocaleDateString('es-CO')}`, 25, y);
     y += 8;
-    doc.text(`DÍAS TOTAL LABORADOS: ${diasTrabajados}`, 25, y);
+    doc.text(`DÃAS TOTAL LABORADOS: ${diasTrabajados}`, 25, y);
     y += 15;
 
     // PRIMA
@@ -109,7 +109,7 @@ export class LiquidarEmpleadoComponent implements OnInit {
     doc.text('PRIMA DE SERVICIOS', 25, y + 6);
     y += 12;
     doc.setFont('helvetica', 'normal');
-    doc.text(`FECHA LIQUIDACIÓN PRIMA: ${fechaLiquidacion.toLocaleDateString('es-CO')}`, 25, y);
+    doc.text(`FECHA LIQUIDACIÃ“N PRIMA: ${fechaLiquidacion.toLocaleDateString('es-CO')}`, 25, y);
     y += 8;
     doc.text(`VALOR PRIMA: $ ${primaServicios.toLocaleString('es-CO')}`, 25, y);
     y += 15;
@@ -121,9 +121,9 @@ export class LiquidarEmpleadoComponent implements OnInit {
     doc.text('VACACIONES', 25, y + 6);
     y += 12;
     doc.setFont('helvetica', 'normal');
-    doc.text(`DÍAS TOMADOS DE VACACIONES: 0`, 25, y);
+    doc.text(`DÃAS TOMADOS DE VACACIONES: 0`, 25, y);
     y += 8;
-    doc.text(`DÍAS PENDIENTES: 15`, 25, y);
+    doc.text(`DÃAS PENDIENTES: 15`, 25, y);
     y += 8;
     doc.text(`VALOR VACACIONES PENDIENTES: $ ${vacacionesPendientes.toLocaleString('es-CO')}`, 25, y);
     y += 15;
@@ -133,14 +133,14 @@ export class LiquidarEmpleadoComponent implements OnInit {
     doc.rect(20, y, 170, 10, 'F');
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
-    doc.text('RESUMEN LIQUIDACIÓN PAGOS', 25, y + 7);
+    doc.text('RESUMEN LIQUIDACIÃ“N PAGOS', 25, y + 7);
     y += 15;
 
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
-    doc.text(`CESANTÍAS: $ ${cesantias.toLocaleString('es-CO')}`, 25, y);
+    doc.text(`CESANTÃAS: $ ${cesantias.toLocaleString('es-CO')}`, 25, y);
     y += 8;
-    doc.text(`INTERESES CESANTÍAS: $ ${interesesCesantias.toLocaleString('es-CO')}`, 25, y);
+    doc.text(`INTERESES CESANTÃAS: $ ${interesesCesantias.toLocaleString('es-CO')}`, 25, y);
     y += 8;
     doc.text(`PRIMA DE SERVICIOS: $ ${primaServicios.toLocaleString('es-CO')}`, 25, y);
     y += 8;
@@ -157,10 +157,10 @@ export class LiquidarEmpleadoComponent implements OnInit {
     y += 25;
 
     doc.setFontSize(10);
-    doc.text(`Liquidación generada el ${new Date().toLocaleString('es-CO')}`, 105, y, { align: 'center' });
+    doc.text(`LiquidaciÃ³n generada el ${new Date().toLocaleString('es-CO')}`, 105, y, { align: 'center' });
 
     // Guardar
     doc.save(`liquidacion_${emp.numeroDocumento}_${new Date().getFullYear()}.pdf`);
-    alert(`¡Liquidación generada correctamente!\nTotal a pagar: $ ${totalDevengos.toLocaleString('es-CO')}`);
+    alert(`Â¡LiquidaciÃ³n generada correctamente!\nTotal a pagar: $ ${totalDevengos.toLocaleString('es-CO')}`);
   }
 }
