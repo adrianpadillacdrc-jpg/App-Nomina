@@ -35,3 +35,4 @@ frontend/dist/
 *.war
 *.nar
 *.ear
+*.tar
