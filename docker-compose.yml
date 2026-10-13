@@ -21,8 +21,8 @@ services:
   mongodb:
     image: mongo:6
     container_name: nomina_mongodb
-    ports:
-      - "27017:27017"
+    profiles:
+      - legacy-docker-mongo
     volumes:
       - mongodb_data:/data/db
     networks:
@@ -46,12 +46,29 @@ services:
       - "8080:8080"
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATA_MONGODB_URI: mongodb://host.docker.internal:27017/numa_mongo
+      SPRING_DATA_MONGODB_DATABASE: numa_mongo
+      SPRING_MONGODB_URI: mongodb://host.docker.internal:27017/numa_mongo
+      SPRING_MONGODB_DATABASE: numa_mongo
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.8-flash}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - app_network
-    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
 
   frontend:
     build: ./frontend
@@ -59,10 +76,10 @@ services:
     ports:
       - "4200:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - app_network
-    restart: unless-stopped
 
 networks:
   app_network:

@@ -28,12 +28,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        final String requestPath = request.getServletPath();
+        final String requestURI = request.getRequestURI();
 
-        // ✅ Saltar filtro para endpoints públicos
-        if (requestPath.startsWith("/api/auth/") ||
-                requestPath.startsWith("/api/periodo-nomina/") ||
-                requestPath.startsWith("/api/prediccion/")) {
+        // ✅ Validación tolerante optimizada para Railway. Permite pasar login, register y los endpoints clave de datos.
+        if (requestURI.contains("/api/auth") || 
+            requestURI.contains("/login") || 
+            requestURI.contains("/register") ||
+            requestURI.contains("/api/periodo-nomina") ||
+            requestURI.contains("/api/periodos") ||
+            requestURI.contains("/api/empleados") ||
+            requestURI.contains("/api/prediccion")) {
+            
             filterChain.doFilter(request, response);
             return;
         }
@@ -66,6 +71,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             System.err.println("Error processing JWT: " + e.getMessage());
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);

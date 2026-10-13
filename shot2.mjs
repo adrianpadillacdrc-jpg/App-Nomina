@@ -1,0 +1,1 @@
+export default async function run(page, ui) { await page.setViewportSize({width:1440, height:900}); await page.goto('http://localhost:4200/register'); await page.waitForTimeout(1500); await page.screenshot({path:'c:/App Nomina/register_vista.png', fullPage:true}); const errs = []; return 'ok'; }

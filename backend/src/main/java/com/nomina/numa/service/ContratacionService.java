@@ -2,6 +2,7 @@ package com.nomina.numa.service;
 
 import com.nomina.numa.model.mongo.Contratacion;
 import com.nomina.numa.repository.mongo.ContratacionRepository;
+import com.nomina.numa.util.EstadoNominaCompat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -21,8 +22,10 @@ public class ContratacionService {
     }
 
     public Contratacion save(Contratacion contratacion) {
-        if (contratacion.getEstado() == null) {
+        if (contratacion.getEstado() == null || contratacion.getEstado().isBlank()) {
             contratacion.setEstado("VIGENTE");
+        } else {
+            contratacion.setEstado(EstadoNominaCompat.normalizar(contratacion.getEstado()));
         }
         return repo.save(contratacion);
     }
@@ -31,7 +34,7 @@ public class ContratacionService {
         Optional<Contratacion> contratoOpt = repo.findById(id);
         if (contratoOpt.isPresent()) {
             Contratacion contrato = contratoOpt.get();
-            contrato.setEstado(estado);
+            contrato.setEstado(EstadoNominaCompat.normalizar(estado));
             return repo.save(contrato);
         }
         throw new RuntimeException("Contrato no encontrado con id: " + id);

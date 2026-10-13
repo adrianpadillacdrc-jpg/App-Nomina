@@ -40,7 +40,9 @@ public class ContratacionController {
         List<Contratacion> contratos = docs.stream().map(doc -> {
             Contratacion c = new Contratacion();
             c.setId(doc.getObjectId("_id").toString());
-            c.setIdEmpleado(doc.getLong("idEmpleado"));  // ← Cambiar a getLong
+            // El campo puede estar como int32 o int64 en Mongo; leerlo como Number evita ClassCastException.
+            Number idEmpleado = (Number) doc.get("idEmpleado");
+            c.setIdEmpleado(idEmpleado == null ? null : idEmpleado.longValue());
             c.setIdTipoContrato(doc.getString("idTipoContrato"));
             
             if (doc.getDate("fechaInicio") != null) {

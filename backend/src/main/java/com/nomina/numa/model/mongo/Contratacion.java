@@ -15,7 +15,7 @@ import java.time.LocalDate;
 public class Contratacion {
     @Id
     private String id;
-    private Long idEmpleado;  // ← Cambiar a Long
+    private Long idEmpleado;  
     private String idTipoContrato;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;

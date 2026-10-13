@@ -6,6 +6,7 @@ import com.nomina.numa.dto.RegisterRequest;
 import com.nomina.numa.model.postgres.Usuario;
 import com.nomina.numa.repository.jpa.UsuarioRepository;
 import com.nomina.numa.security.JwtService;
+import com.nomina.numa.service.EmailService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +21,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "*") // Permite que Angular se conecte sin bloqueos de seguridad
 @RestController
-@RequestMapping("/api/auth")
+// 💡 SOLUCIÓN: Eliminamos el @RequestMapping general para que el login quede exactamente en "/login"
 public class AuthController {
 
     @Autowired
@@ -39,7 +41,10 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @PostMapping("/login")
+    @Autowired
+    private EmailService emailService;
+
+    @PostMapping({ "/login", "/api/auth/login" })
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
             System.err.println("========== LOGIN INICIADO ==========");
@@ -94,7 +99,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/register")
+    @PostMapping({ "/register", "/api/auth/register" })
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         if (usuarioRepository.existsByCorreo(request.getCorreo())) {
             return ResponseEntity.badRequest().body("El correo ya esta registrado");
@@ -109,7 +114,12 @@ public class AuthController {
 
         usuarioRepository.save(usuario);
 
-        return ResponseEntity.ok("Usuario registrado exitosamente");
+        boolean correoEnviado = emailService.enviarConfirmacionRegistro(
+            usuario.getCorreo(), usuario.getNombre());
+        String mensaje = correoEnviado
+            ? "Usuario registrado exitosamente. Revisa tu correo de confirmación."
+            : "Usuario registrado exitosamente. El correo de confirmación está pendiente de configuración SMTP.";
+        return ResponseEntity.ok(mensaje);
     }
 
     @GetMapping("/test")

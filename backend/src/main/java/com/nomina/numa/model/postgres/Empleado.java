@@ -27,6 +27,14 @@ public class Empleado {
     private Long idCargo;
     private String cargo;
     private Double salarioBase;
+    private Double tasaArl;
+    private String modalidadTrabajo;
+    private Boolean transporteSuministrado;
+    private String metodoPago;
+    private String banco;
+    private String tipoCuenta;
+    private String numeroCuenta;
+    private String ultimosCuatroTarjeta;
 
     @Builder.Default
     private Long idEmpresa = 1L;

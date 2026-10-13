@@ -24,7 +24,7 @@ public class Novedad {
     private LocalDate fechaFin;
     private String horaInicio; // ← NUEVO: hora de inicio (HH:MM)
     private String horaFin; // ← NUEVO: hora de fin (HH:MM)
-    private Integer horas; // ← Cantidad de horas
+    private Double horas; // Horas registradas; admite fracciones
     private Double valor; // ← Valor total
     private Double valorHora; // ← NUEVO: valor por hora (para horas extras)
     private String tipoHora; // ← NUEVO: diurnas, nocturnas, festivas
@@ -33,6 +33,8 @@ public class Novedad {
     private String motivo; // ← NUEVO: motivo (para bono)
     private String observaciones;
     private String estado; // PENDIENTE, APROBADA, RECHAZADA
+    private String aprobadoPor; // admin que respondió
+    private LocalDateTime fechaRespuesta; //cuándo se aprobó/rechazó
     private LocalDateTime createdAt; // ← NUEVO: fecha de creación
     private LocalDateTime updatedAt; // ← NUEVO: fecha de actualización
 

@@ -28,5 +28,14 @@ public class PagoNomina {
     private Double totalPagar = 0.0;
 
     @Builder.Default
+    private Double aportesEmpleador = 0.0;
+
+    @Builder.Default
+    private Double provisionesPrestacionales = 0.0;
+
+    @Builder.Default
+    private Double costoTotalEmpleador = 0.0;
+
+    @Builder.Default
     private String estado = "PENDIENTE"; // PENDIENTE, PAGADO, ANULADO
 }

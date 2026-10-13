@@ -1,8 +1,13 @@
 package com.nomina.numa.controller;
 
 import com.nomina.numa.model.mongo.Novedad;
+import com.nomina.numa.model.mongo.PeriodoNomina;
+import com.nomina.numa.model.postgres.Empleado;
+import com.nomina.numa.repository.jpa.EmpleadoRepository;
+import com.nomina.numa.repository.mongo.PeriodoNominaRepository;
 import com.nomina.numa.service.NovedadService;
 import com.nomina.numa.service.NovedadDirectService;
+import com.nomina.numa.util.EstadoNominaCompat;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
@@ -11,7 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,6 +28,8 @@ public class NovedadController {
 
     private final NovedadService novedadService;
     private final NovedadDirectService directService;
+    private final EmpleadoRepository empleadoRepository;
+    private final PeriodoNominaRepository periodoNominaRepository;
 
     @GetMapping("/empleado/{empleadoId}")
     public ResponseEntity<List<Novedad>> getPorEmpleado(@PathVariable Long empleadoId) {
@@ -30,7 +37,7 @@ public class NovedadController {
         return ResponseEntity.ok(lista);
     }
 
-    @GetMapping("/cedula/{cedula}") // ← NUEVO ENDPOINT
+    @GetMapping("/cedula/{cedula}") 
     public ResponseEntity<List<Novedad>> getPorCedula(@PathVariable String cedula) {
         List<Novedad> lista = novedadService.findByCedula(cedula);
         return ResponseEntity.ok(lista);
@@ -45,11 +52,49 @@ public class NovedadController {
     public ResponseEntity<Novedad> crear(@RequestBody Novedad novedad) {
         log.info("Creando novedad - Tipo: {}, Cédula: {}", novedad.getTipoNovedad(), novedad.getCedula());
 
+        if (novedad.getPeriodoId() == null || novedad.getPeriodoId().isBlank()) {
+            periodoNominaRepository.findTopByEstadoOrderByFechaInicioDesc("ABIERTO")
+                    .ifPresent(p -> novedad.setPeriodoId(p.getId()));
+        }
+
         novedad.setEstado("PENDIENTE");
         novedad.setCreatedAt(LocalDateTime.now());
         novedad.setUpdatedAt(LocalDateTime.now());
 
         return ResponseEntity.ok(novedadService.save(novedad));
+    }
+
+    
+    @PostMapping("/asignar-periodo-actual")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> asignarPeriodoActual() {
+        Optional<PeriodoNomina> periodo = periodoNominaRepository.findTopByEstadoOrderByFechaInicioDesc("ABIERTO");
+        if (periodo.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "No hay período ABIERTO"));
+        }
+        String periodoId = periodo.get().getId();
+        List<Novedad> huerfanas = novedadService.findAll().stream()
+                .filter(n -> n.getPeriodoId() == null || n.getPeriodoId().isBlank())
+                .collect(Collectors.toList());
+        for (Novedad n : huerfanas) {
+            n.setPeriodoId(periodoId);
+            novedadService.save(n);
+        }
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("mensaje", "Novedades asignadas al período actual");
+        res.put("periodoId", periodoId);
+        res.put("actualizadas", huerfanas.size());
+        return ResponseEntity.ok(res);
+    }
+
+    /**
+     * ✅ LIMPIEZA: elimina TODAS las novedades (para regenerar datos).
+     */
+    @DeleteMapping("/limpiar")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> limpiar() {
+        novedadService.deleteAll();
+        return ResponseEntity.ok(Map.of("mensaje", "Todas las novedades eliminadas"));
     }
 
     @GetMapping
@@ -62,14 +107,17 @@ public class NovedadController {
             Novedad n = new Novedad();
             n.setId(doc.getObjectId("_id").toString());
             n.setPeriodoId(doc.getString("periodoId"));
-            n.setIdEmpleado(doc.getLong("idEmpleado"));
+            // En Mongo el campo puede estar como int32 o int64 según quién lo insertó;
+            // leerlo como Number evita el ClassCastException Integer→Long.
+            Number idEmpleado = (Number) doc.get("idEmpleado");
+            n.setIdEmpleado(idEmpleado == null ? null : idEmpleado.longValue());
             n.setCedula(doc.getString("cedula")); // ← NUEVO
             n.setTipoNovedad(doc.getString("tipoNovedad"));
             n.setHoraInicio(doc.getString("horaInicio")); // ← NUEVO
             n.setHoraFin(doc.getString("horaFin")); // ← NUEVO
-            n.setValorHora(doc.getDouble("valorHora")); // ← NUEVO
+            n.setValorHora(numeroSeguro(doc, "valorHora")); // ← NUEVO
             n.setTipoHora(doc.getString("tipoHora")); // ← NUEVO
-            n.setMonto(doc.getDouble("monto")); // ← NUEVO
+            n.setMonto(numeroSeguro(doc, "monto")); // ← NUEVO
             n.setConcepto(doc.getString("concepto")); // ← NUEVO
             n.setMotivo(doc.getString("motivo")); // ← NUEVO
 
@@ -82,8 +130,9 @@ public class NovedadController {
                         .atZone(ZoneId.systemDefault()).toLocalDate());
             }
 
-            n.setHoras(doc.getInteger("horas"));
-            n.setValor(doc.getDouble("valor"));
+            Number horas = (Number) doc.get("horas");
+            n.setHoras(horas == null ? null : horas.doubleValue());
+            n.setValor(numeroSeguro(doc, "valor"));
             n.setObservaciones(doc.getString("observaciones"));
             n.setEstado(doc.getString("estado"));
             return n;
@@ -91,5 +140,10 @@ public class NovedadController {
 
         log.info("Novedades convertidas: {}", novedades.size());
         return novedades;
+    }
+
+    private Double numeroSeguro(Document doc, String campo) {
+        Number numero = (Number) doc.get(campo);
+        return numero == null ? null : numero.doubleValue();
     }
 }

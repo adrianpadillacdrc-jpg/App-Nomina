@@ -35,4 +35,8 @@ public class NovedadService {
     public List<Novedad> findByEmpleado(Long id) {
         return repository.findByIdEmpleado(id);
     }
+
+    public void deleteAll() {
+        repository.deleteAll();
+    }
 }

@@ -20,4 +20,8 @@ public interface PeriodoNominaRepository extends MongoRepository<PeriodoNomina, 
     
     // Buscar por estado sin ordenamiento
     List<PeriodoNomina> findByEstado(String estado);
+
+    boolean existsByFechaInicioLessThanEqualAndFechaFinGreaterThanEqual(
+            java.time.LocalDate fechaInicio, java.time.LocalDate fechaFin);
+
 }

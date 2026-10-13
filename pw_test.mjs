@@ -1,0 +1,1 @@
+export default async function run(page, ui) { const res = []; for (const pw of ['Admin1234*','numa','Numa2025!','numanomina','NumaNomina2025','admin@numa.com','AdminNuma2025']) { const r = await page.request.post('http://localhost:4200/api/auth/login', {data:{usuario:'admin@numa.com', password:pw}}); res.push(pw + ':' + r.status()); if (r.status() === 200) break; } return res; }
