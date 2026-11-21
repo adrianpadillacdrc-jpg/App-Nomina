@@ -1,7 +1,7 @@
 package com.nomina.numa.service;
 
-import com.nomina.numa.model.mongo.TipoContrato;
-import com.nomina.numa.repository.mongo.TipoContratoRepository;
+import com.nomina.numa.model.postgres.TipoContrato;
+import com.nomina.numa.repository.jpa.TipoContratoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;

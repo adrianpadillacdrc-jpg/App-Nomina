@@ -4,23 +4,22 @@
   <main class="main-content">
     <div class="liquidar-container">
 
-      <!-- TÍTULO + BARRA DE BÚSQUEDA EN LA MISMA LÍNEA -->
-      <div class="top-section">
-        <h1 class="page-title">Liquidar Empleado</h1>
+      <app-encabezado-pagina titulo="Liquidar empleado"></app-encabezado-pagina>
 
-        <div class="search-box">
-          <input 
-            type="text" 
-            class="search-input" 
-            placeholder="Buscar por nombre, documento, cargo o área..." 
-            [(ngModel)]="terminoBusqueda" 
-            (input)="filtrarEmpleados()"
-          />
-          <span class="search-icon">Buscar</span>
-        </div>
+      <div class="search-box numa-search">
+        <span class="numa-search-icon"><i class="fas fa-search"></i></span>
+        <input
+          type="text"
+          class="numa-search-input"
+          placeholder="Buscar por nombre, documento, cargo o área..."
+          [(ngModel)]="terminoBusqueda"
+          (input)="filtrarEmpleados()"
+        />
+        <span class="numa-search-btn" (click)="filtrarEmpleados()">Buscar</span>
       </div>
 
       <!-- TABLA -->
+      <app-tabla-base>
       <div class="table-card">
         <div class="table-header">
           <div class="col">Nombre Completo</div>
@@ -30,14 +29,21 @@
           <div class="col">Acciones</div>
         </div>
 
-        <div class="table-row" *ngFor="let emp of empleadosFiltrados">
-          <div class="col nombre">{{ emp.nombre }} {{ emp.apellido }}</div>
+        <div class="table-row tabla-fila" *ngFor="let emp of empleadosFiltrados"
+             [class.resaltada]="esEmpleadoAlerta(emp)">
+          <div class="col nombre">
+            {{ emp.nombre }} {{ emp.apellido }}
+            <span class="tag-alerta" *ngIf="esEmpleadoAlerta(emp)">⚠ de la alerta</span>
+          </div>
           <div class="col">{{ emp.cargo || 'Sin cargo' }}</div>
           <div class="col">{{ emp.numeroDocumento }}</div>
           <div class="col">{{ emp.area || 'General' }}</div>
-          <div class="col">
-            <button class="btn-liquidar" (click)="liquidarEmpleado(emp)">
-              Liquidar
+          <div class="col acciones-col">
+            <button class="btn-accion btn-pago" (click)="pagoIndividual(emp)" title="Pagar quincena ordinaria y generar colilla de pago">
+              💳 Pago
+            </button>
+            <button class="btn-accion btn-liquidar" (click)="liquidarEmpleado(emp)" title="Liquidar contrato y prestaciones definitivas">
+              📄 Liquidar
             </button>
           </div>
         </div>
@@ -51,7 +57,17 @@
           </p>
         </div>
       </div>
+      </app-tabla-base>
 
     </div>
   </main>
+
+  <!-- Modal Oficial A4 de Comprobante, Novedades y Contrato -->
+  <app-documento-nomina-modal
+    [visible]="mostrarModalDoc"
+    [empleado]="empleadoModalDoc"
+    [periodo]="periodoActual"
+    [pestanaInicial]="pestanaModalDoc"
+    (cerrar)="cerrarModalDoc()">
+  </app-documento-nomina-modal>
 </div>

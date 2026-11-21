@@ -4,7 +4,7 @@
 
   <main class="main-content">
     <div class="registro-container">
-      <h1 class="page-title">Registro Administrativo</h1>
+      <app-encabezado-pagina titulo="Registro administrativo"></app-encabezado-pagina>
 
       <form (ngSubmit)="registrar()" #form="ngForm" class="registro-form">
         <!-- DATOS PERSONALES -->
@@ -82,7 +82,28 @@
 
             <div class="form-group">
               <label>Salario</label>
-              <input type="number" placeholder="Ej: 2500000" [(ngModel)]="empleado.salarioBase" name="salarioBase" required min="1300000" />
+              <input type="number" placeholder="Ej: 2500000" [(ngModel)]="empleado.salarioBase" name="salarioBase" required min="1750905" />
+            </div>
+
+            <div class="form-group">
+              <label>Tasa ARL asignada (%)</label>
+              <input type="number" placeholder="Ej: 0.522" [(ngModel)]="empleado.tasaArl" name="tasaArl" required min="0.001" max="100" step="0.001" />
+            </div>
+
+            <div class="form-group">
+              <label>Modalidad de trabajo</label>
+              <select [(ngModel)]="empleado.modalidadTrabajo" name="modalidadTrabajo" required>
+                <option value="PRESENCIAL">Presencial</option>
+                <option value="REMOTO">Remoto</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>¿La empresa suministra transporte?</label>
+              <select [(ngModel)]="empleado.transporteSuministrado" name="transporteSuministrado" required>
+                <option [ngValue]="false">No</option>
+                <option [ngValue]="true">Sí</option>
+              </select>
             </div>
 
             <div class="form-group">
@@ -100,6 +121,35 @@
             <div class="form-group">
               <label>Correo Empresarial</label>
               <input type="email" placeholder="usuario@empresa.com" [(ngModel)]="empleado.correoEmpresarial" name="correoEmpresarial" />
+            </div>
+
+            <div class="form-group">
+              <label>Forma de pago</label>
+              <select [(ngModel)]="empleado.metodoPago" name="metodoPago" required>
+                <option *ngFor="let metodo of metodosPago" [value]="metodo">{{ metodo }}</option>
+              </select>
+            </div>
+
+            <ng-container *ngIf="empleado.metodoPago === 'Cuenta bancaria'">
+              <div class="form-group">
+                <label>Banco</label>
+                <input type="text" [(ngModel)]="empleado.banco" name="banco" placeholder="Nombre del banco" />
+              </div>
+              <div class="form-group">
+                <label>Tipo de cuenta</label>
+                <select [(ngModel)]="empleado.tipoCuenta" name="tipoCuenta">
+                  <option *ngFor="let tipo of tiposCuenta" [value]="tipo">{{ tipo }}</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Número de cuenta</label>
+                <input type="text" inputmode="numeric" [(ngModel)]="empleado.numeroCuenta" name="numeroCuenta" placeholder="Número de cuenta" />
+              </div>
+            </ng-container>
+
+            <div class="form-group" *ngIf="empleado.metodoPago === 'Tarjeta'">
+              <label>Número de tarjeta</label>
+              <input type="text" inputmode="numeric" [(ngModel)]="numeroTarjeta" name="numeroTarjeta" placeholder="Solo se guardarán los últimos 4 dígitos" />
             </div>
 
             <div class="form-group">

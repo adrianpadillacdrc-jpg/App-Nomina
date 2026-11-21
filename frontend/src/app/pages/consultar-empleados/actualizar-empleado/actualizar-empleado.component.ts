@@ -28,6 +28,9 @@ export class ActualizarEmpleadoComponent {
         apellido: this.empleado.apellido || '',
         cargo: this.empleado.cargo || '',
         salarioBase: this.empleado.salarioBase || 0,
+        tasaArl: this.empleado.tasaArl ?? null,
+        modalidadTrabajo: this.empleado.modalidadTrabajo || 'PRESENCIAL',
+        transporteSuministrado: this.empleado.transporteSuministrado ?? false,
         numeroDocumento: this.empleado.documento || ''
       };
     }
@@ -45,6 +48,9 @@ export class ActualizarEmpleadoComponent {
       apellido: this.form.apellido,
       cargo: this.form.cargo,
       salarioBase: Number(this.form.salarioBase),
+      tasaArl: Number(this.form.tasaArl),
+      modalidadTrabajo: this.form.modalidadTrabajo,
+      transporteSuministrado: this.form.transporteSuministrado,
       numeroDocumento: this.form.numeroDocumento
     };
 

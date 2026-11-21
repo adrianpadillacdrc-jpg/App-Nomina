@@ -2,5 +2,10 @@
 :host {
   display: block;
   min-height: 100vh;
-  background: url('/assets/numa.jpg') center/cover no-repeat fixed;
+  background-color: #14091f;
+  background-image: linear-gradient(rgba(20, 9, 31, 0.55), rgba(20, 9, 31, 0.55)), url('/assets/numa.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }

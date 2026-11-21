@@ -1,0 +1,176 @@
+<!-- src/app/pages/historial/historial.component.html -->
+<div class="layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="contenido">
+    <app-encabezado-pagina titulo="Historial general" tema="claro"></app-encabezado-pagina>
+
+    <p class="error" *ngIf="error">{{ error }}</p>
+    <p class="cargando" *ngIf="cargando">Cargando historial…</p>
+
+    <ng-container *ngIf="!cargando && resumen">
+      <section class="resumen-grid resumen-estados" aria-label="Estado de empleados">
+        <div class="tarjeta res-activos"><span class="num">{{ resumen.enEmpresa }}</span><span class="lbl">Activos en la empresa</span></div>
+        <div class="tarjeta res-inactivos"><span class="num">{{ resumen.inactivos }}</span><span class="lbl">Inactivos</span></div>
+        <div class="tarjeta res-salidos"><span class="num">{{ resumen.salieron }}</span><span class="lbl">Salieron</span></div>
+      </section>
+
+      <!-- ===== Búsqueda y filtros ===== -->
+      <section class="barra">
+        <div class="buscador">
+          <i class="fas fa-search"></i>
+          <input type="text" [(ngModel)]="busqueda" (keyup.enter)="aplicarFiltros()"
+                 placeholder="Buscar por nombre o documento…" />
+          <button class="btn buscar-btn" (click)="aplicarFiltros()">Buscar</button>
+        </div>
+
+        <div class="chips">
+          <button class="chip-btn" [class.activo]="filtroEstado === ''" (click)="setFiltroEstado('')">Todos</button>
+          <button class="chip-btn verde" [class.activo]="filtroEstado === 'EN_EMPRESA'" (click)="setFiltroEstado('EN_EMPRESA')">En la empresa</button>
+          <button class="chip-btn gris" [class.activo]="filtroEstado === 'INACTIVO'" (click)="setFiltroEstado('INACTIVO')">Inactivos</button>
+          <button class="chip-btn rojo" [class.activo]="filtroEstado === 'LIQUIDADO'" (click)="setFiltroEstado('LIQUIDADO')">Liquidados</button>
+          <button class="chip-btn amarillo" [class.activo]="filtroEstado === 'PENDIENTE'" (click)="setFiltroEstado('PENDIENTE')">Pendientes</button>
+          <button class="chip-btn gris" [class.activo]="filtroEstado === 'SALIDO'" (click)="setFiltroEstado('SALIDO')">Salieron</button>
+        </div>
+
+        <select class="filtro-select" [(ngModel)]="filtroMovimiento" (ngModelChange)="aplicarFiltros()" aria-label="Filtrar por movimiento">
+          <option value="">Todos los movimientos</option>
+          <option value="PAGO_NOMINA">Pagos de nómina</option>
+          <option value="LIQUIDACION">Liquidaciones</option>
+          <option value="PAGO_LIQUIDACION">Pagos de liquidación</option>
+          <option value="CONTRATACION">Contratos</option>
+          <option value="RENUNCIA">Renuncias</option>
+        </select>
+
+        <select class="filtro-select" [(ngModel)]="filtroFrecuencia" (ngModelChange)="aplicarFiltros()" aria-label="Filtrar por frecuencia">
+          <option value="">Todas las frecuencias</option>
+          <option value="QUINCENAL">Quincenal</option>
+          <option value="MENSUAL">Mensual</option>
+        </select>
+
+        <select class="filtro-select" [(ngModel)]="filtroEstadoPago" (ngModelChange)="aplicarFiltros()" aria-label="Filtrar por estado de pago">
+          <option value="">Todos los estados de pago</option>
+          <option value="PAGADO">Pagado</option>
+          <option value="PENDIENTE">Pendiente</option>
+          <option value="ANULADO">Anulado</option>
+        </select>
+
+        <div class="filtro-fechas">
+          <label>Desde<input type="date" [(ngModel)]="fechaDesde" (ngModelChange)="aplicarFiltros()" aria-label="Fecha inicial" [max]="fechaHasta || null"></label>
+          <label>Hasta<input type="date" [(ngModel)]="fechaHasta" (ngModelChange)="aplicarFiltros()" aria-label="Fecha final" [min]="fechaDesde || null"></label>
+        </div>
+
+        <button class="btn limpiar-btn" (click)="limpiarFiltros()">Limpiar filtros</button>
+
+        <div class="toggle-vista">
+          <button [class.activo]="vista === 'EMPLEADOS'" (click)="setVista('EMPLEADOS')"><i class="fas fa-users"></i> Empleados</button>
+          <button [class.activo]="vista === 'EVENTOS'" (click)="setVista('EVENTOS')"><i class="fas fa-stream"></i> Línea de tiempo</button>
+        </div>
+      </section>
+      <p class="filtro-error" *ngIf="rangoFechasInvalido">La fecha inicial debe ser anterior o igual a la fecha final.</p>
+
+      <!-- ===== VISTA EMPLEADOS ===== -->
+      <section class="tabla-wrap" *ngIf="vista === 'EMPLEADOS'">
+        <app-tabla-base *ngIf="empleadosFiltrados.length > 0">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Empleado</th>
+              <th>Documento</th>
+              <th>Cargo</th>
+              <th>Salario</th>
+              <th>Categoría</th>
+              <th>Ingreso</th>
+              <th>Fin contrato</th>
+              <th>Contratos</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let emp of empleadosEnPagina">
+              <td class="nombre">{{ emp.nombreCompleto }}</td>
+              <td>{{ emp.numeroDocumento || 'N/A' }}</td>
+              <td>{{ emp.cargo || 'N/A' }}</td>
+              <td>{{ moneda(emp.salarioBase) }}</td>
+              <td>
+                <span class="badge-cat" [ngClass]="emp.categoria.toLowerCase()">{{ etiquetas[emp.categoria] || emp.categoria }}</span>
+              </td>
+              <td>{{ fechaBonita(emp.fechaInicioContrato || emp.fechaCreacion) }}</td>
+              <td>{{ fechaFinDisplay(emp.fechaFinContrato, emp.categoria) }}</td>
+              <td>{{ emp.totalContratos }} <span class="mini" *ngIf="emp.contratosVigentes">({{ emp.contratosVigentes }} vig.)</span></td>
+              <td><button class="btn ver-btn" (click)="abrirDetalle(emp)">Detalles</button></td>
+            </tr>
+          </tbody>
+        </table>
+        </app-tabla-base>
+        <p class="vacio" *ngIf="empleadosFiltrados.length === 0">No hay empleados o movimientos que coincidan con los filtros.</p>
+        <nav class="paginacion" *ngIf="empleadosFiltrados.length > tamanoEmpleados" aria-label="Páginas de empleados">
+          <button class="btn" (click)="cambiarPaginaEmpleados(-1)" [disabled]="paginaEmpleados === 0">Anterior</button>
+          <span>Página {{ paginaEmpleados + 1 }} de {{ paginasEmpleados }} · {{ empleadosFiltrados.length }} empleados</span>
+          <button class="btn" (click)="cambiarPaginaEmpleados(1)" [disabled]="paginaEmpleados + 1 >= paginasEmpleados">Siguiente</button>
+        </nav>
+      </section>
+
+      <!-- ===== VISTA LÍNEA DE TIEMPO ===== -->
+      <section class="timeline-wrap" *ngIf="vista === 'EVENTOS'">
+        <ul class="timeline" *ngIf="eventosFiltrados.length > 0">
+          <li *ngFor="let ev of eventosFiltrados" [ngClass]="'ev-' + ev.tipo.toLowerCase() + ' nivel-' + ev.nivel.toLowerCase()">
+            <div class="ev-punto"><i class="fas" [ngClass]="iconosEvento[ev.tipo] || 'fa-circle'"></i></div>
+            <div class="ev-card">
+              <div class="ev-cab">
+                <span class="ev-titulo">{{ ev.titulo }}</span>
+                <span class="ev-fecha">{{ fechaBonita(ev.fecha) }}</span>
+              </div>
+              <div class="ev-empleado">{{ ev.empleado }} <span class="doc">· {{ ev.documento }}</span></div>
+              <div class="ev-detalle">{{ ev.detalle }}</div>
+            </div>
+          </li>
+        </ul>
+        <p class="vacio" *ngIf="eventosFiltrados.length === 0">No hay movimientos que coincidan con los filtros.</p>
+        <nav class="paginacion" *ngIf="eventosTotal > 0" aria-label="Páginas de movimientos">
+          <button class="btn" (click)="cambiarPaginaEventos(-1)" [disabled]="paginaEventos === 0">Anterior</button>
+          <span>Mostrando {{ eventos.length }} de {{ eventosTotal }} movimientos · Página {{ paginaEventos + 1 }} de {{ paginasEventos }}</span>
+          <button class="btn" (click)="cambiarPaginaEventos(1)" [disabled]="paginaEventos + 1 >= paginasEventos">Siguiente</button>
+        </nav>
+      </section>
+    </ng-container>
+
+    <!-- ===== Modal detalle de empleado ===== -->
+    <div class="modal-overlay" *ngIf="empleadoDetalle" (click)="cerrarDetalle()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-cab">
+          <strong>{{ empleadoDetalle.nombreCompleto }}</strong>
+          <button class="cerrar" (click)="cerrarDetalle()">×</button>
+        </div>
+        <div class="modal-cuerpo">
+          <div class="datos">
+            <div><span class="lbl">Documento:</span> {{ empleadoDetalle.numeroDocumento || 'N/A' }}</div>
+            <div><span class="lbl">Cargo:</span> {{ empleadoDetalle.cargo || 'N/A' }}</div>
+            <div><span class="lbl">Salario:</span> {{ moneda(empleadoDetalle.salarioBase) }}</div>
+            <div><span class="lbl">Categoría:</span>
+              <span class="badge-cat" [ngClass]="empleadoDetalle.categoria.toLowerCase()">{{ etiquetas[empleadoDetalle.categoria] }}</span>
+            </div>
+            <div><span class="lbl">Ingreso:</span> {{ fechaBonita(empleadoDetalle.fechaInicioContrato || empleadoDetalle.fechaCreacion) }}</div>
+            <div><span class="lbl">Fin contrato:</span> {{ fechaFinDisplay(empleadoDetalle.fechaFinContrato, empleadoDetalle.categoria) }}</div>
+            <div><span class="lbl">Contratos:</span> {{ empleadoDetalle.totalContratos }} ({{ empleadoDetalle.contratosVigentes }} vigentes)</div>
+          </div>
+
+          <h5>Eventos del empleado</h5>
+          <ul class="mini-timeline" *ngIf="eventosDeEmpleado.length > 0">
+            <li *ngFor="let ev of eventosDeEmpleado" [ngClass]="'ev-' + ev.tipo.toLowerCase()">
+              <div class="ev-punto"><i class="fas" [ngClass]="iconosEvento[ev.tipo] || 'fa-circle'"></i></div>
+              <div class="ev-card">
+                <div class="ev-cab">
+                  <span class="ev-titulo">{{ ev.titulo }}</span>
+                  <span class="ev-fecha">{{ fechaBonita(ev.fecha) }}</span>
+                </div>
+                <div class="ev-detalle">{{ ev.detalle }}</div>
+              </div>
+            </li>
+          </ul>
+          <p class="vacio" *ngIf="eventosDeEmpleado.length === 0">Sin eventos registrados para este empleado.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

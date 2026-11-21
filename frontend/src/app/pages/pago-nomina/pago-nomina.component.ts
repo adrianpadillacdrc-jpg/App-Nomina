@@ -2,8 +2,16 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../guards/components/sidebar/sidebar.component';
+import { EncabezadoPaginaComponent } from '../../shared/components/encabezado-pagina/encabezado-pagina.component';
+import { TablaBaseComponent } from '../../shared/components/tabla-base/tabla-base.component';
 import { EmpleadosService } from '../../services/empleados.service';
 import { jsPDF } from 'jspdf';
+
+interface ConceptoDetalle {
+  tipo: string;
+  concepto: string;
+  valor: number;
+}
 
 interface NominaItem {
   id: number;
@@ -13,12 +21,19 @@ interface NominaItem {
   devengos: number;
   deducciones: number;
   totalPagar: number;
+  aportesEmpleador: number;
+  provisionesPrestacionales: number;
+  costoTotalEmpleador: number;
+  detalleAportesEmpleador: ConceptoDetalle[];
+  detalleDevengos: ConceptoDetalle[];
+  detalleDeducciones: ConceptoDetalle[];
+  expandido?: boolean;
 }
 
 @Component({
   selector: 'app-pago-nomina',
   standalone: true,
-  imports: [CommonModule, SidebarComponent],
+  imports: [CommonModule, SidebarComponent, EncabezadoPaginaComponent, TablaBaseComponent],
   templateUrl: './pago-nomina.component.html',
   styleUrl: './pago-nomina.component.scss'
 })
@@ -27,145 +42,131 @@ export class PagoNominaComponent implements OnInit {
   nominaData: NominaItem[] = [];
   cargando = false;
   pagoGenerado = false;
+  expandidoGlobal = false;
+  paginaActual = 0;
+  readonly empleadosPorPagina = 50;
+  errorCarga = '';
+  soloEmpleadosConNovedades = false;
 
+  // Totales generales del período
+  get totalDevengos(): number { return this.nominaData.reduce((a, i) => a + i.devengos, 0); }
+  get totalDeducciones(): number { return this.nominaData.reduce((a, i) => a + i.deducciones, 0); }
+  get totalNomina(): number { return this.nominaData.reduce((a, i) => a + i.totalPagar, 0); }
+  get totalAportesEmpleador(): number {
+    return this.nominaData.reduce((total, item) => total + item.aportesEmpleador, 0);
+  }
+  get totalProvisionesPrestacionales(): number {
+    return this.nominaData.reduce((total, item) => total + item.provisionesPrestacionales, 0);
+  }
+  get costoTotalEmpleador(): number {
+    return this.nominaData.reduce((total, item) => total + item.costoTotalEmpleador, 0);
+  }
+  get totalDevengadoBruto(): number {
+    return this.nominaData.reduce((total, item) => total + item.sueldoBase + item.devengos, 0);
+  }
+  get nominaVisible(): NominaItem[] {
+    return this.soloEmpleadosConNovedades
+      ? this.nominaData.filter(item => item.detalleDevengos.length > 0 || item.detalleDeducciones.length > 0)
+      : this.nominaData;
+  }
+  get empleadosPagina(): NominaItem[] {
+    const inicio = this.paginaActual * this.empleadosPorPagina;
+    return this.nominaVisible.slice(inicio, inicio + this.empleadosPorPagina);
+  }
+  get totalPaginas(): number {
+    return Math.ceil(this.nominaVisible.length / this.empleadosPorPagina);
+  }
+  get inicioPagina(): number {
+    return this.nominaVisible.length ? this.paginaActual * this.empleadosPorPagina + 1 : 0;
+  }
+  get finPagina(): number {
+    return Math.min((this.paginaActual + 1) * this.empleadosPorPagina, this.nominaVisible.length);
+  }
+  get empleadosConNovedades(): number {
+    return this.nominaData.filter(item =>
+      item.detalleDevengos.length > 0 || item.detalleDeducciones.length > 0).length;
+  }
   constructor(private empleadosService: EmpleadosService) { }
 
   ngOnInit(): void {
     this.cargarPeriodoActual();
-    this.cargarNomina();
   }
 
   cargarPeriodoActual() {
     this.empleadosService.getPeriodoActual().subscribe({
       next: (data) => {
         this.periodoActual = data;
-        this.cargarNomina(); // Recargar nÃ³mina cada vez que cambie el perÃ­odo
+        this.cargarNomina();
       },
       error: (err) => {
-        console.log('No hay perÃ­odo activo, usando uno por defecto');
-        this.periodoActual = {
-          id: "temp-001",
-          descripcion: "1ra Quincena Noviembre 2025",
-          estado: "ABIERTO"
-        };
-        this.cargarNomina();
+        this.periodoActual = null;
+        this.errorCarga = err.error?.error || 'No se pudo cargar el período de nómina.';
       }
     });
   }
 
   cargarNomina() {
     this.cargando = true;
+    this.errorCarga = '';
     this.nominaData = [];
+    const periodoId = this.periodoActual?.id;
+    if (!periodoId) {
+      this.cargando = false;
+      this.errorCarga = 'No hay un período válido para liquidar.';
+      return;
+    }
 
-    this.empleadosService.getEmpleados().subscribe({
-      next: (empleados: any[]) => {
-        const periodoId = this.periodoActual?.id;
-
-        if (!periodoId || periodoId === 'temp-001') {
-          // Si no hay perÃ­odo real, mostrar solo sueldo base
-          this.nominaData = empleados.map(emp => ({
-            id: emp.id,
-            nombre: this.cap(emp.nombre || ''),
-            apellido: this.cap(emp.apellido || ''),
-            sueldoBase: Number(emp.salarioBase) || 0,
-            devengos: 0,
-            deducciones: 0,
-            totalPagar: Number(emp.salarioBase) || 0
-          }));
-          this.cargando = false;
-          return;
-        }
-
-        this.empleadosService.getNovedadesPorPeriodo(periodoId).subscribe({
-          next: (novedades: any[]) => {
-            this.nominaData = empleados.map(emp => {
-              const salarioBase = Number(emp.salarioBase) || 0;
-              const salarioDiario = salarioBase / 30;
-              const salarioHora = salarioDiario / 8;
-
-              const misNovedades = novedades.filter(n => n.idEmpleado === emp.id);
-
-              let devengos = 0;
-              let deducciones = 0;
-
-              misNovedades.forEach(nov => {
-                switch (nov.tipoNovedad) {
-                  case 'HORAS_EXTRAS':
-                    const horas = Number(nov.horas) || 0;
-                    devengos += horas * salarioHora * 1.75; // +75% recargo
-                    break;
-
-                  case 'BONIFICACION':
-                  case 'COMISION':
-                    devengos += Number(nov.valor) || 0;
-                    break;
-
-                  case 'AUXILIO_TRANSPORTE':
-                    if (salarioBase <= 2600000) {
-                      devengos += 162000; // Valor 2025 Colombia
-                    }
-                    break;
-
-                  case 'PRESTAMO':
-                  case 'EMBARGO':
-                    deducciones += Number(nov.valor) || 0;
-                    break;
-
-                  case 'INCAPACIDAD':
-                    const diasIncap = this.calcularDias(nov.fechaInicio, nov.fechaFin);
-                    deducciones += diasIncap * salarioDiario * 0.6667; // Empleado paga 66.67%
-                    break;
-
-                  case 'PERMISO_NO_REMUNERADO':
-                    const diasPerm = this.calcularDias(nov.fechaInicio, nov.fechaFin);
-                    deducciones += diasPerm * salarioDiario;
-                    break;
-
-                  case 'VACACIONES':
-                    // No afecta nÃ³mina (ya se pagÃ³ antes)
-                    break;
-                }
-              });
-
-              const totalPagar = salarioBase + devengos - deducciones;
-
-              return {
-                id: emp.id,
-                nombre: this.cap(emp.nombre || ''),
-                apellido: this.cap(emp.apellido || ''),
-                sueldoBase: Math.round(salarioBase),
-                devengos: Math.round(devengos),
-                deducciones: Math.round(deducciones),
-                totalPagar: Math.round(totalPagar)
-              };
-            });
-
-            this.cargando = false;
-          },
-          error: () => {
-            alert('Error al cargar novedades');
-            this.cargando = false;
-          }
-        });
+    this.empleadosService.getLiquidacionNomina(periodoId).subscribe({
+      next: (liquidacion: any) => {
+        this.nominaData = (liquidacion.empleados || []).map((empleado: any) => ({
+          id: empleado.id,
+          nombre: this.cap(empleado.nombre || ''),
+          apellido: this.cap(empleado.apellido || ''),
+          sueldoBase: empleado.sueldoBase,
+          devengos: empleado.devengos,
+          deducciones: empleado.deducciones,
+          totalPagar: empleado.totalPagar,
+          aportesEmpleador: empleado.aportesEmpleador || 0,
+          provisionesPrestacionales: empleado.provisionesPrestacionales || 0,
+          costoTotalEmpleador: empleado.costoTotalEmpleador || 0,
+          detalleAportesEmpleador: empleado.detalleAportesEmpleador || [],
+          detalleDevengos: empleado.detalleDevengos || [],
+          detalleDeducciones: empleado.detalleDeducciones || []
+        }));
+        this.paginaActual = 0;
+        this.soloEmpleadosConNovedades = false;
+        this.cargando = false;
       },
-      error: () => {
-        alert('Error al cargar empleados');
+      error: (err) => {
+        this.errorCarga = err.error?.message || err.error?.error || 'Error al calcular la nómina.';
         this.cargando = false;
       }
     });
   }
 
-  // MÃ‰TODOS AUXILIARES
+  toggleDetalle(item: NominaItem) {
+    item.expandido = !item.expandido;
+  }
+
+  toggleTodo() {
+    this.expandidoGlobal = !this.expandidoGlobal;
+    this.nominaData.forEach(i => i.expandido = this.expandidoGlobal);
+  }
+
   cap(t: string): string {
     return t ? t.charAt(0).toUpperCase() + t.slice(1).toLowerCase() : '';
   }
 
-  calcularDias(inicio: string, fin: string): number {
-    if (!inicio || !fin) return 0;
-    const i = new Date(inicio);
-    const f = new Date(fin);
-    const diff = f.getTime() - i.getTime();
-    return Math.floor(diff / (1000 * 60 * 60 * 24)) + 1;
+  cambiarPagina(delta: number) {
+    const siguiente = this.paginaActual + delta;
+    if (siguiente >= 0 && siguiente < this.totalPaginas) {
+      this.paginaActual = siguiente;
+    }
+  }
+
+  alternarEmpleadosConNovedades() {
+    this.soloEmpleadosConNovedades = !this.soloEmpleadosConNovedades;
+    this.paginaActual = 0;
   }
 
   pagarNomina() {
@@ -173,16 +174,15 @@ export class PagoNominaComponent implements OnInit {
 
     this.cargando = true;
 
-    // 1. Cierra el perÃ­odo actual
-    this.empleadosService.cerrarPeriodoActual().subscribe({
+    this.empleadosService.pagarNomina({
+      periodoId: this.periodoActual.id
+    }).subscribe({
       next: () => {
-        // 2. Crea el siguiente perÃ­odo
-        this.crearSiguienteQuincena();
         this.pagoGenerado = true;
         this.cargando = false;
       },
-      error: () => {
-        alert('Error al cerrar el perÃ­odo');
+      error: (err) => {
+        alert(err.error?.error || 'Error al guardar el pago');
         this.cargando = false;
       }
     });
@@ -191,35 +191,50 @@ export class PagoNominaComponent implements OnInit {
   imprimirComprobante() {
     const doc = new jsPDF();
     doc.setFontSize(16);
-    doc.text('COMPROBANTE DE PAGO - NÃ“MINA', 105, 20, { align: 'center' });
+    doc.text('COMPROBANTE DE PAGO - NÓMINA', 105, 20, { align: 'center' });
     doc.setFontSize(12);
-    doc.text(`PerÃ­odo: ${this.periodoActual?.descripcion}`, 20, 40);
+    doc.text(`Período: ${this.periodoActual?.description || this.periodoActual?.descripcion || ''}`, 20, 40);
     doc.text(`Fecha: ${new Date().toLocaleDateString('es-CO')}`, 20, 50);
 
     let y = 70;
     this.nominaData.forEach(item => {
+      doc.setFont('helvetica', 'bold');
       doc.text(`${item.nombre} ${item.apellido} - Total: $${item.totalPagar.toLocaleString()}`, 20, y);
-      y += 10;
+      doc.setFont('helvetica', 'normal');
+      y += 8;
+      if (item.detalleDevengos.length) {
+        doc.text(`  Devengos: ${item.detalleDevengos.map(d => `${d.concepto} $${d.valor.toLocaleString()}`).join(', ')}`, 24, y, { maxWidth: 170 });
+        y += 7;
+      }
+      if (item.detalleDeducciones.length) {
+        doc.text(`  Deducciones: ${item.detalleDeducciones.map(d => `${d.concepto} $${d.valor.toLocaleString()}`).join(', ')}`, 24, y, { maxWidth: 170 });
+        y += 7;
+      }
+      y += 5;
+      if (y > 270) { doc.addPage(); y = 30; }
     });
 
-    doc.save(`nomina_${this.periodoActual?.descripcion}.pdf`);
+    doc.save(`nomina_${this.periodoActual?.description || this.periodoActual?.descripcion || 'periodo'}.pdf`);
   }
 
   crearSiguienteQuincena() {
     if (!this.periodoActual) return;
 
-    const fechaFin = new Date(this.periodoActual.fechaFin);
+    // ✅ CORRECCIÓN: Si por alguna razón extraña llega sin fechaFin, tomamos la fecha de hoy para que no explote
+    const stringFecha = this.periodoActual.fechaFin || new Date().toISOString().split('T')[0];
+    
+    // Le sumamos 12 horas para que la zona horaria (UTC/GMT) no nos quite un día por accidente
+    const fechaFin = new Date(stringFecha + 'T12:00:00'); 
+    
     let nuevoInicio: Date;
     let nuevoFin: Date;
     let nuevaDescripcion: string;
 
-    // SI LA QUINCENA ACTUAL TERMINA EL 15 â†’ es 1ra quincena â†’ siguiente es 2da
-    if (fechaFin.getDate() === 15) {
+    if (fechaFin.getDate() <= 15) {
       nuevoInicio = new Date(fechaFin.getFullYear(), fechaFin.getMonth(), 16);
-      nuevoFin = new Date(fechaFin.getFullYear(), fechaFin.getMonth() + 1, 0); // Ãºltimo dÃ­a del mes
+      nuevoFin = new Date(fechaFin.getFullYear(), fechaFin.getMonth() + 1, 0); 
       nuevaDescripcion = `2da Quincena ${this.obtenerNombreMes(nuevoInicio.getMonth())} ${nuevoInicio.getFullYear()}`;
     } else {
-      // SI TERMINA EL ÃšLTIMO DÃA DEL MES â†’ es 2da quincena â†’ siguiente es 1ra del mes siguiente
       nuevoInicio = new Date(fechaFin.getFullYear(), fechaFin.getMonth() + 1, 1);
       nuevoFin = new Date(fechaFin.getFullYear(), fechaFin.getMonth() + 1, 15);
       nuevaDescripcion = `1ra Quincena ${this.obtenerNombreMes(nuevoInicio.getMonth())} ${nuevoInicio.getFullYear()}`;
@@ -236,7 +251,7 @@ export class PagoNominaComponent implements OnInit {
 
     this.empleadosService.crearPeriodo(nuevoPeriodo).subscribe({
       next: (res) => {
-        alert(`Â¡NÃ³mina pagada y cerrada!\n\nSe creÃ³ automÃ¡ticamente:\n${nuevaDescripcion}`);
+        alert(`¡Nómina pagada y cerrada!\n\nSe creó automáticamente:\n${nuevaDescripcion}`);
         this.cargarPeriodoActual();
         this.pagoGenerado = false;
       },
@@ -246,6 +261,7 @@ export class PagoNominaComponent implements OnInit {
       }
     });
   }
+
   obtenerNombreMes(mesIndex: number): string {
     const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];

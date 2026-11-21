@@ -1,0 +1,456 @@
+<div class="modal-overlay" *ngIf="visible" (click)="cerrarModal()">
+  <div class="modal-shell" (click)="$event.stopPropagation()">
+    
+    <!-- Barra superior de control del visor de documentos -->
+    <header class="toolbar no-print">
+      <div class="tabs">
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="pestanaActiva === 'comprobante' && !modoImpresionCompleta"
+          (click)="cambiarPestana('comprobante')">
+          📄 1. Comprobante de Pago
+        </button>
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="pestanaActiva === 'novedades' && !modoImpresionCompleta"
+          (click)="cambiarPestana('novedades')">
+          📋 2. Resumen de Novedades
+        </button>
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="pestanaActiva === 'contrato' && !modoImpresionCompleta"
+          (click)="cambiarPestana('contrato')">
+          📜 3. Contrato Laboral
+        </button>
+      </div>
+
+      <div class="toolbar-actions">
+        <label class="check-todos" title="Mostrar e imprimir las 3 páginas consecutivas">
+          <input type="checkbox" [(ngModel)]="modoImpresionCompleta">
+          <span>Ver las 3 páginas</span>
+        </label>
+        <button type="button" class="btn-print" (click)="imprimir()">
+          🖨️ Imprimir / Guardar PDF
+        </button>
+        <button type="button" class="btn-close" (click)="cerrarModal()" aria-label="Cerrar modal">
+          ✕
+        </button>
+      </div>
+    </header>
+
+    <!-- Contenedor scrolleable con las páginas A4 -->
+    <div class="document-viewer">
+
+      <!-- ============ 1. COMPROBANTE DE PAGO ============ -->
+      <section class="page" *ngIf="pestanaActiva === 'comprobante' || modoImpresionCompleta">
+        <div class="wm">PRELIMINAR</div>
+        <div class="head">
+          <div>
+            <div class="brand">NUMA STORE S.A.S.</div>
+            <div class="sub">NIT 901.234.567-1 · Calle 22 Kr 83, Cartagena</div>
+          </div>
+          <div class="doc">
+            <b>Comprobante de pago de nómina</b>
+            <span class="sub">N.º {{ codigoDocumento }}</span><br>
+            <span class="badge">Período abierto · borrador</span>
+          </div>
+        </div>
+
+        <dl class="info">
+          <div><dt>Colaborador</dt><dd>{{ nombreCompleto }}</dd></div>
+          <div><dt>Cédula</dt><dd>C.C. {{ documentoIdentidad }}</dd></div>
+          <div><dt>Cargo</dt><dd>{{ cargo }}</dd></div>
+          <div><dt>Período</dt><dd>{{ descripcionPeriodo }}</dd></div>
+          <div><dt>Fecha de pago</dt><dd>{{ hoy | date:'dd/MM/yyyy' }}</dd></div>
+          <div><dt>Salario base mensual</dt><dd class="num" style="text-align:left">{{ formatCOP(salarioBase) }}</dd></div>
+        </dl>
+
+        <div class="cols">
+          <div class="dev">
+            <h2>Devengados</h2>
+            <table>
+              <thead>
+                <tr><th>Concepto</th><th class="num">Base</th><th class="num">Valor</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Sueldo básico quincenal (15 días)</td>
+                  <td class="num sub">{{ formatCOP(salarioBase) }}</td>
+                  <td class="num">{{ formatCOP(sueldoQuincenal) }}</td>
+                </tr>
+                <tr>
+                  <td>Auxilio de transporte quincenal</td>
+                  <td class="num sub">{{ auxilioAplica ? '$ 249.095' : '$ 0' }}</td>
+                  <td class="num">{{ formatCOP(auxilioQuincenal) }}</td>
+                </tr>
+                <tr>
+                  <td>Horas extras y recargos ({{ novedades.length }} novedades)</td>
+                  <td class="num sub">ver detalle</td>
+                  <td class="num">{{ formatCOP(valorHorasExtras) }}</td>
+                </tr>
+                <tr class="tot">
+                  <td colspan="2">Total devengado</td>
+                  <td class="num">{{ formatCOP(totalDevengado) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="ded">
+            <h2>Deducciones</h2>
+            <table>
+              <thead>
+                <tr><th>Concepto</th><th class="num">Valor</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Salud (4 % sobre IBC)</td>
+                  <td class="num neg">− {{ formatCOP(deduccionSalud) }}</td>
+                </tr>
+                <tr>
+                  <td>Pensión (4 % sobre IBC)</td>
+                  <td class="num neg">− {{ formatCOP(deduccionPension) }}</td>
+                </tr>
+                <tr class="tot">
+                  <td>Total deducido</td>
+                  <td class="num neg">− {{ formatCOP(totalDeducido) }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="sub" style="margin:6px 0 0">
+              IBC = sueldo + horas extras = {{ formatCOP(ibc) }} (el auxilio de transporte no cotiza).
+            </p>
+          </div>
+        </div>
+
+        <div class="neto">
+          <span>Total neto a pagar</span>
+          <strong>{{ formatCOP(totalNeto) }} COP</strong>
+        </div>
+
+        <p class="note">
+          Medio de pago: transferencia a cuenta nómina registrada. Dudas sobre este comprobante: rrhh&#64;numastore.co. Emitido conforme al Código Sustantivo del Trabajo y la Ley 2101 de 2021.
+        </p>
+
+        <div class="sign">
+          <!-- Firma empleador (misma que en el contrato) -->
+          <div class="sign-box">
+            <div class="sign-label">Firma del empleador · NUMA STORE</div>
+            <div class="sign-preview" *ngIf="firmaEmpleadorGuardada">
+              <img [src]="firmaEmpleadorGuardada" alt="Firma empleador" class="firma-img">
+              <div class="sign-info"><b>Adrian Padilla</b><br>Representante Legal</div>
+              <button class="btn-firma-editar no-print" (click)="abrirPadEmpleador()">✏️ Editar firma</button>
+            </div>
+            <div class="sign-empty no-print" *ngIf="!firmaEmpleadorGuardada">
+              <div class="linea-firma"></div>
+              <div class="sign-info"><b>Adrian Padilla</b><br>Representante Legal</div>
+              <button class="btn-firma-primary no-print" (click)="abrirPadEmpleador()">Firmar aquí</button>
+            </div>
+            <!-- PAD empleador -->
+            <div class="firma-pad-overlay no-print" *ngIf="mostrarPadEmpleador">
+              <div class="firma-pad-card">
+                <div class="firma-pad-title">Firma del empleador</div>
+                <div class="firma-pad-hint">Dibuja tu firma con el mouse o con el dedo</div>
+                <canvas #canvasFirmaEmpleador class="firma-canvas"
+                  (mousedown)="onPointerDown($event)" (mousemove)="onPointerMove($event)" (mouseup)="onPointerUp()"
+                  (touchstart)="onPointerDown($event)" (touchmove)="onPointerMove($event)" (touchend)="onPointerUp()">
+                </canvas>
+                <div class="firma-pad-actions">
+                  <button class="btn-pad-limpiar" (click)="limpiarFirma('emp')">🗑️ Borrar</button>
+                  <button class="btn-pad-cancel"  (click)="cancelarPad('emp')">Cancelar</button>
+                  <button class="btn-pad-guardar" (click)="guardarFirma('emp')">✅ Guardar firma</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Firma trabajador (misma que en el contrato) -->
+          <div class="sign-box">
+            <div class="sign-label">Firma del colaborador · Recibido</div>
+            <div class="sign-preview" *ngIf="firmaTrabajadorGuardada">
+              <img [src]="firmaTrabajadorGuardada" alt="Firma trabajador" class="firma-img">
+              <div class="sign-info"><b>{{ nombreCompleto }}</b><br>C.C. {{ documentoIdentidad }}</div>
+              <button class="btn-firma-editar no-print" (click)="abrirPadTrabajador()">✏️ Editar firma</button>
+            </div>
+            <div class="sign-empty no-print" *ngIf="!firmaTrabajadorGuardada">
+              <div class="linea-firma"></div>
+              <div class="sign-info"><b>{{ nombreCompleto }}</b><br>C.C. {{ documentoIdentidad }}</div>
+              <button class="btn-firma-primary no-print" (click)="abrirPadTrabajador()">Firmar aquí</button>
+            </div>
+            <!-- PAD trabajador -->
+            <div class="firma-pad-overlay no-print" *ngIf="mostrarPadTrabajador">
+              <div class="firma-pad-card">
+                <div class="firma-pad-title">Firma del trabajador</div>
+                <div class="firma-pad-hint">Dibuja tu firma con el mouse o con el dedo</div>
+                <canvas #canvasFirmaTrabajador class="firma-canvas"
+                  (mousedown)="onPointerDown($event)" (mousemove)="onPointerMove($event)" (mouseup)="onPointerUp()"
+                  (touchstart)="onPointerDown($event)" (touchmove)="onPointerMove($event)" (touchend)="onPointerUp()">
+                </canvas>
+                <div class="firma-pad-actions">
+                  <button class="btn-pad-limpiar" (click)="limpiarFirma('trab')">🗑️ Borrar</button>
+                  <button class="btn-pad-cancel"  (click)="cancelarPad('trab')">Cancelar</button>
+                  <button class="btn-pad-guardar" (click)="guardarFirma('trab')">✅ Guardar firma</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="foot">
+          <span>Generado el {{ hoy | date:'dd/MM/yyyy' }}</span>
+          <span>Código de verificación: NS-7F3K-92QD</span>
+        </div>
+      </section>
+
+      <!-- ============ 2. RESUMEN DE NOVEDADES ============ -->
+      <section class="page" *ngIf="pestanaActiva === 'novedades' || modoImpresionCompleta">
+        <div class="head">
+          <div>
+            <div class="brand">NUMA STORE S.A.S.</div>
+            <div class="sub">{{ descripcionPeriodo }}</div>
+          </div>
+          <div class="doc">
+            <b>Resumen de salario y novedades aprobadas</b>
+            <span class="sub">{{ nombreCompleto }} · C.C. {{ documentoIdentidad }}</span>
+          </div>
+        </div>
+
+        <div class="alert" *ngIf="valorHorasExtras > 0">
+          <b>Auditoría Ley 2101:</b> Las horas extras y recargos suman {{ formatCOP(valorHorasExtras) }}. El límite legal según MinTrabajo es de máximo 2h extras diarias y 12h extras semanales por persona.
+        </div>
+        <div class="alert" *ngIf="valorHorasExtras === 0" style="background:#e9f5ee; border-color:#86efac; color:#15803d;">
+          <b>Operación al día:</b> No se registran sobrecargas ni horas extras atípicas para este colaborador en el período.
+        </div>
+
+        <h2>Devengos</h2>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:56px">Cód.</th>
+              <th>Concepto</th>
+              <th>Detalle</th>
+              <th class="num">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>001</td>
+              <td>Sueldo básico quincenal</td>
+              <td class="sub">15 días</td>
+              <td class="num">{{ formatCOP(sueldoQuincenal) }}</td>
+            </tr>
+            <tr>
+              <td>002</td>
+              <td>Auxilio de transporte</td>
+              <td class="sub">15 días</td>
+              <td class="num">{{ formatCOP(auxilioQuincenal) }}</td>
+            </tr>
+            <tr *ngFor="let nov of novedades; let i = index">
+              <td>{{ (i + 3).toString().padStart(3, '0') }}</td>
+              <td>{{ nov.tipoNovedad || nov.concepto || 'Hora extra' }}</td>
+              <td class="sub">{{ nov.descripcion || 'Novedad aprobada en tienda' }}</td>
+              <td class="num">{{ formatCOP(nov.valor || nov.monto || 0) }}</td>
+            </tr>
+            <tr *ngIf="!novedades || novedades.length === 0">
+              <td>003</td>
+              <td>Horas extras ordinarias</td>
+              <td class="sub">Sin novedades adicionales</td>
+              <td class="num">{{ formatCOP(0) }}</td>
+            </tr>
+            <tr class="tot">
+              <td colspan="3">Subtotal horas extras</td>
+              <td class="num">{{ formatCOP(valorHorasExtras) }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="sub" style="margin:4px 0 14px">
+          En «Detalle» muestra fecha, tipo (diurna, nocturna, dominical, festiva), horas y recargo de cada novedad.
+        </p>
+
+        <div class="cols" style="grid-template-columns:1fr 1fr">
+          <div class="dev">
+            <h2>Total devengado</h2>
+            <table>
+              <tr class="tot">
+                <td>Suma de devengos</td>
+                <td class="num">{{ formatCOP(totalDevengado) }}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="ded">
+            <h2>Total deducido</h2>
+            <table>
+              <tr class="tot">
+                <td>Salud + pensión</td>
+                <td class="num neg">− {{ formatCOP(totalDeducido) }}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="neto">
+          <span>Neto estimado</span>
+          <strong>{{ formatCOP(totalNeto) }}</strong>
+        </div>
+
+        <div class="foot">
+          <span>Generado el {{ hoy | date:'dd/MM/yyyy' }}</span>
+          <span>NUMA Nómina · Auditoría de Personal</span>
+        </div>
+      </section>
+
+      <!-- ============ 3. CONTRATO ============ -->
+      <section class="page contract" *ngIf="pestanaActiva === 'contrato' || modoImpresionCompleta">
+        <div class="head">
+          <div>
+            <div class="brand">NUMA STORE S.A.S.</div>
+            <div class="sub">NIT 901.234.567-1 · Calle 22 Kr 83</div>
+          </div>
+          <div class="doc">
+            <b>Contrato individual de trabajo</b>
+            <span class="sub">A término fijo · N.º {{ codigoContrato }}</span>
+          </div>
+        </div>
+
+        <dl class="data">
+          <div><dt>Empleador</dt><dd>NUMA STORE S.A.S.</dd></div>
+          <div><dt>Representante legal</dt><dd>Adrian Padilla</dd></div>
+          <div><dt>Trabajador(a)</dt><dd>{{ nombreCompleto }}</dd></div>
+          <div><dt>Identificación</dt><dd>C.C. {{ documentoIdentidad }}</dd></div>
+          <div><dt>Dirección</dt><dd>{{ direccionEmpleado }}</dd></div>
+          <div><dt>Teléfono</dt><dd>{{ telefonoEmpleado }}</dd></div>
+          <div><dt>Cargo</dt><dd>{{ cargo }}</dd></div>
+          <div><dt>Sede</dt><dd>Villa Grande · Calle 45 #12-30</dd></div>
+          <div><dt>Vigencia</dt><dd>{{ fechaInicioContrato | date:'dd/MM/yyyy' }} al {{ fechaFinContrato | date:'dd/MM/yyyy' }}</dd></div>
+          <div><dt>Salario mensual</dt><dd>{{ formatCOP(salarioBase) }} COP</dd></div>
+        </dl>
+
+        <p>
+          Entre NUMA STORE S.A.S., representada por Adrian Padilla, y el(la) trabajador(a) identificado(a) arriba, se celebra un contrato individual de trabajo a término fijo, regido por las siguientes cláusulas:
+        </p>
+
+        <h3>Primera · Objeto</h3>
+        <p>El trabajador presta sus servicios personales, bajo dependencia y subordinación del empleador, en el cargo de {{ cargo }}.</p>
+
+        <h3>Segunda · Duración</h3>
+        <p>Desde el {{ fechaInicioContrato | date:'dd/MM/yyyy' }} hasta el {{ fechaFinContrato | date:'dd/MM/yyyy' }}. Se prorroga por períodos iguales si ninguna parte avisa por escrito su decisión de no renovar con al menos 30 días de anticipación.</p>
+
+        <h3>Tercera · Jornada</h3>
+        <p>La jornada ordinaria es de 42 horas semanales (Ley 2101 de 2021), distribuida según las necesidades de la empresa. El trabajo suplementario requiere autorización previa y no puede superar el máximo legal.</p>
+
+        <h3>Cuarta · Remuneración</h3>
+        <p>Salario mensual de {{ formatCOP(salarioBase) }} COP, pagadero por quincenas. Se pagan además el auxilio de transporte y los recargos y horas extras que correspondan conforme a la ley.</p>
+
+        <h3>Quinta · Lugar de trabajo</h3>
+        <p>Sede Villa Grande de NUMA STORE, Calle 45 #12-30. El empleador puede reubicar al trabajador dentro de la ciudad sin desmejorar sus condiciones laborales.</p>
+
+        <h3>Sexta · Obligaciones</h3>
+        <p>Cumplir el reglamento interno de trabajo, cuidar los bienes y el inventario a su cargo, y guardar absoluta reserva sobre la información confidencial de la empresa.</p>
+
+        <h3>Séptima · Seguridad social y deducciones</h3>
+        <p>El empleador afilia al trabajador al sistema general de seguridad social. El trabajador autoriza descontar de su salario los aportes a salud y pensión y demás deducciones autorizadas por la ley colombiana.</p>
+
+        <p style="margin-top:14px;">Para constancia se firma en dos ejemplares el {{ hoy | date:'dd/MM/yyyy' }}.</p>
+
+        <!-- ═══════════════════ FIRMAS TÁCTILES ═══════════════════ -->
+        <div class="sign">
+
+          <!-- FIRMA TRABAJADOR -->
+          <div class="sign-box">
+            <div class="sign-label">Firma del Trabajador</div>
+
+            <!-- Imagen ya guardada -->
+            <div class="sign-preview" *ngIf="firmaTrabajadorGuardada">
+              <img [src]="firmaTrabajadorGuardada" alt="Firma trabajador" class="firma-img">
+              <div class="sign-info">
+                <b>{{ nombreCompleto }}</b><br>
+                C.C. {{ documentoIdentidad }}
+              </div>
+              <button class="btn-firma-editar no-print" (click)="abrirPadTrabajador()">✏️ Editar firma</button>
+            </div>
+
+            <!-- Línea vacía si aún no hay firma -->
+            <div class="sign-empty no-print" *ngIf="!firmaTrabajadorGuardada">
+              <div class="linea-firma"></div>
+              <div class="sign-info">
+                <b>{{ nombreCompleto }}</b><br>
+                C.C. {{ documentoIdentidad }}
+              </div>
+              <button class="btn-firma-primary no-print" (click)="abrirPadTrabajador()">Firmar aquí</button>
+            </div>
+
+            <!-- PAD táctil trabajador -->
+            <div class="firma-pad-overlay no-print" *ngIf="mostrarPadTrabajador">
+              <div class="firma-pad-card">
+                <div class="firma-pad-title">✍️ Firma del trabajador</div>
+                <div class="firma-pad-hint">Dibuja tu firma con el mouse o con el dedo</div>
+                <canvas #canvasFirmaTrabajador class="firma-canvas"
+                  (mousedown)="onPointerDown($event)" (mousemove)="onPointerMove($event)" (mouseup)="onPointerUp()"
+                  (touchstart)="onPointerDown($event)" (touchmove)="onPointerMove($event)" (touchend)="onPointerUp()">
+                </canvas>
+                <div class="firma-pad-actions">
+                  <button class="btn-pad-limpiar" (click)="limpiarFirma('trab')">🗑️ Borrar</button>
+                  <button class="btn-pad-cancel"  (click)="cancelarPad('trab')">Cancelar</button>
+                  <button class="btn-pad-guardar" (click)="guardarFirma('trab')">✅ Guardar firma</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FIRMA EMPLEADOR -->
+          <div class="sign-box">
+            <div class="sign-label">Firma del Empleador</div>
+
+            <!-- Imagen ya guardada -->
+            <div class="sign-preview" *ngIf="firmaEmpleadorGuardada">
+              <img [src]="firmaEmpleadorGuardada" alt="Firma empleador" class="firma-img">
+              <div class="sign-info">
+                <b>Adrian Padilla</b><br>
+                Representante legal · NUMA STORE
+              </div>
+              <button class="btn-firma-editar no-print" (click)="abrirPadEmpleador()">✏️ Editar firma</button>
+            </div>
+
+            <!-- Línea vacía si aún no hay firma -->
+            <div class="sign-empty no-print" *ngIf="!firmaEmpleadorGuardada">
+              <div class="linea-firma"></div>
+              <div class="sign-info">
+                <b>Adrian Padilla</b><br>
+                Representante legal · NUMA STORE
+              </div>
+              <button class="btn-firma-primary no-print" (click)="abrirPadEmpleador()">Firmar aquí</button>
+            </div>
+
+            <!-- PAD táctil empleador -->
+            <div class="firma-pad-overlay no-print" *ngIf="mostrarPadEmpleador">
+              <div class="firma-pad-card">
+                <div class="firma-pad-title">✍️ Firma del empleador</div>
+                <div class="firma-pad-hint">Dibuja tu firma con el mouse o con el dedo</div>
+                <canvas #canvasFirmaEmpleador class="firma-canvas"
+                  (mousedown)="onPointerDown($event)" (mousemove)="onPointerMove($event)" (mouseup)="onPointerUp()"
+                  (touchstart)="onPointerDown($event)" (touchmove)="onPointerMove($event)" (touchend)="onPointerUp()">
+                </canvas>
+                <div class="firma-pad-actions">
+                  <button class="btn-pad-limpiar" (click)="limpiarFirma('emp')">🗑️ Borrar</button>
+                  <button class="btn-pad-cancel"  (click)="cancelarPad('emp')">Cancelar</button>
+                  <button class="btn-pad-guardar" (click)="guardarFirma('emp')">✅ Guardar firma</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- ══════════════════════════════════════════════════════ -->
+
+        <div class="foot">
+          <span>NUMA STORE S.A.S. · Contrato {{ codigoContrato }}</span>
+          <span>Fecha de generación: {{ hoy | date:'dd/MM/yyyy' }}</span>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>

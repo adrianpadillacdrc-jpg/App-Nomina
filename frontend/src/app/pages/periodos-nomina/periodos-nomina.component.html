@@ -3,7 +3,67 @@
   <app-sidebar></app-sidebar>
   <main class="main-content">
     <div class="periodos-container">
-      <h1 class="page-title">Períodos de Nómina</h1>
+      <app-encabezado-pagina titulo="Períodos de nómina"></app-encabezado-pagina>
+
+      <!-- KPI CARDS: INFORMACIÓN DE QUINCENAS -->
+      <section class="quincenas-resumen" aria-label="Resumen de quincenas">
+        <div class="kpi-quincena abierta">
+          <div class="kpi-icon"><i class="fas fa-calendar-check"></i></div>
+          <div class="kpi-info">
+            <span class="kpi-num">{{ quincenasAbiertas }}</span>
+            <span class="kpi-lbl">Quincenas abiertas</span>
+          </div>
+        </div>
+
+        <div class="kpi-quincena cerrada">
+          <div class="kpi-icon"><i class="fas fa-archive"></i></div>
+          <div class="kpi-info">
+            <span class="kpi-num">{{ quincenasCerradas }}</span>
+            <span class="kpi-lbl">Quincenas cerradas</span>
+          </div>
+        </div>
+
+        <div class="kpi-quincena total">
+          <div class="kpi-icon"><i class="fas fa-layer-group"></i></div>
+          <div class="kpi-info">
+            <span class="kpi-num">{{ totalQuincenas }}</span>
+            <span class="kpi-lbl">Total de quincenas</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- BARRA DE FILTROS PARA EVITAR DUPLICADOS Y FACILITAR VISTA -->
+      <section class="filtros-periodos">
+        <div class="grupo-filtros">
+          <span class="filtro-label">Frecuencia:</span>
+          <div class="chips">
+            <button class="chip-btn" [class.activo]="filtroTipo === 'QUINCENAL'" (click)="setFiltroTipo('QUINCENAL')">
+              <i class="fas fa-calendar-alt"></i> Quincenales
+            </button>
+            <button class="chip-btn" [class.activo]="filtroTipo === 'MENSUAL'" (click)="setFiltroTipo('MENSUAL')">
+              <i class="fas fa-calendar"></i> Mensuales
+            </button>
+            <button class="chip-btn" [class.activo]="filtroTipo === 'TODOS'" (click)="setFiltroTipo('TODOS')">
+              Todos
+            </button>
+          </div>
+        </div>
+
+        <div class="grupo-filtros">
+          <span class="filtro-label">Estado:</span>
+          <div class="chips">
+            <button class="chip-btn" [class.activo]="filtroEstado === 'TODOS'" (click)="setFiltroEstado('TODOS')">
+              Todos
+            </button>
+            <button class="chip-btn verde" [class.activo]="filtroEstado === 'ABIERTO'" (click)="setFiltroEstado('ABIERTO')">
+              Abiertos
+            </button>
+            <button class="chip-btn rojo" [class.activo]="filtroEstado === 'CERRADO'" (click)="setFiltroEstado('CERRADO')">
+              Cerrados
+            </button>
+          </div>
+        </div>
+      </section>
 
       <div class="periodos-grid">
         <div class="periodo-card" *ngFor="let periodo of periodos">
@@ -21,8 +81,8 @@
               <strong>Costo Nómina:</strong>
               <span class="costo-valor">{{ formatearCosto(periodo.costoCOP) }}</span>
             </p>
-            <p *ngIf="!periodo.costoCOP && periodo.estado === 'CERRADO'" class="costo-periodo">
-              <strong>Costo:</strong> No calculado
+            <p *ngIf="periodo.costoEstimado" class="costo-estimado">
+              Estimado con salarios de empleados activos
             </p>
           </div>
           <button class="btn-ver" (click)="verNominaPeriodo(periodo)">
@@ -31,8 +91,11 @@
         </div>
       </div>
 
+      <div class="empty-state" *ngIf="cargando">
+        Cargando períodos de nómina…
+      </div>
       <div class="empty-state" *ngIf="periodos.length === 0">
-        No hay períodos registrados
+        Aún no hay registros en esta sección.
       </div>
     </div>
   </main>
@@ -44,21 +107,49 @@
     <h2>Nómina - {{ periodoSeleccionado?.description }}</h2>
     <button class="btn-cerrar" (click)="cerrarModal()">X</button>
 
+    <div class="nomina-resumen" *ngIf="nominaHistorica.length > 0">
+      <div><span>Total devengado</span><strong>{{ formatearCosto(totalDevengado) }}</strong></div>
+      <div><span>Total deducciones</span><strong class="deduccion">{{ formatearCosto(totalDeducciones) }}</strong></div>
+      <div><span>Neto a pagar</span><strong class="total">{{ formatearCosto(totalNeto) }}</strong></div>
+    </div>
+
+    <app-tabla-base>
     <div class="tabla-nomina">
       <div class="header">
         <div>Empleado</div>
-        <div>Sueldo Base</div>
-        <div>Devengos</div>
+        <div>{{ periodoSeleccionado?.estado === 'ABIERTO' ? 'Sueldo base' : (smmlvPeriodo ? 'Sueldo mínimo legal vigente (' + (smmlvPeriodo | number) + ')' : 'Sueldo base') }}</div>
+        <div>{{ periodoSeleccionado?.estado === 'ABIERTO' ? 'Devengos' : 'Total devengado' }}</div>
         <div>Deducciones</div>
         <div>Total Pagado</div>
       </div>
       <div class="row" *ngFor="let item of nominaHistorica">
         <div>{{ item.nombre }} {{ item.apellido }}</div>
-        <div>$ {{ item.sueldoBase | number }}</div>
-        <div class="devengo">$ {{ item.devengos | number }}</div>
-        <div class="deduccion">$ {{ item.deducciones | number }}</div>
+        <div>
+          <ng-container *ngIf="item.sueldoBase !== null; else sueldoNoDisponible">
+            $ {{ item.sueldoBase | number }}
+          </ng-container>
+          <ng-template #sueldoNoDisponible>
+            {{ smmlvPeriodo ? ($any(smmlvPeriodo) | number) : 'No disponible' }}
+          </ng-template>
+        </div>
+        <div class="devengo">
+          $ {{ item.devengos | number }}
+          <small *ngFor="let detalle of item.detalleDevengos">
+            {{ detalle.concepto }}: $ {{ detalle.valor | number }}
+          </small>
+        </div>
+        <div class="deduccion">
+          $ {{ item.deducciones | number }}
+          <small *ngFor="let detalle of item.detalleDeducciones">
+            {{ detalle.concepto }}: $ {{ detalle.valor | number }}
+          </small>
+        </div>
         <div class="total">$ {{ item.totalPagar | number }}</div>
       </div>
+      <p class="sin-nomina" *ngIf="!cargando && nominaHistorica.length === 0">
+        No hay empleados ni valores de nómina para este período.
+      </p>
     </div>
+    </app-tabla-base>
   </div>
 </div>

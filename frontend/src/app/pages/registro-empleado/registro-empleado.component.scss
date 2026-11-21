@@ -1,18 +1,7 @@
-/* === FONDO + SIDEBAR FIJO === */
+/* === LAYOUT + SIDEBAR FIJO === */
 .page-wrapper {
   display: flex;
   min-height: 100vh;
-  background: url('/assets/numa.jpg') center/cover no-repeat fixed;
-  position: relative;
-}
-
-.page-wrapper::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(255, 255, 255, 0);
-  z-index: 1;
-  pointer-events: none;
 }
 
 .main-content {

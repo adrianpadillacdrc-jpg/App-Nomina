@@ -3,6 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../../guards/components/sidebar/sidebar.component';
+import { EncabezadoPaginaComponent } from '../../shared/components/encabezado-pagina/encabezado-pagina.component';
+import { TablaBaseComponent } from '../../shared/components/tabla-base/tabla-base.component';
 import { ActualizarEmpleadoComponent } from './actualizar-empleado/actualizar-empleado.component';
 import { EmpleadosService } from '../../services/empleados.service';
 
@@ -13,6 +15,8 @@ import { EmpleadosService } from '../../services/empleados.service';
     CommonModule,
     FormsModule,
     SidebarComponent,
+    EncabezadoPaginaComponent,
+    TablaBaseComponent,
     ActualizarEmpleadoComponent
   ],
   templateUrl: './consultar-empleados.component.html',
@@ -24,7 +28,13 @@ export class ConsultarEmpleadosComponent implements OnInit {
   empleadosFiltrados: any[] = [];
   busqueda = '';
 
-  // Modal NÃ³mina (EL MISMO QUE EL EMPLEADO)
+  // ✅ Variables de Control para la Paginación
+  paginaActual = 0;
+  tamanoPagina = 10;
+  totalElementos = 0;
+  totalPaginas = 0;
+
+  // Modal Nómina
   mostrarModalNomina = false;
   empleadoSeleccionado: any = null;
   periodoActual: any = null;
@@ -44,22 +54,44 @@ export class ConsultarEmpleadosComponent implements OnInit {
     this.cargarPeriodoActual();
   }
 
+  // ✅ Actualizado: Lee la propiedad '.content' que devuelve Spring Boot
   cargarEmpleados() {
-    this.empleadosService.getEmpleados().subscribe({
-      next: (data: any[]) => {
-        this.empleados = data.map(emp => ({
+    this.empleadosService.getEmpleados(this.paginaActual, this.tamanoPagina).subscribe({
+      next: (response: any) => {
+        // Extraemos la lista de la propiedad content de Spring Data Page
+        const rawContent = response.content || [];
+        
+        this.empleados = rawContent.map((emp: any) => ({
           id: emp.id,
           documento: emp.numeroDocumento || emp.documento || 'S/N',
-          nombre: emp.nombre || 'Sin nombre',
-          apellido: emp.apellido || 'Sin apellido',
+          nombre: this.limpiarTexto(emp.nombre || 'Sin nombre'),
+          apellido: this.limpiarTexto(emp.apellido || 'Sin apellido'),
           cargo: emp.cargo || 'Sin cargo',
           salarioBase: Number(emp.salarioBase) || 0,
           foto: emp.foto || '/assets/user-default.png'
         }));
+        
         this.empleadosFiltrados = [...this.empleados];
+
+        // Guardamos la información de las páginas para los botones
+        this.totalElementos = response.totalElements || 0;
+        this.totalPaginas = response.totalPages || 0;
       },
       error: () => alert('Error al cargar empleados')
     });
+  }
+
+  // ✅ Métodos nuevos para controlar el flujo de páginas
+  cambiarPagina(nuevaPagina: number) {
+    if (nuevaPagina >= 0 && nuevaPagina < this.totalPaginas) {
+      this.paginaActual = nuevaPagina;
+      this.cargarEmpleados();
+    }
+  }
+
+  cambiarTamanoPagina() {
+    this.paginaActual = 0; // Reinicia a la página 1 cuando cambia la densidad
+    this.cargarEmpleados();
   }
 
   cargarPeriodoActual() {
@@ -72,13 +104,12 @@ export class ConsultarEmpleadosComponent implements OnInit {
   filtrar() {
     const term = this.busqueda.toLowerCase();
     this.empleadosFiltrados = this.empleados.filter(e =>
-      e.documento.includes(term) ||
+      e.documento.toLowerCase().includes(term) ||
       `${e.nombre} ${e.apellido}`.toLowerCase().includes(term) ||
       e.cargo.toLowerCase().includes(term)
     );
   }
 
-  // FUNCIÃ“N CLAVE: ABRE EL COMPROBANTE Ã‰PICO
   verNominaCompleta(empleado: any) {
     this.empleadoSeleccionado = empleado;
     this.novedadesEmpleado = [];
@@ -86,16 +117,14 @@ export class ConsultarEmpleadosComponent implements OnInit {
     this.totalDeducciones = 0;
     this.netoPagar = empleado.salarioBase;
 
-    // Carga las novedades reales del backend
     this.empleadosService.getNovedadesPorEmpleado(empleado.id).subscribe({
       next: (novedades: any[]) => {
-        this.novedadesEmpleado = novedades.map(n => ({
+        this.novedadesEmpleado = novedades.filter(n => n.estado?.toUpperCase() === 'APROBADA').map(n => ({
           tipo: this.esDevengo(n.tipoNovedad) ? 'DEVENGO' : 'DEDUCCION',
           descripcion: this.getConcepto(n.tipoNovedad),
-          valor: Number(n.valor) || 0
+          valor: Number(n.valor ?? n.monto) || 0
         }));
 
-        // Recalcula totales
         this.novedadesEmpleado.forEach(n => {
           if (n.tipo === 'DEVENGO') this.totalDevengos += n.valor;
           if (n.tipo === 'DEDUCCION') this.totalDeducciones += n.valor;
@@ -103,31 +132,28 @@ export class ConsultarEmpleadosComponent implements OnInit {
         this.netoPagar = this.totalDevengos - this.totalDeducciones;
       },
       error: () => {
-        // Si falla el backend, al menos muestra el salario base
         this.novedadesEmpleado = [];
       },
       complete: () => {
-        this.mostrarModalNomina = true; // Abre el modal con el diseÃ±o brutal
+        this.mostrarModalNomina = true;
       }
     });
   }
 
-  // Helper: Â¿es devengo?
   esDevengo(tipo: string): boolean {
     return ['HORAS_EXTRAS', 'BONIFICACION', 'COMISION', 'AUXILIO_TRANSPORTE'].includes(tipo);
   }
 
-  // Helper: nombre bonito del concepto
   getConcepto(tipo: string): string {
     const mapa: any = {
       HORAS_EXTRAS: 'Horas extras',
-      BONIFICACION: 'BonificaciÃ³n',
-      COMISION: 'ComisiÃ³n',
+      BONIFICACION: 'Bonificación',
+      COMISION: 'Comisión',
       AUXILIO_TRANSPORTE: 'Auxilio de transporte',
-      PRESTAMO: 'PrÃ©stamo',
+      PRESTAMO: 'Préstamo',
       EMBARGO: 'Embargo',
       SALUD: 'Salud (4%)',
-      PENSION: 'PensiÃ³n (4%)'
+      PENSION: 'Pensión (4%)'
     };
     return mapa[tipo] || tipo;
   }
@@ -143,7 +169,6 @@ export class ConsultarEmpleadosComponent implements OnInit {
     this.mostrarActualizar = true;
   }
 
-  // IMPRIMIR EL COMPROBANTE Ã‰PICO (el mismo que el empleado)
   imprimirNomina() {
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
@@ -176,15 +201,14 @@ export class ConsultarEmpleadosComponent implements OnInit {
       </head>
       <body>
         <div class="header-comprobante">
-          <h1>COMPROBANTE DE PAGO DE NÃ“MINA</h1>
+          <h1>Resumen de salario y novedades aprobadas</h1>
           <h2>NUMA S.A.S</h2>
-          <p>NIT: 901.234.567-8 | Periodo: Noviembre 2025</p>
+          <p>${this.periodoActual?.description || 'Sin período activo'}</p>
         </div>
         <div class="info-empleado">
           <div><strong>Empleado:</strong> ${this.empleadoSeleccionado?.nombre} ${this.empleadoSeleccionado?.apellido}</div>
-          <div><strong>CÃ©dula:</strong> ${this.empleadoSeleccionado?.documento}</div>
+          <div><strong>Cédula:</strong> ${this.empleadoSeleccionado?.documento}</div>
           <div><strong>Cargo:</strong> ${this.empleadoSeleccionado?.cargo}</div>
-          <div><strong>DÃ­as trabajados:</strong> 30</div>
         </div>
         <table>
           <tr>
@@ -192,7 +216,7 @@ export class ConsultarEmpleadosComponent implements OnInit {
             <th class="deduccion" colspan="2">DEDUCCIONES</th>
           </tr>
           <tr>
-            <th>CÃ³d.</th><th>Concepto</th><th>Valor</th><th>Concepto</th><th>Valor</th>
+            <th>Cód.</th><th>Concepto</th><th>Valor</th><th>Concepto</th><th>Valor</th>
           </tr>
           <tr>
             <td>001</td>
@@ -222,7 +246,7 @@ export class ConsultarEmpleadosComponent implements OnInit {
         </table>
         <div style="text-align:center;margin:40px 0">
           <div class="caja-liquido">
-            <strong>LÃQUIDO A PERCIBIR</strong><br>
+            <strong>LÍQUIDO A PERCIBIR</strong><br>
             <span class="monto-grande">$ ${this.netoPagar.toLocaleString('es-CO')}</span>
           </div>
         </div>
@@ -244,5 +268,52 @@ export class ConsultarEmpleadosComponent implements OnInit {
 
   trackByEmpleadoId(index: number, emp: any): any {
     return emp.id || index;
+  }
+
+  limpiarTexto(texto: string): string {
+    if (!texto) return '';
+    return texto
+      .replace(/Mart\?nez/gi, 'Martínez')
+      .replace(/Hern\?ndez/gi, 'Hernández')
+      .replace(/G\?mez/gi, 'Gómez')
+      .replace(/P\?rez/gi, 'Pérez')
+      .replace(/Rodr\?guez/gi, 'Rodríguez')
+      .replace(/S\?nchez/gi, 'Sánchez')
+      .replace(/D\?az/gi, 'Díaz')
+      .replace(/Garc\?a/gi, 'García')
+      .replace(/L\?pez/gi, 'López')
+      .replace(/Ram\?rez/gi, 'Ramírez')
+      .replace(/Gonz\?lez/gi, 'González')
+      .replace(/Mu\?oz/gi, 'Muñoz')
+      .replace(/Pe\?a/gi, 'Peña')
+      .replace(/Ni\?o/gi, 'Niño')
+      .replace(/Berm\?dez/gi, 'Bermúdez')
+      .replace(/Jim\?nez/gi, 'Jiménez')
+      .replace(/Guti\?rrez/gi, 'Gutiérrez')
+      .replace(/V\?squez/gi, 'Vásquez')
+      .replace(/Vel\?squez/gi, 'Velásquez')
+      .replace(/Su\?rez/gi, 'Suárez')
+      .replace(/M\?rquez/gi, 'Márquez')
+      .replace(/C\?rdenas/gi, 'Cárdenas')
+      .replace(/Casta\?eda/gi, 'Castañeda')
+      .replace(/Ca\?averal/gi, 'Cañaveral')
+      .replace(/Qui\?ones/gi, 'Quiñones')
+      .replace(/Monta\?o/gi, 'Montaño')
+      .replace(/Acu\?a/gi, 'Acuña')
+      .replace(/Londo\?o/gi, 'Londoño')
+      .replace(/Pati\?o/gi, 'Patiño')
+      .replace(/Andr\?s/gi, 'Andrés')
+      .replace(/Jos\?(\b|\s)/gi, 'José$1')
+      .replace(/Mar\?a/gi, 'María')
+      .replace(/Jes\?s/gi, 'Jesús')
+      .replace(/Sebasti\?n/gi, 'Sebastián')
+      .replace(/Juli\?n/gi, 'Julián')
+      .replace(/Mart\?n/gi, 'Martín')
+      .replace(/Hern\?n/gi, 'Hernán')
+      .replace(/Ra\?l/gi, 'Raúl')
+      .replace(/Iv\?n/gi, 'Iván')
+      .replace(/Rub\?n/gi, 'Rubén')
+      .replace(/C\?sar/gi, 'César')
+      .replace(/\?/g, '');
   }
 }

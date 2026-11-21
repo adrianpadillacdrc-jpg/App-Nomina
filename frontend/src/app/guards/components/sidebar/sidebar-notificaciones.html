@@ -1,0 +1,117 @@
+<!-- src/app/guards/components/sidebar/sidebar-notificaciones.html -->
+<div class="notificaciones">
+  <button class="campana-btn" (click)="togglePanel()" (click)="solicitarPermiso()" title="Alertas">
+    <i class="fas fa-bell"></i>
+    <span class="badge" *ngIf="total > 0">{{ total }}</span>
+  </button>
+
+  <div class="panel" *ngIf="panelAbierto">
+    <div class="panel-header">
+      <strong>Alertas</strong>
+      <button class="limpiar" *ngIf="total > 0" (click)="limpiarTodas()">Limpiar todas</button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros">
+      <button class="filtro-btn" [class.activo]="filtro === 'TODAS'" (click)="setFiltro('TODAS')">Todas <span class="chip">{{ contar('TODAS') }}</span></button>
+      <button class="filtro-btn" [class.activo]="filtro === 'URGENTE'" (click)="setFiltro('URGENTE')">Urgentes <span class="chip">{{ contar('URGENTE') }}</span></button>
+      <button class="filtro-btn" [class.activo]="filtro === 'VENCIDO'" (click)="setFiltro('VENCIDO')">Vencidos <span class="chip">{{ contar('VENCIDO') }}</span></button>
+    </div>
+
+    <div class="panel-body">
+      <p class="vacio" *ngIf="filtradas.length === 0">No hay alertas en este filtro, tranquilo ✅</p>
+
+      <div class="alerta" *ngFor="let a of filtradas" [ngClass]="a.nivel.toLowerCase()">
+        <div class="alerta-header">
+          <span class="titulo">{{ a.titulo }}</span>
+          <button class="cerrar" (click)="descartar(a)" title="Descartar">×</button>
+        </div>
+        <p class="mensaje" (click)="verDetalle(a)" title="Ver detalles">{{ a.mensaje }}</p>
+        <div class="acciones">
+          <ng-container [ngSwitch]="a.tipo">
+            <!-- PERIODO: mantener navegación a Pago Nómina -->
+            <ng-container *ngSwitchCase="'PERIODO'">
+              <button class="btn-accion" (click)="irA(a)">Ir a Pago Nómina →</button>
+            </ng-container>
+            <!-- CONTRATO / CONTRATACION: solo ver detalles -->
+            <ng-container *ngSwitchDefault>
+              <button class="btn-accion" (click)="verDetalle(a)">
+                Ver detalles
+              </button>
+            </ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Modal: Detalles del contrato ===== -->
+  <div class="modal-overlay" *ngIf="detalleAbierto" (click)="cerrarDetalle()">
+    <div class="modal-detalle" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <strong>Detalles del contrato</strong>
+        <button class="cerrar" (click)="cerrarDetalle()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="vacio" *ngIf="detalleCargando">Cargando detalles…</p>
+
+        <ng-container *ngIf="!detalleCargando">
+          <p class="vacio" *ngIf="!detalleEmpleado">No se encontró el empleado de esta alerta.</p>
+
+          <ng-container *ngIf="detalleEmpleado as emp">
+            <!-- Ficha del empleado -->
+            <div class="ficha">
+              <h4>{{ emp.nombre }} {{ emp.apellido }}</h4>
+              <div class="ficha-grid">
+                <div><span class="lbl">Documento:</span> {{ emp.numeroDocumento || 'N/A' }}</div>
+                <div><span class="lbl">Cargo:</span> {{ emp.cargo || 'N/A' }}</div>
+                <div><span class="lbl">Estado:</span>
+                  <span class="badge-estado" [ngClass]="(emp.estado || '').toLowerCase()">{{ emp.estado || 'N/A' }}</span>
+                </div>
+                <div><span class="lbl">Salario base:</span> {{ emp.salarioBase ? (emp.salarioBase | currency:'COP':'symbol':'1.0-0') : 'N/A' }}</div>
+                <div><span class="lbl">Inicio contrato:</span> {{ fechaBonita(emp.fechaInicioContrato || detalleContrato?.fechaInicio) }}</div>
+                <div><span class="lbl">Fin contrato:</span> {{ fechaBonita(emp.fechaFinContrato || detalleContrato?.fechaFin) }}</div>
+              </div>
+            </div>
+
+            <!-- Contrato actual (MongoDB) -->
+            <div class="seccion" *ngIf="detalleContrato">
+              <h5>Contrato actual</h5>
+              <div class="ficha-grid">
+                <div><span class="lbl">Tipo:</span> {{ nombreTipoContrato[detalleContrato.idTipoContrato] || detalleContrato.idTipoContrato }}</div>
+                <div><span class="lbl">Estado:</span> {{ detalleContrato.estado || 'N/A' }}</div>
+                <div><span class="lbl">Inicio:</span> {{ fechaBonita(detalleContrato.fechaInicio) }}</div>
+                <div><span class="lbl">Fin:</span> {{ fechaBonita(detalleContrato.fechaFin) }}</div>
+              </div>
+            </div>
+            <p class="vacio" *ngIf="!detalleContrato && detalleContratos.length === 0">Sin contrataciones registradas en el sistema.</p>
+
+            <!-- Botón para ir al módulo de contratos y abrir el contrato completo -->
+            <div class="seccion acciones-contrato">
+              <button class="btn-ver-contrato" (click)="irAContrato(emp)">
+                <i class="fas fa-file-contract"></i> Ver contrato del empleado
+              </button>
+            </div>
+
+            <!-- Historial -->
+            <div class="seccion">
+              <h5>Historial del empleado</h5>
+              <ul class="historial" *ngIf="detalleHistorial.length > 0">
+                <li *ngFor="let ev of detalleHistorial" [ngClass]="ev.tipo.toLowerCase()">
+                  <div class="ev-punto"></div>
+                  <div class="ev-contenido">
+                    <span class="ev-titulo">{{ ev.titulo }}</span>
+                    <span class="ev-fecha" *ngIf="ev.fecha">{{ fechaBonita(ev.fecha) }}</span>
+                    <span class="ev-detalle">{{ ev.detalle }}</span>
+                  </div>
+                </li>
+              </ul>
+              <p class="vacio" *ngIf="detalleHistorial.length === 0">Sin eventos registrados.</p>
+            </div>
+          </ng-container>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>

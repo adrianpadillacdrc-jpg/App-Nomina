@@ -1,51 +1,87 @@
-<!-- src/app/pages/dashboard/dashboard.component.html -->
 <app-sidebar></app-sidebar>
 
 <main class="main-content">
-  <header class="header">
-    <h1>Dashboard Administrador</h1>
-    <div style="display: flex; align-items: center; gap: 15px;">
-      <button class="btn-new" routerLink="/registro">+ Nuevo empleado</button>
-      <!-- Botón de Cerrar Sesión con confirmación -->
-      <button class="btn-logout" (click)="cerrarSesion()">
-        Cerrar Sesión
-      </button>
-    </div>
-  </header>
+  <app-encabezado-pagina titulo="Dashboard administrador">
+    <button accionesPagina class="btn-new" routerLink="/registro">+ Nuevo empleado</button>
+  </app-encabezado-pagina>
 
-  <!-- KPIs -->
+  <div class="periodo-banner" *ngIf="periodoActual">
+    <div class="periodo-item">
+      <span>Período activo</span>
+      <strong>{{ periodoActual.description || periodoActual.description }}</strong>
+    </div>
+    <div class="periodo-item">
+      <span>Mes</span>
+      <strong>{{ periodoActual.mes || periodoActual.month || 'N/A' }} {{ periodoActual.anio || '' }}</strong>
+    </div>
+    <div class="periodo-item">
+      <span>Estado del período</span>
+      <strong class="estado-abierto-badge">{{ periodoActual.estado || 'Abierto / En curso' }}</strong>
+    </div>
+  </div>
+
   <div class="kpis">
     <div class="kpi-card">
-      <span class="num">{{ totalEmpleados }}</span>
+      <div class="kpi-header blue">
+        <i class="material-icons">people</i>
+      </div>
+      <span class="num">{{ totalEmpleados | number:'1.0-0' }}</span>
       <p>Total Empleados</p>
+      <div class="delta positive">{{ totalEmpleados | number:'1.0-0' }} en total</div>
     </div>
     <div class="kpi-card">
-      <span class="num green">{{ liquidados }}</span>
+      <div class="kpi-header green">
+        <i class="material-icons">check_circle</i>
+      </div>
+      <span class="num green">{{ liquidados | number:'1.0-0' }}</span>
       <p>Liquidados</p>
+      <div class="delta positive">{{ liquidados | number:'1.0-0' }} en total</div>
     </div>
     <div class="kpi-card">
-      <span class="num orange">{{ porcentajeLiquidado }}%</span>
-      <p>% Liquidado</p>
+      <div class="kpi-header orange">
+        <i class="material-icons">pending</i>
+      </div>
+      <span class="num orange">{{ pendientes | number:'1.0-0' }}</span>
+      <p>Pendientes</p>
+      <div class="delta neutral">{{ pendientes | number:'1.0-0' }} en total</div>
     </div>
     <div class="kpi-card">
-      <span class="num red">$ {{ nominaMes | number:'1.0-0' }}</span>
-      <p>Nómina Mes</p>
+      <div class="kpi-header red">
+        <i class="material-icons">payments</i>
+      </div>
+      <span class="num red cost-value" *ngIf="costoActualMillones > 0">$ {{ formatearMillones(costoActualMillones) }} M</span>
+      <span class="num red cost-value" *ngIf="costoActualMillones <= 0" style="font-size: 1.4rem;">Por liquidar</span>
+      <p>Total devengado periodo</p>
+      <div class="delta positive" *ngIf="costoActualMillones > 0">{{ deltaNomina }}</div>
+      <div class="delta neutral" *ngIf="costoActualMillones <= 0">En proceso de nómina</div>
     </div>
   </div>
 
-  <!-- Búsqueda -->
-  <div class="search-bar">
-    <input type="text" placeholder="Buscar por nombre, documento o cargo..." (input)="onFiltroChange($event)" />
+  <div class="progress-section">
+    <div class="progress-header">
+      <h3>Progreso de Liquidación</h3>
+      <span class="progress-text">{{ porcentajeLiquidado }}% Completado</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="porcentajeLiquidado"></div>
+    </div>
+    <div class="progress-stats">
+      <span>{{ liquidados | number:'1.0-0' }} de {{ totalEmpleados | number:'1.0-0' }} empleados liquidados</span>
+    </div>
   </div>
 
-  <!-- Tabla -->
-  <div class="table-container">
+  <div class="search-bar numa-search">
+    <span class="numa-search-icon"><i class="fas fa-search"></i></span>
+    <input type="text" class="numa-search-input" placeholder="Buscar por nombre, documento o cargo..." (input)="onFiltroChange($event)" />
+    <button class="numa-search-btn">Buscar</button>
+  </div>
+
+  <app-tabla-base>
     <table>
       <thead>
         <tr>
           <th>Documento</th>
-          <th>Nombre</th>
-          <th>Apellido</th>
+          <th>Empleado</th>
           <th>Cargo</th>
           <th>Salario</th>
           <th>Estado</th>
@@ -54,8 +90,14 @@
       <tbody>
         <tr *ngFor="let e of empleadosFiltrados; trackBy: trackByDocumento">
           <td>{{ e.numeroDocumento }}</td>
-          <td>{{ e.nombre }}</td>
-          <td>{{ e.apellido }}</td>
+          <td>
+            <div class="employee-cell">
+              <div class="avatar">{{ getInitials(e.nombre, e.apellido) }}</div>
+              <div class="employee-info">
+                <div class="employee-name">{{ e.nombre }} {{ e.apellido }}</div>
+              </div>
+            </div>
+          </td>
           <td>{{ e.cargo }}</td>
           <td>$ {{ e.salarioBase | number:'1.0-0' }}</td>
           <td>
@@ -65,12 +107,46 @@
           </td>
         </tr>
         <tr *ngIf="!empleadosFiltrados.length && !loading">
-          <td colspan="6" class="empty">No hay empleados registrados</td>
+          <td colspan="5" class="empty">Aún no hay registros en esta sección.</td>
         </tr>
         <tr *ngIf="loading">
-          <td colspan="6" class="loading">Cargando empleados...</td>
+          <td colspan="5" class="loading">Cargando empleados...</td>
         </tr>
       </tbody>
     </table>
+  </app-tabla-base>
+
+  <div class="paginacion-dashboard" *ngIf="totalElementosReal > 0 && !loading" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 15px 25px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+
+    <div style="font-size: 14px; color: rgba(255,255,255,0.7);">
+      Mostrando del <strong>{{ (paginaActual * tamanoPagina) + 1 | number:'1.0-0' }}</strong> al <strong>{{ (((paginaActual + 1) * tamanoPagina) > totalElementosReal ? totalElementosReal : ((paginaActual + 1) * tamanoPagina)) | number:'1.0-0' }}</strong> de <strong>{{ totalElementosReal | number:'1.0-0' }}</strong> empleados
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 15px;">
+      <button
+        (click)="cambiarPagina(paginaActual - 1)"
+        [disabled]="paginaActual === 0"
+        style="padding: 8px 16px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: #6a1b9a; color: white; cursor: pointer; opacity: paginaActual === 0 ? 0.3 : 1; transition: all 0.3s ease;"
+        [style.cursor]="paginaActual === 0 ? 'not-allowed' : 'pointer'"
+        onmouseover="this.style.background='#8e24aa'"
+        onmouseout="this.style.background='#6a1b9a'">
+        ← Anterior
+      </button>
+
+      <span style="font-size: 15px; color: white; font-weight: 500;">
+        Página <strong>{{ paginaActual + 1 | number:'1.0-0' }}</strong> de {{ totalPaginas | number:'1.0-0' }}
+      </span>
+
+      <button
+        (click)="cambiarPagina(paginaActual + 1)"
+        [disabled]="paginaActual >= totalPaginas - 1"
+        style="padding: 8px 16px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: #6a1b9a; color: white; cursor: pointer; opacity: paginaActual >= totalPaginas - 1 ? 0.3 : 1; transition: all 0.3s ease;"
+        [style.cursor]="paginaActual >= totalPaginas - 1 ? 'not-allowed' : 'pointer'"
+        onmouseover="this.style.background='#8e24aa'"
+        onmouseout="this.style.background='#6a1b9a'">
+        Siguiente →
+      </button>
+    </div>
+
   </div>
 </main>

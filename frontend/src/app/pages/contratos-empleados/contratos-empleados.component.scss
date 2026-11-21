@@ -40,11 +40,10 @@
     font-size: 18px;
     border: 3px solid #8e44ad;
     border-radius: 50px;
-    background: rgba(255, 255, 255, 0.95);
+    background: #f6f4fa;
     outline: none;
     box-shadow: 0 10px 30px rgba(142, 68, 173, 0.4);
     transition: all 0.4s ease;
-    backdrop-filter: blur(10px);
 }
 
 .search-input:focus {
@@ -58,6 +57,72 @@
     font-style: italic;
 }
 
+.sucursal-filtro-bar {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 14px 22px;
+    border-radius: 14px;
+    margin: 0 auto 30px;
+    max-width: 1000px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+    .filtro-label {
+        font-weight: 700;
+        color: #4a148c;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .chips-sucursales {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .chip-sucursal {
+        padding: 8px 16px;
+        border-radius: 50px;
+        border: 1px solid #d1c4e9;
+        background: #fdfbff;
+        color: #555;
+        font-size: 13.5px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.25s ease;
+
+        &:hover {
+            background: #ede7f6;
+            color: #4a148c;
+        }
+
+        &.activo {
+            background: #6a1b9a;
+            color: white;
+            border-color: #6a1b9a;
+            box-shadow: 0 4px 12px rgba(106, 27, 154, 0.35);
+        }
+
+        &.sede-1.activo {
+            background: #1565c0;
+            border-color: #1565c0;
+            box-shadow: 0 4px 12px rgba(21, 101, 192, 0.35);
+        }
+
+        &.sede-2.activo {
+            background: #2e7d32;
+            border-color: #2e7d32;
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.35);
+        }
+    }
+}
+
 .tabla-empleados {
     background: white;
     border-radius: 20px;
@@ -69,10 +134,9 @@
     background: linear-gradient(135deg, #8e44ad, #6a1b9a);
     color: white;
     font-weight: 800;
-    text-transform: uppercase;
     letter-spacing: 1px;
     display: grid;
-    grid-template-columns: 1.5fr 2.5fr 2fr 1.5fr;
+    grid-template-columns: 1.2fr 2fr 1.6fr 1.8fr 1.2fr;
     padding: 20px 24px;
     font-size: 15px;
     text-align: center;
@@ -80,12 +144,87 @@
 
 .empleado-row {
     display: grid;
-    grid-template-columns: 1.5fr 2.5fr 2fr 1.5fr;
+    grid-template-columns: 1.2fr 2fr 1.6fr 1.8fr 1.2fr;
     padding: 20px 24px;
     align-items: center;
     font-size: 15.5px;
     border-bottom: 1px solid #eee;
     transition: all 0.3s ease;
+}
+
+.badge-sucursal {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #ede7f6;
+    color: #4a148c;
+
+    &.sede-1 {
+        background: #e3f2fd;
+        color: #1565c0;
+        border: 1px solid #bbdefb;
+    }
+
+    &.sede-2 {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #c8e6c9;
+    }
+}
+
+.paginacion-contratos {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 25px;
+    padding: 16px 24px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+
+    .info-paginacion {
+        font-size: 14px;
+        color: #555;
+    }
+
+    .botones-paginacion {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .btn-pag {
+        padding: 8px 16px;
+        border-radius: 8px;
+        border: 1px solid #6a1b9a;
+        background: #6a1b9a;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover:not(:disabled) {
+            background: #8e24aa;
+        }
+
+        &:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            border-color: #ccc;
+            background: #eee;
+            color: #888;
+        }
+    }
+
+    .pagina-actual {
+        font-weight: 700;
+        color: #4a148c;
+        font-size: 15px;
+    }
 }
 
 .empleado-row:hover {
@@ -188,7 +327,6 @@
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 8px 20px rgba(40, 167, 69, 0.5);
-    text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
@@ -198,33 +336,12 @@
     box-shadow: 0 15px 30px rgba(40, 167, 69, 0.6);
 }
 
-.btn-imprimir {
-    background: #ff9800;
-    color: white;
-    padding: 15px 30px;
-    border: none;
-    border-radius: 50px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 20px rgba(255, 152, 0, 0.5);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.btn-imprimir:hover {
-    background: #f57c00;
-    transform: translateY(-3px);
-    box-shadow: 0 15px 30px rgba(255, 152, 0, 0.6);
-}
-
 /* ESTILOS DEL CONTRATO EN EL MODAL */
 .contrato-content {
     position: relative;
     z-index: 1;
     padding: 60px;
-    font-family: 'Georgia', serif;
+    font-family: inherit;
     line-height: 1.9;
     color: #1a1a1a;
     overflow-y: auto;
@@ -267,7 +384,6 @@
     font-weight: bold;
     margin: 50px 0 40px;
     color: #4a148c;
-    text-transform: uppercase;
     letter-spacing: 2px;
 }
 
@@ -367,8 +483,7 @@
         width: 90%;
     }
 
-    .btn-descargar,
-    .btn-imprimir {
+    .btn-descargar {
         padding: 12px 20px;
         font-size: 14px;
     }
@@ -453,7 +568,6 @@
     border-radius: 20px;
     font-size: 12px;
     font-weight: bold;
-    text-transform: uppercase;
 
     &.vigente {
         background: #28a745;

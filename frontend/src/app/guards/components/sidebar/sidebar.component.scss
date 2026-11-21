@@ -1,78 +1,238 @@
 .sidebar {
   position: fixed;
-  left: 0;
-  top: 0;
-  width: 240px;
-  height: 100vh;
-  background: white;
-  box-shadow: 0 0 30px rgba(0,0,0,0.1);
+  inset: 0 auto 0 0;
   z-index: 1000;
-  padding: 20px 0;
   display: flex;
   flex-direction: column;
+  width: 260px;
+  height: 100vh;
+  height: 100dvh;
+  padding: 20px 0 14px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  background: var(--surface);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
 }
 
 .logo-container {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 40px;
+  min-height: 50px;
+  margin-bottom: 22px;
   padding: 0 20px;
 }
 
 .logo {
+  display: block;
+  flex: 0 0 auto;
   width: 200px;
-  height: 50px;
+  max-width: 100%;
+  height: auto;
   object-fit: contain;
 }
 
-.numa {
-  font-size: 28px;
-  font-weight: 800;
-  color: #4a148c;
+.sidebar app-notificaciones {
+  flex: 0 0 auto;
 }
 
-.nomina {
-  font-size: 13px;
-  color: #7c4dff;
-  font-weight: 600;
+.menu {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  gap: 0;
+  padding: 0 8px;
 }
 
-.menu a {
+.menu-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-section + .menu-section {
+  margin-top: 18px;
+}
+
+.menu-section-title {
+  margin: 0 10px 4px;
+  padding: 0;
+  color: var(--menu-muted);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.menu a,
+.menu button {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 12px 20px;
-  margin: 0 16px 8px;
-  border-radius: 50px;
-  color: #4a148c; /* ← MORADO OSCURO */
-  text-decoration: none;
-  font-weight: 600;
+  gap: 12px;
+  min-height: 42px;
+  margin: 2px 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: var(--brand-purple-dark);
   font-size: 14px;
-  transition: all 0.3s;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  box-sizing: border-box;
 }
 
-.menu a:hover {
-  background: #f3e8ff;
-  padding-left: 25px;
+.menu button {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.menu a:hover,
+.menu button:hover {
+  background: var(--brand-lilac);
 }
 
 .menu a.active {
-  background: #e3d4ff;
-  color: #4a148c;
-  box-shadow: 0 5px 15px rgba(74, 20, 140, 0.3);
+  background: var(--brand-lilac);
+  color: var(--brand-purple-dark);
 }
 
 .menu i {
-  font-size: 20px;
-  color: #4a148c;
+  flex: 0 0 24px;
+  width: 24px;
+  color: var(--brand-purple);
+  font-size: 16px;
+  text-align: center;
 }
 
-.logout {
+.menu a span {
+  min-width: 0;
+}
+
+.menu .periodos-link span {
+  white-space: nowrap;
+}
+
+.menu .periodos-link {
+  flex-shrink: 0;
+}
+
+.menu a:focus-visible,
+.menu button:focus-visible,
+.sidebar button:focus-visible {
+  outline: 3px solid var(--brand-purple);
+  outline-offset: 2px;
+}
+
+.menu-footer {
   margin-top: auto;
-  color: #c62828;
+  padding-top: 12px;
+  border-top: 1px solid #eee8f4;
 }
 
-.logout:hover {
-  background: #ffebee;
+.menu .menu-section.menu-footer {
+  margin-top: auto;
+}
+
+.menu button.logout {
+  padding: 8px 12px;
+}
+
+.menu .logout {
+  color: var(--danger);
+}
+
+.menu .logout i {
+  color: var(--danger);
+}
+
+.menu .logout:hover {
+  background: var(--danger-soft);
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    position: sticky;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    max-height: 100dvh;
+    padding: 8px 12px 6px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    overflow-x: hidden;
+    overflow-y: visible;
+  }
+
+  .logo-container {
+    min-height: 36px;
+    margin: 0;
+    padding: 0 8px;
+  }
+
+  .logo {
+    width: 120px;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .sidebar app-notificaciones {
+    margin-left: auto;
+  }
+
+  .menu {
+    display: flex;
+    flex: 1 1 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    min-width: 0;
+    margin-top: 6px;
+    overflow-x: hidden;
+    padding: 0;
+    scrollbar-width: thin;
+  }
+
+  .menu-section {
+    display: contents;
+  }
+
+  .menu-section-title {
+    display: none;
+  }
+
+  .menu-section + .menu-section {
+    margin-top: 0;
+  }
+
+  .menu a,
+  .menu button {
+    flex: 0 1 auto;
+    width: auto;
+    min-height: 38px;
+    gap: 6px;
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .menu .periodos-link {
+    flex-shrink: 0;
+  }
+
+  .menu i {
+    flex-basis: 24px;
+    font-size: 14px;
+  }
+
+  .menu .periodos-link span {
+    white-space: nowrap;
+  }
+
+  .menu-footer {
+    margin-top: 0;
+    padding-top: 0;
+    border: 0;
+  }
 }

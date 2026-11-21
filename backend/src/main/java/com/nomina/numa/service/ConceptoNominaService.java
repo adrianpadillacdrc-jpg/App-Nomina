@@ -1,7 +1,7 @@
 package com.nomina.numa.service;
 
-import com.nomina.numa.model.mongo.ConceptoNomina;
-import com.nomina.numa.repository.mongo.ConceptoNominaRepository;
+import com.nomina.numa.model.postgres.ConceptoNomina;
+import com.nomina.numa.repository.jpa.ConceptoNominaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;

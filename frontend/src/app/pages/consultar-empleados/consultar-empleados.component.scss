@@ -131,7 +131,6 @@
   align-items: center;
   justify-content: center;
   z-index: 9000;
-  backdrop-filter: blur(8px);
 }
 
 .modal-nomina {
@@ -346,7 +345,7 @@
 
 /* REUTILIZAMOS EL MISMO ESTILO DEL EMPLEADO */
 .comprobante-colombia {
-  font-family: 'Courier New', monospace;
+  font-family: inherit;
   background: white;
   color: #000;
 }
@@ -406,7 +405,7 @@
 .tabla-nomina td.valor {
   text-align: right;
   font-weight: bold;
-  font-family: monospace;
+  font-family: inherit;
 }
 
 .totales {

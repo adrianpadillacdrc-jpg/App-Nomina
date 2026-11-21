@@ -1,0 +1,1124 @@
+/* optimizacion.component.css */
+
+.main-content {
+  padding: 24px;
+  max-width: 1300px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: #1f2937;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+/* ── Encabezado & Parámetros ────────────────────────────────────────────────── */
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.title-wrap h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  color: #111827;
+}
+
+.title-wrap .subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 2px 0 0;
+}
+
+.norma-pill {
+  background: #ede9fe;
+  color: #6d28d9;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid #ddd6fe;
+}
+
+/* ── Métricas en vivo (KPI Mini Grid) ───────────────────────────────────────── */
+.kpi-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.kpi-mini-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.kpi-mini-card:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.kpi-mini-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.kpi-mini-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.kpi-mini-sub {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.color-alert {
+  color: #b91c1c;
+}
+
+/* ── Barra de Plantillas Rápidas ──────────────────────────────────────────── */
+.presets-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 10px 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.presets-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.presets-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-preset {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-preset:hover {
+  background: #ede9fe;
+  color: #6d28d9;
+  border-color: #c4b5fd;
+}
+
+.btn-preset.active {
+  background: #6d28d9;
+  color: #ffffff;
+  border-color: #6d28d9;
+}
+
+.params-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.param-box {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.param-box label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 8px;
+}
+
+.inp-with-unit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inp-with-unit input {
+  width: 90px;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.inp-with-unit span {
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* ── Tabla de Demanda ───────────────────────────────────────────────────────── */
+.table-responsive {
+  overflow-x: auto;
+}
+
+.tabla-demanda, .tabla-escenario {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+.tabla-demanda th, .tabla-escenario th {
+  background: #f8fafc;
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.tabla-demanda td, .tabla-escenario td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.9rem;
+}
+
+.cargo-cell-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cargo-equipo-pill {
+  background: #ede9fe;
+  color: #6d28d9;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.cargo-total-pill {
+  display: inline-block;
+  background: #f1f5f9;
+  color: #1e293b;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.tfoot-totales {
+  background: #f8fafc;
+  border-top: 2px solid #cbd5e1;
+  font-weight: 700;
+}
+
+.tfoot-totales td {
+  padding: 14px;
+  border-bottom: none;
+}
+
+.color-purple {
+  color: #6d28d9;
+}
+
+.pill-status {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.pill-success {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.pill-warning {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.pill-danger {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.salario-hint {
+  display: block;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.inp-num {
+  width: 90px;
+  padding: 8px 10px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  background: #f8fafc;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.inp-num:focus {
+  outline: none;
+  border-color: #7c3aed;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+
+.panel-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(109, 40, 217, 0.25);
+}
+
+.btn-primary:hover:not(:disabled) {
+  opacity: 0.93;
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ── Alertas de Estado ──────────────────────────────────────────────────────── */
+.alert-error {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #fca5a5;
+}
+
+.alert-success {
+  background: #ecfdf5;
+  color: #047857;
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #a7f3d0;
+}
+
+/* ── Alertas de Fatiga y Riesgo Legal ───────────────────────────────────────── */
+/* ── Compliance Banner ──────────────────────────────────────────────────────── */
+.compliance-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border-radius: 12px;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  flex-wrap: wrap;
+}
+
+.compliance-ok {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #15803d;
+}
+
+.compliance-err {
+  background: #fff5f5;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+
+.compliance-icon {
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+.compliance-text {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.compliance-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.ctag {
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid #fecaca;
+}
+
+/* ── Escenarios & Comparativa — diseño ejecutivo ────────────────────────────── */
+.escenarios-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.sim-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #111827;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.sim-sub {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #9ca3af;
+}
+
+.actions-top {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-pdf {
+  background: #1e293b;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-pdf:hover { opacity: 0.85; }
+
+.btn-vacantes {
+  background: linear-gradient(135deg, #059669, #047857);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(5, 150, 105, 0.2);
+  transition: opacity 0.2s;
+}
+
+.btn-vacantes:hover:not(:disabled) { opacity: 0.9; }
+.btn-vacantes:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ── Tarjetas de escenario ───────────────────────────────────────────────────── */
+.escenarios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.esc-card {
+  border: 2px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 16px 18px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  position: relative;
+}
+
+.esc-card:hover {
+  border-color: #c4b5fd;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+.esc-card.esc-active {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
+}
+
+.esc-card.esc-optimo {
+  background: linear-gradient(160deg, #faf5ff 0%, #fff 60%);
+  border-color: #c4b5fd;
+}
+
+.esc-recom-pill {
+  position: absolute;
+  top: -11px;
+  right: 14px;
+  background: #7c3aed;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.esc-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.esc-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.gray-bg   { background: #f1f5f9; }
+.purple-bg { background: #ede9fe; }
+.blue-bg   { background: #dbeafe; }
+
+.esc-label {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.1;
+}
+
+.esc-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-top: 2px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.esc-tag.gray   { color: #6b7280; }
+.esc-tag.purple { color: #7c3aed; }
+.esc-tag.blue   { color: #2563eb; }
+
+/* Números KPI dentro de tarjeta */
+.esc-nums {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 12px;
+}
+
+.esc-num-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 60px;
+}
+
+.esc-num-block.wide { flex: 2; }
+
+.num-val {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1;
+}
+
+.num-val.purple { color: #7c3aed; }
+
+.num-val.cost {
+  font-size: 1rem;
+}
+
+.num-lbl {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.esc-ahorro {
+  margin-top: 10px;
+  background: #ecfdf5;
+  color: #065f46;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid #a7f3d0;
+}
+
+/* ── Gráfico de Barras compacto ─────────────────────────────────────────────── */
+.bar-section {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bar-row-mini {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bar-name {
+  width: 90px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #475569;
+  flex-shrink: 0;
+}
+
+.bar-track {
+  flex: 1;
+  background: #e2e8f0;
+  border-radius: 20px;
+  height: 22px;
+  overflow: hidden;
+  display: flex;
+}
+
+.bar-fill {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 10px;
+  height: 100%;
+  border-radius: 20px;
+  transition: width 0.7s ease;
+  min-width: 70px;
+}
+
+.bar-conservador { background: linear-gradient(90deg, #94a3b8, #64748b); }
+.bar-optimo      { background: linear-gradient(90deg, #a855f7, #7c3aed); }
+.bar-expansion   { background: linear-gradient(90deg, #60a5fa, #3b82f6); }
+
+.bar-val {
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* ── Detalle Cargo compacto ──────────────────────────────────────────────────── */
+.detalle-cargo-section {
+  margin-top: 4px;
+}
+
+.detalle-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.detalle-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.detalle-esc-pill {
+  background: #ede9fe;
+  color: #6d28d9;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+/* conserva compatibilidad con clases antiguas que siguen usándose en tabla */
+.badge-recomendado,
+.esc-header,
+.esc-badge,
+.esc-desc,
+.esc-kpis,
+.kpi-row,
+.kpi-costo,
+.ahorro-tag,
+.grafico-barras-section,
+.bar-row,
+.bar-label,
+.bar-value,
+.escenario-card {
+  /* mantenidas para no romper estilos residuales */
+}
+
+.color-purple { color: #7c3aed !important; }
+
+/* ── Detalle Cargo ─────────────────────────────────────────────────────────── */
+
+.badge-contrato {
+  background: #f3f4f6;
+  color: #4b5563;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.badge-contrato.positivo {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.status-badge {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.status-badge.status-ok {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* ── Gemini Card ───────────────────────────────────────────────────────────── */
+.gemini-card {
+  background: linear-gradient(135deg, #fbfaff, #f5f3ff);
+  border: 1px solid #ddd6fe;
+  padding: 18px 20px;
+}
+
+.gemini-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.gemini-pill {
+  background: #7c3aed;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.03em;
+}
+
+.gemini-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #5b21b6;
+}
+
+.gemini-text {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #374151;
+  white-space: pre-line;
+}
+
+/* ── Banner Chatbot — oculto, reemplazado por compliance banner ───────────── */
+.banner-chatbot {
+  display: none;
+}
+
+/* ── Región Factible 2D & Fundamento Matemático (MILP) ─────────────────────── */
+.region-factible-card {
+  background: #ffffff;
+  border: 1px solid #ddd6fe;
+  box-shadow: 0 4px 18px rgba(109, 40, 217, 0.05);
+  padding: 20px 22px;
+}
+
+.region-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.region-title-wrap h2 {
+  margin: 4px 0 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1e1b4b;
+}
+
+.region-badge {
+  background: #ede9fe;
+  color: #6d28d9;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 8px;
+}
+
+/* Barra compacta de fórmula */
+.formula-compact-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  color: #334155;
+  font-family: 'Consolas', monospace;
+}
+
+.formula-compact-bar .sep {
+  color: #cbd5e1;
+}
+
+/* Slider compacto */
+.slider-container-compact {
+  background: #faf8ff;
+  border: 1px solid #ede9fe;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+}
+
+.slider-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.costo-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lbl-costo {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.highlight-cost {
+  color: #6d28d9;
+  font-weight: 900;
+  font-size: 1.05rem;
+}
+
+.factor-pill {
+  background: #ede9fe;
+  color: #5b21b6;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+}
+
+.c2-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.btn-c2-preset {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-c2-preset:hover {
+  border-color: #7c3aed;
+  background: #fbfaff;
+}
+
+.btn-c2-preset.active {
+  background: #6d28d9;
+  color: #ffffff;
+  border-color: #5b21b6;
+}
+
+.btn-c2-preset.btn-equilibrio {
+  border-color: #f59e0b;
+  color: #b45309;
+}
+
+.btn-c2-preset.btn-equilibrio.active {
+  background: #d97706;
+  color: #ffffff;
+  border-color: #b45309;
+}
+
+.custom-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #e2e8f0;
+  outline: none;
+  cursor: pointer;
+  accent-color: #7c3aed;
+  margin: 6px 0;
+}
+
+/* Línea Ejecutiva de Estado */
+.status-decision-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  margin-top: 6px;
+}
+
+.status-decision-line.modo-extras {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.status-decision-line.modo-contrato {
+  background: #f5f3ff;
+  color: #4c1d95;
+  border: 1px solid #ddd6fe;
+}
+
+.status-decision-line .dot-indicator {
+  font-size: 0.9rem;
+}
+
+.decision-mini-cost {
+  font-weight: 800;
+}
+
+.decision-mini-sub {
+  font-size: 0.78rem;
+  opacity: 0.9;
+}
+
+/* Gráfico SVG */
+.grafico-svg-wrap {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+
+.svg-region-factible {
+  width: 100%;
+  height: auto;
+  max-height: 420px;
+  display: block;
+}
+
+/* Trío de KPIs Limpios */
+.kpi-trio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.kpi-trio-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: all 0.2s ease;
+}
+
+.kpi-trio-card.highlight {
+  background: #f5f3ff;
+  border-color: #8b5cf6;
+  box-shadow: 0 2px 10px rgba(109, 40, 217, 0.08);
+}
+
+.kpi-trio-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.kpi-trio-val {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.kpi-trio-val.color-green {
+  color: #059669;
+}
+
+.kpi-trio-badge {
+  align-self: flex-start;
+  background: #dcfce7;
+  color: #15803d;
+  font-weight: 800;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 2px;
+}
+
+.kpi-trio-badge.badge-safe {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.kpi-trio-sub {
+  font-size: 0.73rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+/* Colapsable técnico opcional */
+.detalles-tecnicos-collapse {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+.detalles-tecnicos-collapse summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: #6d28d9;
+}
+
+.detalles-contenido {
+  margin-top: 10px;
+}
+
+.tabla-mini-limpia {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.tabla-mini-limpia th {
+  text-align: left;
+  padding: 6px 8px;
+  background: #e2e8f0;
+  color: #334155;
+  font-weight: 700;
+}
+
+.tabla-mini-limpia td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.badge-tag {
+  font-weight: 800;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.badge-tag.blue { background: #dbeafe; color: #1d4ed8; }
+.badge-tag.green { background: #dcfce7; color: #15803d; }

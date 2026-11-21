@@ -32,11 +32,10 @@
   font-size: 18px;
   border: 3px solid #9c27b0;
   border-radius: 50px;
-  background: rgba(255, 255, 255, 0.95);
+  background: #f6f4fa;
   outline: none;
   box-shadow: 0 10px 30px rgba(156, 39, 176, 0.3);
   transition: all 0.4s ease;
-  backdrop-filter: blur(10px);
 }
 
 .search-input:focus {
@@ -66,18 +65,17 @@
 
 .table-header, .table-row {
   display: grid;
-  grid-template-columns: 2.5fr 1.5fr 1.2fr 1fr 1.2fr;
-  padding: 20px 24px;
+  grid-template-columns: 2.2fr 1.3fr 1.1fr 0.9fr 1.8fr;
+  padding: 16px 20px;
   align-items: center;
-  font-size: 15.5px;
+  font-size: 15px;
 }
 
 .table-header {
   background: linear-gradient(135deg, #f3e8ff, #e8daf5);
   color: #6a1b9a;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
 }
 
 .table-row:hover {
@@ -89,22 +87,49 @@
 
 .nombre { font-weight: 600; color: #4a148c; }
 
-.btn-liquidar {
-  background: linear-gradient(135deg, #e91e63, #c2185b);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 50px;
-  font-weight: bold;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 6px 15px rgba(233,30,99,0.4);
+.acciones-col {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: nowrap;
 }
 
-.btn-liquidar:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 25px rgba(233,30,99,0.5);
+.btn-accion {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.btn-pago {
+  background: linear-gradient(135deg, #7c3aed, #5b21b6);
+  color: white;
+  box-shadow: 0 3px 8px rgba(124, 58, 237, 0.25);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(124, 58, 237, 0.4);
+    opacity: 0.95;
+  }
+}
+
+.btn-liquidar {
+  background: linear-gradient(135deg, #e11d48, #be123c);
+  color: white;
+  box-shadow: 0 3px 8px rgba(225, 29, 72, 0.25);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(225, 29, 72, 0.4);
+    opacity: 0.95;
+  }
 }
 
 .empty-state {
@@ -116,3 +141,27 @@
 }
 
 .empty-state strong { color: #9c27b0; }
+
+/* Empleado preseleccionado desde las alertas */
+.tabla-fila.resaltada {
+  background: linear-gradient(90deg, #fff3e0, #fffde7);
+  border-left: 5px solid #f57c00;
+  animation: pulsoAlerta 1.6s ease-in-out infinite;
+}
+
+.tag-alerta {
+  display: inline-block;
+  margin-left: 8px;
+  background: #f57c00;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 2px 8px;
+  vertical-align: middle;
+}
+
+@keyframes pulsoAlerta {
+  0%, 100% { box-shadow: 0 0 0 rgba(245, 124, 0, 0); }
+  50% { box-shadow: 0 0 14px rgba(245, 124, 0, 0.45); }
+}

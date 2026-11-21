@@ -18,6 +18,19 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/register/register.component').then(m => m.RegisterComponent)
   },
 
+  // Portal de auto-servicio del EMPLEADO (acceso con nombre + cédula)
+  {
+    path: 'portal-empleado',
+    loadComponent: () => import('./pages/portal-empleado/portal-empleado.component').then(m => m.PortalEmpleadoComponent)
+  },
+
+  // Panel ADMIN: aprobar novedades, renuncias, liquidar y pagar
+  {
+    path: 'admin-aprobaciones',
+    loadComponent: () => import('./pages/admin-aprobaciones/admin-aprobaciones.component').then(m => m.AdminAprobacionesComponent),
+    canActivate: [authGuard, adminGuard]
+  },
+
   // Rutas solo ADMIN
   {
     path: 'dashboard',
@@ -43,11 +56,11 @@ export const routes: Routes = [
     canActivate: [authGuard, adminGuard]
   },
 
-  // Ruta solo EMPLEADO
+  // Mantener el enlace usado por el login, pero mostrar el portal de autoservicio actual.
   {
     path: 'consulta-empleado',
-    loadComponent: () => import('./pages/consulta-empleado/consulta-empleado.component').then(m => m.ConsultaEmpleadoComponent),
-    canActivate: [authGuard, empleadoGuard]
+    redirectTo: 'portal-empleado',
+    pathMatch: 'full'
   },
 
   // Rutas para ambos roles (solo autenticación)
@@ -57,10 +70,17 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
 
+  // Alias histórico usado por el sidebar/notificaciones
+  {
+    path: 'contratos-empleados',
+    loadComponent: () => import('./pages/contratos-empleados/contratos-empleados.component').then(m => m.ContratosEmpleadosComponent),
+    canActivate: [authGuard]
+  },
+
   {
     path: 'novedades',
-    loadComponent: () => import('./pages/novedades/novedades.component').then(m => m.NovedadesComponent),
-    canActivate: [authGuard]
+    redirectTo: 'admin-aprobaciones',
+    pathMatch: 'full'
   },
 
   {
@@ -81,12 +101,20 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
 
-  // NUEVA RUTA: PREDICCIONES
+  // NUEVA RUTA: HISTORIAL GENERAL
   {
-    path: 'predicciones',
-    loadComponent: () => import('./pages/predicciones/predicciones.component').then(m => m.PrediccionesComponent),
+    path: 'historial',
+    loadComponent: () => import('./pages/historial/historial.component').then(m => m.HistorialComponent),
     canActivate: [authGuard, adminGuard]
   },
+
+  // NUEVA RUTA: OPTIMIZACIÓN DE TURNOS
+  {
+    path: 'optimizacion',
+    loadComponent: () => import('./pages/optimizacion/optimizacion.component').then(m => m.OptimizacionComponent),
+    canActivate: [authGuard, adminGuard]
+  },
+
 
   // Ruta comodín
   { path: '**', redirectTo: '/login' }

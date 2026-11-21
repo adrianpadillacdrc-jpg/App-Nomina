@@ -27,7 +27,25 @@
             </div>
             <div class="input-group">
                 <label>Salario Base</label>
-                <input type="number" [(ngModel)]="form.salarioBase" name="salarioBase" required>
+                <input type="number" [(ngModel)]="form.salarioBase" name="salarioBase" required min="1750905">
+            </div>
+            <div class="input-group">
+                <label>Tasa ARL asignada (%)</label>
+                <input type="number" [(ngModel)]="form.tasaArl" name="tasaArl" required min="0.001" max="100" step="0.001">
+            </div>
+            <div class="input-group">
+                <label>Modalidad de trabajo</label>
+                <select [(ngModel)]="form.modalidadTrabajo" name="modalidadTrabajo" required>
+                    <option value="PRESENCIAL">Presencial</option>
+                    <option value="REMOTO">Remoto</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>¿La empresa suministra transporte?</label>
+                <select [(ngModel)]="form.transporteSuministrado" name="transporteSuministrado" required>
+                    <option [ngValue]="false">No</option>
+                    <option [ngValue]="true">Sí</option>
+                </select>
             </div>
             <div class="input-group full">
                 <label>Documento</label>

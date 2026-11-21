@@ -1,52 +1,55 @@
-﻿// src/app/interceptors/auth.interceptor.ts
-import { HttpInterceptorFn } from '@angular/common/http';
+﻿import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
+import { environment } from '../../environments/environment'; 
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const authService = inject(AuthService);
     const router = inject(Router);
     const token = authService.getToken();
+    const baseUrl = environment.apiUrl.replace(/\/$/, '');
 
-    // Rutas que NO necesitan token (públicas)
+   
     const publicUrls = [
-        '/api/periodo-nomina/todos',
-        '/api/periodo-nomina/test',
-        '/api/periodo-nomina/actual',
-        '/api/periodo-nomina/actual-con-costo',
-        '/api/prediccion/'
+        '/login',
+        '/register',
+        '/api/auth/login',
+        '/api/auth/register',
+        '/api/portal/login',
+        '/api/portal/chat'
     ];
 
-    // Verificar si la URL actual es pública
     const isPublicUrl = publicUrls.some(url => req.url.includes(url));
+    const isPortalUrl = req.url.includes('/api/portal/');
+    
+    const apiPrefix = baseUrl ? `${baseUrl}/api/` : '/api/';
+    const isApiUrl = req.url.startsWith(apiPrefix);
 
     let authReq = req;
-    if (token && !isPublicUrl) {
+    
+    if (token && !isPublicUrl && isApiUrl && !req.headers.has('Authorization')) {
         authReq = req.clone({
             setHeaders: {
                 Authorization: `Bearer ${token}`
             }
         });
-        console.log('🔐 Token agregado a:', req.url);
     } else if (isPublicUrl) {
-        console.log('🔓 Endpoint público, sin token:', req.url);
+        console.log(' Endpoint público, sin token:', req.url);
     }
 
     return next(authReq).pipe(
         catchError(err => {
-            console.log('⚠️ Error en petición:', err.status, req.url);
+            console.log(' Error en petición:', err.status, req.url);
 
-            // Solo hacer logout en 401 (no autenticado)
-            if (err.status === 401) {
+            if (err.status === 401 && !isPortalUrl) {
                 console.warn('401 → Token inválido/expirado → logout');
                 authService.logout();
                 router.navigate(['/login']);
             } else if (err.status === 403) {
                 console.warn('403 → Acceso denegado a:', req.url);
-                // No hacer logout para 403, solo mostrar el error
             }
             return throwError(() => err);
         })

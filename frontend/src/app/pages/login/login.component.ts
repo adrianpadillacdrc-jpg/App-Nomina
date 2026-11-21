@@ -229,7 +229,8 @@ export class LoginComponent {
 
         let targetRoute = '/dashboard';
 
-        if (role?.toUpperCase() === 'EMPLEADO') {
+        const upperRole = role?.toUpperCase() || '';
+        if (upperRole.includes('EMPLEADO')) {
           targetRoute = '/consulta-empleado';
         }
 

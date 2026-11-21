@@ -3,18 +3,21 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: url('/assets/numa.jpg') center/cover no-repeat fixed;
+  background: url('/assets/numa.jpg') center/cover no-repeat;
+  background-attachment: fixed;
+  padding: 40px 20px;
 }
 
 .register-card {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(24px);
   border-radius: 40px;
   width: 400px;
+  max-width: 100%;
   padding: 50px;
   text-align: center;
-  box-shadow: 0 24px 48px rgba(0,0,0,0.35);
-  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .field {
@@ -22,19 +25,38 @@
   text-align: left;
 }
 
-label {
-  color: #f0f0f0;
+h1 {
+  color: #4a148c;
+  font-size: 24px;
   font-weight: 600;
+  margin: 0 0 30px;
+}
+
+label {
+  color: #333;
+  font-weight: 600;
+  font-size: 13px;
   margin-bottom: 8px;
   display: block;
 }
 
-input, select {
+input,
+select {
   width: 100%;
   padding: 12px;
-  border: none;
+  border: 1.5px solid #ded9e8;
   border-radius: 10px;
-  background: rgba(255,255,255,0.9);
+  background: #f6f4fa;
+  color: #333;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #6d3fc0;
+  box-shadow: 0 0 0 3px rgba(109, 63, 192, 0.12);
 }
 
 button {
@@ -45,8 +67,38 @@ button {
   border: none;
   border-radius: 50px;
   font-weight: 600;
+  font-size: 15px;
   cursor: pointer;
+  transition: background 0.2s ease;
 }
 
-.success { color: #27ae60; margin-top: 15px; }
-.error { color: #e74c3c; margin-top: 15px; }
+button:hover:not(:disabled) {
+  background: #8e24aa;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.success {
+  color: #27ae60;
+  margin-top: 15px;
+  font-size: 13px;
+}
+
+.error {
+  color: #e74c3c;
+  margin-top: 15px;
+  font-size: 13px;
+}
+
+p a {
+  color: #6d3fc0;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+p a:hover {
+  text-decoration: underline;
+}
