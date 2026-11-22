@@ -3,68 +3,91 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Empleado } from '../models/empleado.model';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class EmpleadosService {
-  private api = 'http://localhost:8080';
-  private apiUrl = 'http://localhost:8080/api';
+
+  private baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 
   getPeriodoActual(): Observable<any> {
-    return this.http.get(`${this.api}/api/periodo-nomina/actual`);
+    return this.http.get(`${this.baseUrl}/api/periodo-nomina/actual`);
   }
 
   getNovedades(idEmpleado: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.api}/api/novedades/empleado/${idEmpleado}`);
+    return this.http.get<any[]>(`${this.baseUrl}/api/novedades/empleado/${idEmpleado}`);
   }
 
   pagarNomina(payload: any): Observable<any> {
-    return this.http.post('http://localhost:8080/api/pagos-nomina', payload, {
-      responseType: 'text'
-    });
+    return this.http.post(`${this.baseUrl}/api/pagos-nomina`, payload);
   }
 
-  getEmpleados(): Observable<Empleado[]> {
-    return this.http.get<Empleado[]>(`${this.api}/api/empleados`);
+  getLiquidacionNomina(periodoId: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/api/pagos-nomina/liquidacion/${periodoId}`);
+  }
+
+  getPagosPorPeriodo(periodoId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/api/pagos-nomina/periodo/${periodoId}`);
+  }
+
+  // ✅ Paginación Activa con soporte opcional de filtro por sucursal y búsqueda global en BD
+  getEmpleados(page: number = 0, size: number = 10, idSucursal?: number | '', buscar?: string): Observable<any> {
+    let url = `${this.baseUrl}/api/empleados?page=${page}&size=${size}`;
+    if (idSucursal !== undefined && idSucursal !== null && idSucursal !== '') {
+      url += `&idSucursal=${idSucursal}`;
+    }
+    if (buscar && buscar.trim() !== '') {
+      url += `&buscar=${encodeURIComponent(buscar.trim())}`;
+    }
+    return this.http.get<any>(url);
+  }
+
+  // ✅ Buscar un empleado por su ID directo
+  getEmpleadoPorId(id: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/api/empleados/${id}`);
+  }
+
+  // ✅ NUEVO MÉTODO: Trae el total exacto de empleados activos e inactivos de BD
+  getEstadisticasEmpleados(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/api/empleados/estadisticas`);
   }
 
   guardarNovedad(novedad: any): Observable<any> {
-    return this.http.post('http://localhost:8080/api/novedades', novedad);
+    return this.http.post(`${this.baseUrl}/api/novedades`, novedad);
   }
 
   getNovedadesPorPeriodo(periodoId: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.api}/api/novedades/periodo/${periodoId}`);
+    return this.http.get<any[]>(`${this.baseUrl}/api/novedades/periodo/${periodoId}`);
   }
 
   getNovedadesPorPeriodoYEmpleado(periodoId: string, empleadoId: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.api}/api/novedades/periodo/${periodoId}/empleado/${empleadoId}`);
+    return this.http.get<any[]>(`${this.baseUrl}/api/novedades/periodo/${periodoId}/empleado/${empleadoId}`);
   }
 
   getNovedadesPeriodoActual(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.api}/api/novedades/periodo-actual`);
+    return this.http.get<any[]>(`${this.baseUrl}/api/novedades/periodo-actual`);
   }
 
-  // ✅ Método para obtener todos los períodos (público, sin token)
   getPeriodos(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.api}/api/periodo-nomina/todos`);
-  }
-
-  // ✅ Método de prueba para verificar conexión
-  getPeriodosTest(): Observable<any> {
-    return this.http.get<any>(`${this.api}/api/periodo-nomina/test`);
+    return this.http.get<any[]>(`${this.baseUrl}/api/periodo-nomina/todos`);
   }
 
   cerrarPeriodoActual(): Observable<any> {
-    return this.http.patch('http://localhost:8080/api/periodo-nomina/cerrar-actual', {});
+    return this.http.patch(`${this.baseUrl}/api/periodo-nomina/cerrar-actual`, {});
   }
 
   crearPeriodo(periodo: any): Observable<any> {
-    return this.http.post('http://localhost:8080/api/periodo-nomina', periodo);
+    return this.http.post(`${this.baseUrl}/api/periodo-nomina`, periodo);
   }
 
   getNovedadesPorEmpleado(empleadoId: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/novedades/empleado/${empleadoId}`);
+    return this.http.get<any[]>(`${this.baseUrl}/api/novedades/empleado/${empleadoId}`);
+  }
+
+  actualizarEmpleado(empleado: any): Observable<any> {
+    return this.http.put(`${this.baseUrl}/api/empleados/${empleado.id}`, empleado);
   }
 
   getConcepto(tipo: string): string {
@@ -80,8 +103,32 @@ export class EmpleadosService {
     return mapa[tipo] || tipo;
   }
 
-  actualizarEmpleado(empleado: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/empleados/${empleado.id}`, empleado);
+  // ✅ Agregado: Requerido por dashboard.component.ts
+  getPeriodoActualConCosto(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/api/periodo-nomina/actual-con-costo`);
+  }
+
+  // ✅ Agregado: Requerido por predicciones.component.ts
+  getCargos(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/api/empleados/cargos`);
+  }
+
+  getEmpresas(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/api/empresas`);
+  }
+
+  getSucursales(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/api/sucursales`);
+  }
+
+  // ✅ Guardar firma permanente del empleado en PostgreSQL
+  guardarFirmaEmpleado(idEmpleado: number | string, firmaBase64: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/empleados/${idEmpleado}/firma`, { firma: firmaBase64 });
+  }
+
+  // ✅ Guardar firma permanente del representante legal de la empresa en PostgreSQL
+  guardarFirmaEmpresa(idEmpresa: number | string, firmaBase64: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/api/empresas/${idEmpresa}/firma`, { firma: firmaBase64 });
   }
 }
 

@@ -1,16 +1,18 @@
-<!-- src/app/pages/consultar-empleados/consultar-empleados.component.html -->
 <div class="page-wrapper">
   <app-sidebar></app-sidebar>
 
   <main class="main-content">
     <div class="consultar-container">
-      <h1 class="page-title">Consultar Empleados</h1>
+      <app-encabezado-pagina titulo="Consultar empleados"></app-encabezado-pagina>
 
-      <div class="search-container">
-        <input type="text" class="search-input" placeholder="Buscar por documento, nombre o cargo..."
-          [(ngModel)]="busqueda" (input)="filtrar()">
+      <div class="search-container numa-search">
+        <span class="numa-search-icon"><i class="fas fa-search"></i></span>
+        <input type="text" class="numa-search-input" placeholder="Buscar por documento, nombre o cargo..."
+          [(ngModel)]="busqueda" (input)="filtrar()" (keyup.enter)="buscarDirecto()">
+        <button class="numa-search-btn" (click)="buscarDirecto()">Buscar</button>
       </div>
 
+      <app-tabla-base>
       <div class="tabla-empleados">
         <div class="header-row">
           <div>Documento</div>
@@ -36,42 +38,78 @@
         </div>
 
         <div class="empty-state" *ngIf="empleadosFiltrados.length === 0">
-          No se encontraron empleados
+          Aún no hay registros en esta sección.
         </div>
       </div>
+      </app-tabla-base>
+
+      <div class="paginacion-wrapper" *ngIf="totalElementos > 0" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 10px; background-color: rgba(255,255,255,0.05); border-radius: 8px; flex-wrap: wrap; gap: 15px;">
+        
+        <div class="paginacion-size">
+          <label style="margin-right: 8px;">Mostrar:</label>
+          <select [(ngModel)]="tamanoPagina" (change)="cambiarTamanoPagina()" style="padding: 6px 12px; border-radius: 4px; background: #333; color: white; border: 1px solid #555; cursor: pointer;">
+            <option [ngValue]="10">10 registros</option>
+            <option [ngValue]="25">25 registros</option>
+            <option [ngValue]="50">50 registros</option>
+            <option [ngValue]="100">100 registros</option>
+          </select>
+        </div>
+
+        <div class="paginacion-info" style="font-size: 14px;">
+          Página <strong>{{ paginaActual + 1 }}</strong> de <strong>{{ totalPaginas }}</strong> 
+          <span style="opacity: 0.7; margin-left: 5px;">(Total: {{ totalElementos }} empleados)</span>
+        </div>
+
+        <div class="paginacion-botones" style="display: flex; gap: 8px;">
+          <button 
+            (click)="cambiarPagina(paginaActual - 1)" 
+            [disabled]="paginaActual === 0"
+            style="padding: 6px 14px; border-radius: 4px; border: none; background-color: #6a1b9a; color: white; cursor: pointer; opacity: paginaActual === 0 ? 0.4 : 1;"
+            [style.cursor]="paginaActual === 0 ? 'not-allowed' : 'pointer'">
+            Anterior
+          </button>
+          
+          <button 
+            (click)="cambiarPagina(paginaActual + 1)" 
+            [disabled]="paginaActual >= totalPaginas - 1"
+            style="padding: 6px 14px; border-radius: 4px; border: none; background-color: #6a1b9a; color: white; cursor: pointer; opacity: paginaActual >= totalPaginas - 1 ? 0.4 : 1;"
+            [style.cursor]="paginaActual >= totalPaginas - 1 ? 'not-allowed' : 'pointer'">
+            Siguiente
+          </button>
+        </div>
+
+      </div>
+
     </div>
   </main>
 </div>
 
-<!-- MODAL DE ACTUALIZAR -->
 <app-actualizar-empleado *ngIf="mostrarActualizar" [empleado]="empleadoEditando" (cerrar)="mostrarActualizar = false"
   (actualizado)="cargarEmpleados()">
 </app-actualizar-empleado>
 
-<!-- MODAL NÓMINA - FUERA DEL *ngFor (ESTO ES LA CLAVE) -->
 <div class="overlay-nomina" *ngIf="mostrarModalNomina" (click)="mostrarModalNomina = false">
   <div class="modal-comprobante" (click)="$event.stopPropagation()">
     <span class="cerrar" (click)="mostrarModalNomina = false">×</span>
 
     <div class="comprobante-colombia">
       <div class="header-comprobante">
-        <h1>COMPROBANTE DE PAGO DE NÓMINA</h1>
+        <h1>Resumen de salario y novedades aprobadas</h1>
         <h2>NUMA S.A.S</h2>
-        <p>NIT: 901.234.567-8 | Periodo: Noviembre 2025</p>
+        <p>{{ periodoActual?.description || 'Sin período activo' }}</p>
       </div>
 
       <div class="info-empleado">
         <div><strong>Empleado:</strong> {{ empleadoSeleccionado?.nombre }} {{ empleadoSeleccionado?.apellido }}</div>
         <div><strong>Cédula:</strong> {{ empleadoSeleccionado?.documento }}</div>
         <div><strong>Cargo:</strong> {{ empleadoSeleccionado?.cargo }}</div>
-        <div><strong>Días trabajados:</strong> 30</div>
       </div>
 
       <table class="tabla-nomina">
         <thead>
           <tr>
-            <th class="devengo" colspan="3">DEVENGOS</th>
-            <th class="deduccion" colspan="2">DEDUCCIONES</th>
+            <th class="devengo" colspan="3">Devengos</th>
+            <th class="deduccion" colspan="2">Deducciones</th>
           </tr>
           <tr>
             <th>Cód.</th>

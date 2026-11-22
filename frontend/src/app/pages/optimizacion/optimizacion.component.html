@@ -1,0 +1,561 @@
+<app-sidebar></app-sidebar>
+
+<div class="main-content">
+  <app-encabezado-pagina
+    titulo="Optimización de Turnos"
+    subtitulo="Simulación de cobertura laboral y costos bajo Ley 42h">
+  </app-encabezado-pagina>
+
+  <!-- ── 1. Parámetros Legales & Demanda ────────────────────────────────────── -->
+  <div class="card panel-parametros">
+    <div class="panel-header">
+      <div class="title-wrap">
+        <div>
+          <h2>Demanda y Horarios</h2>
+          <p class="subtitle">Horas requeridas por franja semanal</p>
+        </div>
+      </div>
+      <div class="norma-pill">
+        <span>Ley 42h · 2026</span>
+      </div>
+    </div>
+
+    <!-- Métricas en vivo de la demanda -->
+    <div class="kpi-mini-grid">
+      <div class="kpi-mini-card">
+        <span class="kpi-mini-label">Demanda Semanal Total</span>
+        <strong class="kpi-mini-value">{{ granTotalDemanda | number:'1.0-0' }} h</strong>
+        <span class="kpi-mini-sub">Total horas requeridas</span>
+      </div>
+      <div class="kpi-mini-card">
+        <span class="kpi-mini-label">Personal Activo</span>
+        <strong class="kpi-mini-value">{{ totalPersonalActivo }} personas</strong>
+        <span class="kpi-mini-sub">Equipo registrado en tienda</span>
+      </div>
+      <div class="kpi-mini-card">
+        <span class="kpi-mini-label">Capacidad Ordinaria</span>
+        <strong class="kpi-mini-value">{{ granTotalCapacidadOrdinaria | number:'1.0-0' }} h</strong>
+        <span class="kpi-mini-sub">{{ horasSemanMax }}h semanales por persona</span>
+      </div>
+      <div class="kpi-mini-card">
+        <span class="kpi-mini-label">Horas Suplementarias Proyectadas</span>
+        <strong class="kpi-mini-value" [class.color-alert]="horasSuplementariasProyectadas > 0">
+          {{ horasSuplementariasProyectadas | number:'1.0-0' }} h
+        </strong>
+        <span class="kpi-mini-sub">A cubrir con extras o contratos</span>
+      </div>
+    </div>
+
+    <!-- Parámetros legales -->
+    <div class="params-row">
+      <div class="param-box">
+        <label>Jornada máxima semanal</label>
+        <div class="inp-with-unit">
+          <input type="number" [(ngModel)]="horasSemanMax" min="36" max="48" />
+          <span>horas</span>
+        </div>
+      </div>
+      <div class="param-box">
+        <label>Tope legal horas extra</label>
+        <div class="inp-with-unit">
+          <input type="number" [(ngModel)]="horasExtraMaxSemana" min="1" max="16" />
+          <span>h / sem</span>
+        </div>
+      </div>
+      <div class="param-box">
+        <label>Tope dominicales</label>
+        <div class="inp-with-unit">
+          <input type="number" [(ngModel)]="horasDomMaxSemana" min="1" max="12" />
+          <span>h / sem</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barra de Plantillas Rápidas -->
+    <div class="presets-toolbar">
+      <span class="presets-label">Plantillas:</span>
+      <div class="presets-buttons">
+        <button type="button" class="btn-preset" (click)="cargarOperacionEstandar()">
+          Operación Normal
+        </button>
+        <button type="button" class="btn-preset active" (click)="cargarTemporadaAlta()">
+          Temporada Alta
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabla editable de demanda por cargo -->
+    <div class="table-responsive">
+      <table class="tabla-demanda">
+        <thead>
+          <tr>
+            <th>Cargo y Equipo</th>
+            <th>Diurna (h)</th>
+            <th>Nocturna (h)</th>
+            <th>Dom. Diurna (h)</th>
+            <th>Dom. Nocturna (h)</th>
+            <th>Total Cargo</th>
+            <th>Diagnóstico Preliminar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of cargos; trackBy: trackByCargo">
+            <td>
+              <div class="cargo-cell-info">
+                <strong>{{ c.cargo_nombre }}</strong>
+                <span class="cargo-equipo-pill">{{ c.n_activos }} activos</span>
+              </div>
+              <small class="salario-hint">Salario base: {{ formatCOP(c.salario) }}</small>
+            </td>
+            <td>
+              <input type="number" [(ngModel)]="c.demanda.diurna" min="0" placeholder="0" class="inp-num" />
+            </td>
+            <td>
+              <input type="number" [(ngModel)]="c.demanda.nocturna" min="0" placeholder="0" class="inp-num" />
+            </td>
+            <td>
+              <input type="number" [(ngModel)]="c.demanda.dom_diurna" min="0" placeholder="0" class="inp-num" />
+            </td>
+            <td>
+              <input type="number" [(ngModel)]="c.demanda.dom_nocturna" min="0" placeholder="0" class="inp-num" />
+            </td>
+            <td>
+              <strong class="cargo-total-pill">{{ totalHorasCargo(c) | number:'1.0-0' }} h</strong>
+            </td>
+            <td>
+              <span class="pill-status" [ngClass]="estadoCargo(c).clase">
+                {{ estadoCargo(c).label }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="tfoot-totales">
+            <td>
+              <strong>Total Cadena Retail</strong>
+              <small class="salario-hint">{{ totalPersonalActivo }} personas totales</small>
+            </td>
+            <td><strong>{{ totalDiurna | number:'1.0-0' }} h</strong></td>
+            <td><strong>{{ totalNocturna | number:'1.0-0' }} h</strong></td>
+            <td><strong>{{ totalDomDiurna | number:'1.0-0' }} h</strong></td>
+            <td><strong>{{ totalDomNocturna | number:'1.0-0' }} h</strong></td>
+            <td><strong class="color-purple">{{ granTotalDemanda | number:'1.0-0' }} h</strong></td>
+            <td>
+              <span class="pill-status" [class.pill-danger]="horasSuplementariasProyectadas > (totalPersonalActivo * horasExtraMaxSemana)">
+                {{ horasSuplementariasProyectadas > (totalPersonalActivo * horasExtraMaxSemana) ? 'Exceso de Topes' : 'Cobertura Viable' }}
+              </span>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="panel-actions">
+      <button class="btn-primary" (click)="simular()" [disabled]="cargando">
+        <span *ngIf="!cargando">Simular Escenarios</span>
+        <span *ngIf="cargando">Calculando...</span>
+      </button>
+      <button class="btn-secondary" (click)="resetear()" [disabled]="cargando">Limpiar</button>
+    </div>
+  </div>
+
+  <!-- ── 1.5. Simulación Gráfica de Turnos (Región Factible MILP) ── -->
+  <div class="card region-factible-card">
+    <div class="region-header">
+      <div class="region-title-wrap">
+        <h2>Gráfica de Optimización</h2>
+        <p class="subtitle">Equilibrio de costo entre contratos y horas extra</p>
+      </div>
+
+      <!-- Botones Rápidos de Recargos Colombianos -->
+      <div class="c2-presets">
+        <button type="button" class="btn-c2-preset" [class.active]="factorCostoExtra === 0.60" (click)="setPresetCostoExtra(0.60)">
+          Diurna ($ 6.458)
+        </button>
+        <button type="button" class="btn-c2-preset" [class.active]="factorCostoExtra === 1.00" (click)="setPresetCostoExtra(1.00)">
+          Ordinaria ($ 10.763)
+        </button>
+        <button type="button" class="btn-c2-preset btn-equilibrio" [class.active]="factorCostoExtra === 1.36" (click)="setPresetCostoExtra(1.36)">
+          ⚖️ Equilibrio ($ 14.589)
+        </button>
+        <button type="button" class="btn-c2-preset" [class.active]="factorCostoExtra === 1.65" (click)="setPresetCostoExtra(1.65)">
+          Dominical ($ 17.759)
+        </button>
+      </div>
+    </div>
+
+    <div class="region-body">
+      <!-- Línea Ejecutiva de Estado -->
+      <div class="status-decision-line" [ngClass]="esModoHorasExtras ? 'modo-extras' : 'modo-contrato'">
+        <span class="dot-indicator">●</span>
+        <strong>{{ esModoHorasExtras ? 'Opción Más Económica: Vértice A (Cubrir con Horas Extras)' : 'Opción Más Económica: Vértice B (Contratar Personal Fijo)' }}</strong>
+        <span class="decision-mini-cost">— Costo total: {{ formatMillones(optimoActual.z) }}</span>
+        <span class="sep">•</span>
+        <span class="decision-mini-sub">{{ esModoHorasExtras ? 'Recargo bajo: pagar horas extras ahorra más dinero.' : 'Recargo alto: contratar personal nuevo frena sobrecostos.' }}</span>
+      </div>
+
+      <!-- Gráfico SVG Interactivo 2D -->
+      <div class="grafico-svg-wrap">
+        <svg viewBox="0 0 620 360" class="svg-region-factible">
+          <defs>
+            <linearGradient id="regionGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ede9fe" stop-opacity="0.8"/>
+              <stop offset="100%" stop-color="#ddd6fe" stop-opacity="0.4"/>
+            </linearGradient>
+            <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#059669"/>
+            </marker>
+          </defs>
+
+          <!-- Rejilla de Fondo -->
+          <line *ngFor="let tick of [0, 10, 20, 30, 40]" 
+                [attr.x1]="mapX(tick)" [attr.y1]="mapY(0)" 
+                [attr.x2]="mapX(tick)" [attr.y2]="mapY(2200)" 
+                stroke="#f1f5f9" stroke-width="1"/>
+          <line *ngFor="let tick of [500, 1000, 1500, 2000]" 
+                [attr.x1]="mapX(0)" [attr.y1]="mapY(tick)" 
+                [attr.x2]="mapX(42)" [attr.y2]="mapY(tick)" 
+                stroke="#f1f5f9" stroke-width="1"/>
+
+          <!-- Polígono Región Factible F -->
+          <polygon [attr.points]="svgRegionFactible" fill="url(#regionGrad)" stroke="#c4b5fd" stroke-width="1.5"/>
+
+          <text [attr.x]="mapX(26)" [attr.y]="mapY(1350)" fill="#7c3aed" font-weight="700" font-size="12">
+            Región factible F
+          </text>
+
+          <!-- Curvas de Isocosto Z = k -->
+          <path [attr.d]="isocostLine1" stroke="#06b6d4" stroke-width="2.5" stroke-dasharray="6,4"/>
+          <path [attr.d]="isocostLine2" stroke="#0891b2" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.5"/>
+          <text [attr.x]="mapX(24)" [attr.y]="mapY(1850)" fill="#0891b2" font-size="10.5" font-weight="600">
+            Isocosto Z = k
+          </text>
+
+          <!-- Vector Gradiente -∇Z -->
+          <line [attr.x1]="mapX(23)" [attr.y1]="mapY(950)" 
+                [attr.x2]="mapX(17)" [attr.y2]="mapY(500)" 
+                stroke="#059669" stroke-width="2" marker-end="url(#arrow)"/>
+          <text [attr.x]="mapX(18)" [attr.y]="mapY(680)" fill="#059669" font-size="10" font-weight="700">
+            −∇Z (menor costo)
+          </text>
+
+          <!-- Línea Restricción R1: Cobertura -->
+          <line [attr.x1]="mapX(0)" [attr.y1]="mapY(1430)" 
+                [attr.x2]="mapX(34.05)" [attr.y2]="mapY(0)" 
+                stroke="#1f2937" stroke-width="2.5"/>
+          <rect [attr.x]="mapX(11)" [attr.y]="mapY(940) - 18" width="132" height="18" rx="4" fill="#ffffff" stroke="#334155" stroke-width="1"/>
+          <text [attr.x]="mapX(11) + 6" [attr.y]="mapY(940) - 5" fill="#111827" font-size="10" font-weight="700">
+            R1: 42x₁ + x₂ = 1.430
+          </text>
+
+          <!-- Línea Restricción R2: Tope Legal -->
+          <line [attr.x1]="mapX(0)" [attr.y1]="mapY(1920)" 
+                [attr.x2]="mapX(12)" [attr.y2]="mapY(2064)" 
+                stroke="#dc2626" stroke-width="2" stroke-dasharray="6,3"/>
+          <rect [attr.x]="mapX(11)" [attr.y]="mapY(2050) - 18" width="140" height="18" rx="4" fill="#ffffff" stroke="#ef4444" stroke-width="1"/>
+          <text [attr.x]="mapX(11) + 6" [attr.y]="mapY(2050) - 5" fill="#b91c1c" font-size="9.5" font-weight="700">
+            R2: Tope 12h extras/pers
+          </text>
+
+          <!-- Vértice C (0; 1920) -->
+          <circle [attr.cx]="mapX(0)" [attr.cy]="mapY(1920)" r="5.5" fill="#ef4444" stroke="#b91c1c" stroke-width="2"/>
+          <rect [attr.x]="mapX(0) + 10" [attr.y]="mapY(1920) - 16" width="94" height="18" rx="4" fill="#fee2e2" stroke="#fca5a5"/>
+          <text [attr.x]="mapX(0) + 14" [attr.y]="mapY(1920) - 4" fill="#991b1b" font-weight="700" font-size="10">
+            C (0; 1.920)
+          </text>
+
+          <!-- Vértice A (0; 1430) -->
+          <circle [attr.cx]="mapX(0)" [attr.cy]="mapY(1430)" r="6.5" fill="#10b981" stroke="#047857" stroke-width="2.5"/>
+          <rect [attr.x]="mapX(0) + 10" [attr.y]="mapY(1430) - 17" width="94" height="19" rx="4" fill="#ecfdf5" stroke="#a7f3d0"/>
+          <text [attr.x]="mapX(0) + 14" [attr.y]="mapY(1430) - 3" fill="#065f46" font-weight="800" font-size="10.5">
+            A (0; 1.430)
+          </text>
+
+          <!-- Vértice B (34.05; 0) -->
+          <circle [attr.cx]="mapX(34.05)" [attr.cy]="mapY(0)" r="6" fill="#6d28d9" stroke="#4c1d95" stroke-width="2"/>
+          <rect [attr.x]="mapX(34.05) - 25" [attr.y]="mapY(0) - 26" width="96" height="19" rx="4" fill="#f5f3ff" stroke="#ddd6fe"/>
+          <text [attr.x]="mapX(34.05) - 20" [attr.y]="mapY(0) - 12" fill="#5b21b6" font-weight="800" font-size="10.5">
+            B (34; 0)
+          </text>
+
+          <!-- Óptimo MILP (32; 86) -->
+          <rect [attr.x]="mapX(32) - 5" [attr.y]="mapY(86) - 5" width="10" height="10" [attr.transform]="'rotate(45 ' + mapX(32) + ' ' + mapY(86) + ')'" fill="#7c3aed" stroke="#ffffff" stroke-width="2"/>
+          <rect [attr.x]="mapX(23)" [attr.y]="mapY(86) - 48" width="128" height="22" rx="4" fill="#7c3aed" stroke="#ffffff" stroke-width="1.5"/>
+          <text [attr.x]="mapX(24) + 6" [attr.y]="mapY(86) - 33" fill="#ffffff" font-weight="800" font-size="10">
+            ★ Óptimo MILP (32; 86)
+          </text>
+          <line [attr.x1]="mapX(31)" [attr.y1]="mapY(86) - 24" [attr.x2]="mapX(32)" [attr.y2]="mapY(86) - 6" stroke="#7c3aed" stroke-width="2"/>
+
+          <!-- Expansión (35; 0) -->
+          <rect [attr.x]="mapX(35) - 4" [attr.y]="mapY(0) - 4" width="8" height="8" [attr.transform]="'rotate(45 ' + mapX(35) + ' ' + mapY(0) + ')'" fill="#2563eb" stroke="#ffffff" stroke-width="1.5"/>
+
+          <!-- RESALTADO EN VIVO DEL ÓPTIMO ACTIVO -->
+          <circle [attr.cx]="svgPuntoOptimoActual.cx" [attr.cy]="svgPuntoOptimoActual.cy" r="15" fill="none" stroke="#10b981" stroke-width="3" stroke-dasharray="4,2"/>
+          <circle [attr.cx]="svgPuntoOptimoActual.cx" [attr.cy]="svgPuntoOptimoActual.cy" r="8" fill="#10b981" stroke="#ffffff" stroke-width="2.5"/>
+
+          <!-- Eje X -->
+          <line [attr.x1]="mapX(0)" [attr.y1]="mapY(0)" [attr.x2]="mapX(42)" [attr.y2]="mapY(0)" stroke="#334155" stroke-width="2"/>
+          <text *ngFor="let tick of [0, 10, 20, 30, 40]" 
+                [attr.x]="mapX(tick)" [attr.y]="mapY(0) + 16" 
+                fill="#475569" font-size="10.5" text-anchor="middle">
+            {{ tick }}
+          </text>
+          <text [attr.x]="mapX(21)" [attr.y]="mapY(0) + 32" fill="#0f172a" font-weight="700" font-size="11" text-anchor="middle">
+            x₁ = nuevos contratos (personas)
+          </text>
+
+          <!-- Eje Y -->
+          <line [attr.x1]="mapX(0)" [attr.y1]="mapY(0)" [attr.x2]="mapX(0)" [attr.y2]="mapY(2200)" stroke="#334155" stroke-width="2"/>
+          <text *ngFor="let tick of [0, 500, 1000, 1500, 2000]" 
+                [attr.x]="mapX(0) - 8" [attr.y]="mapY(tick) + 4" 
+                fill="#475569" font-size="10" text-anchor="end">
+            {{ tick | number:'1.0-0' }}
+          </text>
+          <text [attr.x]="-(mapY(1100))" [attr.y]="16" fill="#0f172a" font-weight="700" font-size="11" transform="rotate(-90)" text-anchor="middle">
+            x₂ = horas extra / sem
+          </text>
+        </svg>
+      </div>
+
+      <!-- 3 KPIs Visuales Limpios (Reemplazan tablas pesadas de texto) -->
+      <div class="kpi-trio-grid">
+        <div class="kpi-trio-card" [class.highlight]="esModoHorasExtras">
+          <span class="kpi-trio-label">Vértice A (Solo Extras)</span>
+          <strong class="kpi-trio-val">{{ formatMillones(verticeA.z) }}</strong>
+          <span class="kpi-trio-badge" *ngIf="verticeMinimo === 'A'">Mínimo Actual</span>
+          <small class="kpi-trio-sub">0 contratos • 1.430h extras</small>
+        </div>
+
+        <div class="kpi-trio-card" [class.highlight]="!esModoHorasExtras">
+          <span class="kpi-trio-label">Vértice B (Solo Contratación)</span>
+          <strong class="kpi-trio-val">{{ formatMillones(verticeB.z) }}</strong>
+          <span class="kpi-trio-badge" *ngIf="verticeMinimo === 'B'">Mínimo Actual</span>
+          <small class="kpi-trio-sub">34 contratos • 0h extras</small>
+        </div>
+
+        <div class="kpi-trio-card">
+          <span class="kpi-trio-label">Margen Legal de Seguridad</span>
+          <strong class="kpi-trio-val color-green">490 horas</strong>
+          <span class="kpi-trio-badge badge-safe">Cumple MinTrabajo</span>
+          <small class="kpi-trio-sub">Holgura disponible sin riesgo</small>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── 2. Mensajes de Estado ─────────────────────────────────────────────── -->
+  <div class="alert-error" *ngIf="error">
+    <strong>Error en la simulación:</strong> {{ error }}
+  </div>
+
+  <div class="alert-success" *ngIf="mensajeVacantes">
+    <strong>Éxito:</strong> {{ mensajeVacantes }}
+  </div>
+
+  <!-- ── 3. Resultados de la Simulación ────────────────────────────────────── -->
+  <ng-container *ngIf="simulacion">
+
+    <!-- 2.1 Alertas Inteligentes de Fatiga / Sobrecarga Legal -->
+    <!-- Compliance banner: solo alerta real si hay violación severa -->
+    <div class="compliance-banner"
+         [class.compliance-ok]="!simulacion.hay_violacion_legal_severa"
+         [class.compliance-err]="simulacion.hay_violacion_legal_severa">
+      <ng-container *ngIf="!simulacion.hay_violacion_legal_severa">
+        <span class="compliance-icon">✅</span>
+        <span class="compliance-text">Cumplimiento Normativo — Todas las horas programadas respetan los límites de la Ley 2101 (2026)</span>
+      </ng-container>
+      <ng-container *ngIf="simulacion.hay_violacion_legal_severa">
+        <span class="compliance-icon">⚠️</span>
+        <span class="compliance-text">Violación Legal Detectada — Revisa los cargos con déficit antes de generar vacantes</span>
+        <div class="compliance-tags">
+          <span class="ctag" *ngFor="let al of simulacion.alertas_sobrecarga">
+            {{ al.cargo_nombre }}: {{ al.deficit_horas | number:'1.0-0' }}h déficit
+          </span>
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- 2.2 Simulador Comparativo — diseño ejecutivo limpio -->
+    <div class="card escenarios-container">
+
+      <!-- Cabecera mínima -->
+      <div class="escenarios-header">
+        <h2 class="sim-title">Simulador Comparativo <span class="sim-sub">¿Qué pasaría si…?</span></h2>
+        <div class="actions-top">
+          <button class="btn-pdf" (click)="descargarPDFEjecutivo()">
+            📄 Reporte PDF
+          </button>
+          <button class="btn-vacantes" (click)="generarVacantesEnBorrador()" [disabled]="generandoVacantes">
+            <span *ngIf="!generandoVacantes">✚ Generar Vacantes</span>
+            <span *ngIf="generandoVacantes">Procesando…</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tarjetas de escenario — visual compacto -->
+      <div class="escenarios-grid">
+
+        <!-- Conservador -->
+        <div class="esc-card" [class.esc-active]="escenarioActivo === 'conservador'" (click)="escenarioActivo = 'conservador'">
+          <div class="esc-top">
+            <span class="esc-icon gray-bg">⏱</span>
+            <div>
+              <div class="esc-label">Conservador</div>
+              <div class="esc-tag gray">Solo horas extra</div>
+            </div>
+          </div>
+          <div class="esc-nums">
+            <div class="esc-num-block">
+              <span class="num-val">{{ simulacion.escenario_conservador.total_nuevos_a_contratar }}</span>
+              <span class="num-lbl">Contratos</span>
+            </div>
+            <div class="esc-num-block">
+              <span class="num-val">{{ simulacion.escenario_conservador.total_horas_extra | number:'1.0-0' }}h</span>
+              <span class="num-lbl">H. Extra/sem</span>
+            </div>
+            <div class="esc-num-block wide">
+              <span class="num-val cost">{{ formatCOP(simulacion.escenario_conservador.costo_total_adicional) }}</span>
+              <span class="num-lbl">Costo semanal</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Óptimo MILP — destacado -->
+        <div class="esc-card esc-optimo" [class.esc-active]="escenarioActivo === 'optimo'" (click)="escenarioActivo = 'optimo'">
+          <div class="esc-recom-pill">★ Plan Óptimo</div>
+          <div class="esc-top">
+            <span class="esc-icon purple-bg">⚡</span>
+            <div>
+              <div class="esc-label">Óptimo MILP</div>
+              <div class="esc-tag purple">Balance matemático</div>
+            </div>
+          </div>
+          <div class="esc-nums">
+            <div class="esc-num-block">
+              <span class="num-val purple">{{ simulacion.escenario_optimo.total_nuevos_a_contratar }}</span>
+              <span class="num-lbl">Contratos</span>
+            </div>
+            <div class="esc-num-block">
+              <span class="num-val">{{ simulacion.escenario_optimo.total_horas_extra | number:'1.0-0' }}h</span>
+              <span class="num-lbl">H. Extra/sem</span>
+            </div>
+            <div class="esc-num-block wide">
+              <span class="num-val cost purple">{{ formatCOP(simulacion.escenario_optimo.costo_total_adicional) }}</span>
+              <span class="num-lbl">Costo semanal</span>
+            </div>
+          </div>
+          <div class="esc-ahorro" *ngIf="simulacion.escenario_optimo.ahorro_vs_conservador > 0">
+            💰 Ahorra {{ formatCOP(simulacion.escenario_optimo.ahorro_vs_conservador) }} vs Conservador
+          </div>
+        </div>
+
+        <!-- Expansión -->
+        <div class="esc-card" [class.esc-active]="escenarioActivo === 'expansion'" (click)="escenarioActivo = 'expansion'">
+          <div class="esc-top">
+            <span class="esc-icon blue-bg">🏢</span>
+            <div>
+              <div class="esc-label">Expansión</div>
+              <div class="esc-tag blue">0 h extra</div>
+            </div>
+          </div>
+          <div class="esc-nums">
+            <div class="esc-num-block">
+              <span class="num-val">{{ simulacion.escenario_expansion.total_nuevos_a_contratar }}</span>
+              <span class="num-lbl">Contratos</span>
+            </div>
+            <div class="esc-num-block">
+              <span class="num-val">0h</span>
+              <span class="num-lbl">H. Extra/sem</span>
+            </div>
+            <div class="esc-num-block wide">
+              <span class="num-val cost">{{ formatCOP(simulacion.escenario_expansion.costo_total_adicional) }}</span>
+              <span class="num-lbl">Costo semanal</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráfico de barras minimalista -->
+      <div class="bar-section">
+        <div class="bar-row-mini">
+          <span class="bar-name">Conservador</span>
+          <div class="bar-track">
+            <div class="bar-fill bar-conservador" style="width:100%">
+              <span class="bar-val">{{ formatCOP(simulacion.escenario_conservador.costo_total_adicional) }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="bar-row-mini">
+          <span class="bar-name">Óptimo</span>
+          <div class="bar-track">
+            <div class="bar-fill bar-optimo"
+              [style.width.%]="(simulacion.escenario_optimo.costo_total_adicional / (simulacion.escenario_conservador.costo_total_adicional || 1)) * 100">
+              <span class="bar-val">{{ formatCOP(simulacion.escenario_optimo.costo_total_adicional) }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="bar-row-mini">
+          <span class="bar-name">Expansión</span>
+          <div class="bar-track">
+            <div class="bar-fill bar-expansion"
+              [style.width.%]="(simulacion.escenario_expansion.costo_total_adicional / (simulacion.escenario_conservador.costo_total_adicional || 1)) * 100">
+              <span class="bar-val">{{ formatCOP(simulacion.escenario_expansion.costo_total_adicional) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla compacta por cargo -->
+      <div class="detalle-cargo-section" *ngIf="escenarioActual">
+        <div class="detalle-header">
+          <span class="detalle-title">Detalle por cargo</span>
+          <span class="detalle-esc-pill">{{ escenarioActual.nombre }}</span>
+        </div>
+        <div class="table-responsive">
+          <table class="tabla-escenario">
+            <thead>
+              <tr>
+                <th>Cargo</th>
+                <th>Activos</th>
+                <th>+ Contratos</th>
+                <th>H. Extra</th>
+                <th>Costo</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let det of escenarioActual.cargos">
+                <td><strong>{{ det.cargo_nombre }}</strong></td>
+                <td>{{ det.n_activos }}</td>
+                <td>
+                  <span class="badge-contrato" [class.positivo]="det.nuevos_a_contratar > 0">
+                    +{{ det.nuevos_a_contratar }}
+                  </span>
+                </td>
+                <td>{{ det.total_horas_extra | number:'1.0-0' }}h</td>
+                <td>{{ formatCOP(det.costo_adicional_semanal) }}</td>
+                <td>
+                  <span class="status-badge" [class.status-ok]="det.estado_solver === 'Optimal'">
+                    {{ det.estado_solver }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- IA Executive insight — compacto -->
+    <div class="card gemini-card">
+      <div class="gemini-header">
+        <span class="gemini-pill">✦ IA</span>
+        <h3>Recomendación del Solver</h3>
+      </div>
+      <p class="gemini-text">{{ simulacion.analisis_gemini }}</p>
+    </div>
+
+  </ng-container>
+</div>

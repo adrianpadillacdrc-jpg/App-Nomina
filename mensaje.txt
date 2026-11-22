@@ -1,0 +1,16 @@
+﻿feat: mejora UI de nómina y validación de salario
+
+- Quitar badge "borrador" del modal de contrato
+- Selector de Sucursal al registro de empleados
+- Botones "Pago" y "Liquidar" en la barra lateral con lógica de apertura de modales
+- Corregir pre-selección de empleado y selección de contrato
+- Conservar el método de pago (EFECTIVO / TRANSFERENCIA) en PagoNominaService
+- Extender DTO PagoNominaRequest con campo metodoPago
+- Validar salario mínimo y rango de ARL en backend y frontend
+- Mostrar método de pago en el PDF de liquidación
+- Limpiar código
+- Gmail con código de confirmación de la firma
+- Mejora de frontend en todas las vistas y funcionalidades
+- Mejora en vista de contrato
+- Mejora en responsive
+- Modelo matemático con una librería de Python

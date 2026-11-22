@@ -1,11 +1,11 @@
-﻿import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { SidebarComponent } from '../../guards/components/sidebar/sidebar.component';
-
+import { environment } from '../../../environments/environment';
 @Component({
   selector: 'app-nueva-novedad',
   standalone: true,
@@ -39,7 +39,7 @@ import { SidebarComponent } from '../../guards/components/sidebar/sidebar.compon
             </button>
           </div>
 
-          <!-- InformaciÃ³n del empleado -->
+          <!-- Información del empleado -->
           <div class="empleado-card" *ngIf="nombreEmpleado">
             <div class="empleado-avatar">
               <mat-icon>person</mat-icon>
@@ -64,7 +64,7 @@ import { SidebarComponent } from '../../guards/components/sidebar/sidebar.compon
                 <select class="input-select" [(ngModel)]="novedad.tipo" name="tipo" (change)="onTipoChange()" required>
                   <option value="" disabled selected>Seleccione un tipo...</option>
                   <option value="AUXILIO_TRANSPORTE"> Auxilio de Transporte</option>
-                  <option value="BONO"> Bono / BonificaciÃ³n</option>
+                  <option value="BONO"> Bono / Bonificación</option>
                   <option value="HORAS_EXTRAS"> Horas Extras</option>
                   <option value="INCAPACIDAD"> Incapacidad</option>
                   <option value="VACACIONES"> Vacaciones</option>
@@ -74,7 +74,7 @@ import { SidebarComponent } from '../../guards/components/sidebar/sidebar.compon
                 </select>
               </div>
 
-              <!-- Campos especÃ­ficos segÃºn tipo -->
+              <!-- Campos específicos según tipo -->
               <div *ngIf="novedad.tipo === 'AUXILIO_TRANSPORTE'" class="subseccion">
                 <div class="subseccion-titulo">
                   <mat-icon>directions_bus</mat-icon>
@@ -124,25 +124,23 @@ import { SidebarComponent } from '../../guards/components/sidebar/sidebar.compon
                   <div class="campo mitad">
                     <label class="etiqueta-pequena">Tipo de hora extra</label>
                     <select class="input-select" [(ngModel)]="novedad.horasExtras.tipo" name="horasExtrasTipo">
-                      <option value="diurnas">Diurnas (6am - 9pm)</option>
-                      <option value="nocturnas">Nocturnas (9pm - 6am)</option>
-                      <option value="festivas">Festivas / Dominicales</option>
+                      <option value="diurnas">Extra diurna (6:00 a. m. - 7:00 p. m.)</option>
+                      <option value="nocturnas">Extra nocturna (7:00 p. m. - 6:00 a. m.)</option>
+                      <option value="dominicales_diurnas">Extra diurna en descanso/festivo</option>
+                      <option value="dominicales_nocturnas">Extra nocturna en descanso/festivo</option>
                     </select>
                   </div>
                   <div class="campo mitad">
-                    <label class="etiqueta-pequena">Valor por hora</label>
-                    <div class="input-con-prefijo">
-                      <span class="prefijo">$</span>
-                      <input type="number" class="input-text" [(ngModel)]="novedad.horasExtras.valorHora" name="horasExtrasValorHora" placeholder="0">
-                    </div>
+                    <label class="etiqueta-pequena">Cálculo</label>
+                    <p>El sistema calculará el valor con el salario y la tarifa legal vigente.</p>
                   </div>
                 </div>
               </div>
 
-              <!-- PerÃ­odo de la novedad -->
+              <!-- Período de la novedad -->
               <div class="seccion-titulo">
                 <mat-icon>calendar_today</mat-icon>
-                PerÃ­odo de la novedad
+                Período de la novedad
               </div>
 
               <div class="fila">
@@ -198,7 +196,12 @@ import { SidebarComponent } from '../../guards/components/sidebar/sidebar.compon
                   <div><strong>Tipo:</strong> {{ getTipoLabel() }}</div>
                   <div><strong>Inicio:</strong> {{ novedad.fechaInicio }} {{ novedad.horaInicio ? novedad.horaInicio : '' }}</div>
                   <div><strong>Fin:</strong> {{ novedad.fechaFin || 'Indefinido' }} {{ novedad.horaFin ? novedad.horaFin : '' }}</div>
-                  <div *ngIf="getMontoTotal() > 0"><strong>Monto:</strong> $ {{ getMontoTotal() | number:'1.0-0' }}</div>
+                  <div *ngIf="novedad.tipo === 'HORAS_EXTRAS'">
+                    El valor se calculará al liquidar según el salario y la tarifa vigente.
+                  </div>
+                  <div *ngIf="novedad.tipo !== 'HORAS_EXTRAS' && getMontoTotal() > 0">
+                    <strong>Monto:</strong> $ {{ getMontoTotal() | number:'1.0-0' }}
+                  </div>
                 </div>
               </div>
 
@@ -226,16 +229,30 @@ import { SidebarComponent } from '../../guards/components/sidebar/sidebar.compon
 
     .page-wrapper {
       display: flex;
+      flex-direction: column;
       min-height: 100vh;
+      min-height: 100dvh;
+      width: 100%;
+
+      @media (min-width: 901px) {
+        flex-direction: row;
+      }
     }
 
     .main-content {
-      margin-left: 240px;
-      padding: 40px;
+      margin-left: 0;
+      padding: clamp(14px, 3vw, 40px);
       flex: 1;
-      background: url('/assets/images/numa.jpg') no-repeat center center fixed;
+      width: 100%;
+      min-width: 0;
+      background: url('/assets/numa.jpg') no-repeat center center fixed;
       background-size: cover;
       min-height: 100vh;
+
+      @media (min-width: 901px) {
+        margin-left: 260px;
+        width: calc(100% - 260px);
+      }
     }
 
     .content {
@@ -357,8 +374,8 @@ import { SidebarComponent } from '../../guards/components/sidebar/sidebar.compon
     /* Form Card */
     .form-card {
       background: white;
-      border-radius: 32px;
-      padding: 40px;
+      border-radius: clamp(18px, 3vw, 32px);
+      padding: clamp(18px, 4vw, 40px);
       box-shadow: 0 20px 50px rgba(0,0,0,0.15);
     }
 
@@ -471,8 +488,14 @@ import { SidebarComponent } from '../../guards/components/sidebar/sidebar.compon
     /* Filas */
     .fila {
       display: flex;
-      gap: 24px;
+      flex-direction: column;
+      gap: 14px;
       margin-bottom: 20px;
+
+      @media (min-width: 640px) {
+        flex-direction: row;
+        gap: 24px;
+      }
     }
 
     .fila:last-child {
@@ -650,7 +673,7 @@ export class NuevaNovedadComponent implements OnInit {
     observaciones: '',
     auxilioTransporte: { monto: null, concepto: '' },
     bono: { monto: null, motivo: '' },
-    horasExtras: { valorHora: null, tipo: 'diurnas' }
+    horasExtras: { tipo: 'diurnas' }
   };
 
   tiposConValor = ['AUXILIO_TRANSPORTE', 'BONO', 'HORAS_EXTRAS'];
@@ -678,7 +701,7 @@ export class NuevaNovedadComponent implements OnInit {
     } else if (this.novedad.tipo === 'BONO') {
       this.novedad.bono = { monto: null, motivo: '' };
     } else if (this.novedad.tipo === 'HORAS_EXTRAS') {
-      this.novedad.horasExtras = { valorHora: null, tipo: 'diurnas' };
+      this.novedad.horasExtras = { tipo: 'diurnas' };
     }
   }
 
@@ -688,10 +711,6 @@ export class NuevaNovedadComponent implements OnInit {
     }
     if (this.novedad.tipo === 'BONO' && this.novedad.bono?.monto) {
       return this.novedad.bono.monto;
-    }
-    if (this.novedad.tipo === 'HORAS_EXTRAS' && this.novedad.horasExtras?.valorHora && this.novedad.horaInicio && this.novedad.horaFin) {
-      const horas = this.calcularHoras(this.novedad.horaInicio, this.novedad.horaFin);
-      return horas * this.novedad.horasExtras.valorHora;
     }
     if (this.novedad.valor) {
       return this.novedad.valor;
@@ -714,14 +733,14 @@ export class NuevaNovedadComponent implements OnInit {
 
   getTipoLabel(): string {
     const tipos: any = {
-      'AUXILIO_TRANSPORTE': 'ðŸšŒ Auxilio de Transporte',
-      'BONO': 'ðŸŽ Bono / BonificaciÃ³n',
-      'HORAS_EXTRAS': 'â° Horas Extras',
-      'INCAPACIDAD': 'ðŸ¥ Incapacidad',
-      'VACACIONES': 'ðŸŒ´ Vacaciones',
-      'PERMISO': 'ðŸ“‹ Permiso',
-      'LICENCIA': 'ðŸ“„ Licencia',
-      'OTRO': 'ðŸ“Œ Otro'
+      'AUXILIO_TRANSPORTE': 'Auxilio de transporte',
+      'BONO': 'Bono / Bonificación',
+      'HORAS_EXTRAS': 'Horas extras',
+      'INCAPACIDAD': 'Incapacidad',
+      'VACACIONES': 'Vacaciones',
+      'PERMISO': 'Permiso',
+      'LICENCIA': 'Licencia',
+      'OTRO': 'Otro'
     };
     return tipos[this.novedad.tipo] || this.novedad.tipo;
   }
@@ -743,12 +762,22 @@ export class NuevaNovedadComponent implements OnInit {
       estado: 'PENDIENTE'
     };
 
+    // ✅ Asociar la novedad al período de nómina ABIERTO actual
+    this.http.get<any>(`${environment.apiUrl}/api/periodo-nomina/actual`)
+      .subscribe({
+        next: (periodo) => {
+          if (periodo?.id) datosEnviar.periodoId = periodo.id;
+          this.enviarNovedad(datosEnviar);
+        },
+        error: () => this.enviarNovedad(datosEnviar) // sin período: el backend lo resolverá
+      });
+  }
+
+  private enviarNovedad(datosEnviar: any) {
     if (this.novedad.tipo === 'HORAS_EXTRAS') {
       const horas = this.calcularHoras(this.novedad.horaInicio, this.novedad.horaFin);
       datosEnviar.horas = horas;
-      datosEnviar.valorHora = this.novedad.horasExtras.valorHora;
       datosEnviar.tipoHora = this.novedad.horasExtras.tipo;
-      datosEnviar.valor = horas * this.novedad.horasExtras.valorHora;
     }
 
     if (this.novedad.tipo === 'AUXILIO_TRANSPORTE') {
@@ -763,15 +792,15 @@ export class NuevaNovedadComponent implements OnInit {
       datosEnviar.valor = this.novedad.valor;
     }
 
-    this.http.post('http://localhost:8080/api/novedades', datosEnviar)
-      .subscribe({
-        next: () => {
-          alert('âœ… Â¡Novedad guardada exitosamente!');
-          this.router.navigate(['/novedades']);
-        },
-        error: (err) => {
-          alert('âŒ Error al guardar: ' + err.message);
-        }
-      });
+    this.http.post(`${environment.apiUrl}/api/novedades`, datosEnviar)
+    .subscribe({
+      next: () => {
+        alert('¡Novedad guardada exitosamente!');
+        this.router.navigate(['/novedades']);
+      },
+      error: (err) => {
+        alert('Error al guardar: ' + err.message);
+      }
+    });
   }
 }

@@ -4,14 +4,14 @@
 
   <main class="main-content">
     <div class="pago-container">
-      <h1 class="page-title">Pago de Nómina</h1>
+      <app-encabezado-pagina titulo="Pago de Nómina"></app-encabezado-pagina>
 
       <!-- ENCABEZADO DEL PERÍODO ACTUAL -->
       <div class="periodo-card" *ngIf="periodoActual">
         <h2>
           Nómina Actual:
           <span class="descripcion-destacada">
-            {{ periodoActual.descripcion }}
+            {{ periodoActual.description || periodoActual.descripcion }}
           </span>
         </h2>
         <p class="periodo-info">
@@ -24,6 +24,10 @@
             [class.cerrado]="periodoActual.estado === 'CERRADO'" class="estado-badge">
             {{ periodoActual.estado }}
           </strong>
+        </p>
+        <p class="costo-periodo" *ngIf="periodoActual.costoCOP">
+          <strong>Costo del período:</strong>
+          $ {{ periodoActual.costoCOP | number:'1.0-0' }}
         </p>
       </div>
 
@@ -38,7 +42,7 @@
 
         <!-- SI ESTÁ ABIERTO → MOSTRAR BOTÓN PAGAR -->
         <div class="actions-top" *ngIf="periodoActual?.estado === 'ABIERTO'">
-          <button class="btn-pagar grande" (click)="pagarNomina()" [disabled]="cargando || pagoGenerado">
+          <button class="btn-pagar grande" (click)="pagarNomina()" [disabled]="cargando || pagoGenerado || nominaData.length === 0">
             <i class="fas fa-credit-card"></i>
             {{ cargando ? 'PROCESANDO PAGO...' : pagoGenerado ? 'NÓMINA YA PAGADA' : 'PAGAR Y CERRAR NÓMINA' }}
           </button>
@@ -69,51 +73,159 @@
       </div>
 
       <!-- TABLA DE NÓMINA -->
-      <div class="table-card" *ngIf="nominaData.length > 0">
+      <section class="nomina-totales" *ngIf="nominaData.length > 0" aria-label="Totales de nómina">
+        <article>
+          <span>Total devengado</span>
+          <strong>$ {{ totalDevengadoBruto | number:'1.0-0' }}</strong>
+        </article>
+        <article class="positivo">
+          <span>Devengos adicionales</span>
+          <strong>$ {{ totalDevengos | number:'1.0-0' }}</strong>
+        </article>
+        <article class="negativo">
+          <span>Deducciones</span>
+          <strong>$ {{ totalDeducciones | number:'1.0-0' }}</strong>
+        </article>
+        <article>
+          <span>Neto a pagar</span>
+          <strong>$ {{ totalNomina | number:'1.0-0' }}</strong>
+        </article>
+        <article>
+          <span>Aportes patronales</span>
+          <strong>$ {{ totalAportesEmpleador | number:'1.0-0' }}</strong>
+        </article>
+        <article>
+          <span>Provisiones prestacionales</span>
+          <strong>$ {{ totalProvisionesPrestacionales | number:'1.0-0' }}</strong>
+        </article>
+        <article class="positivo">
+          <span>Costo total estimado empleador</span>
+          <strong>$ {{ costoTotalEmpleador | number:'1.0-0' }}</strong>
+        </article>
+      </section>
+      <div class="nomina-list-tools" *ngIf="nominaData.length > 0">
+        <button type="button" class="btn-ver-novedades" (click)="alternarEmpleadosConNovedades()">
+          {{ soloEmpleadosConNovedades ? 'Ver todos los empleados' : 'Ver empleados con devengos o deducciones' }}
+          <span>({{ empleadosConNovedades }})</span>
+        </button>
+      </div>
+      <app-tabla-base *ngIf="nominaVisible.length > 0">
+      <div class="table-card">
         <div class="table-header">
           <div>Empleado</div>
-          <div>Sueldo Base</div>
+          <div>Sueldo base</div>
           <div>Devengos</div>
           <div>Deducciones</div>
-          <div>Total a Pagar</div>
+          <div>Total a pagar</div>
+          <div class="col-accion"></div>
         </div>
-
-        <div class="table-row" *ngFor="let item of nominaData; trackBy: trackById">
-          <div class="empleado-nombre">
-            {{ item.nombre }} {{ item.apellido }}
-          </div>
-
-          <div class="sueldo-base">
-            $ {{ item.sueldoBase | number:'1.0-0' }}
-          </div>
-
-          <div class="devengo-col">
-            <div class="valor-devengo" [class.positive]="item.devengos > 0">
-              $ {{ item.devengos | number:'1.0-0' }}
+        <ng-container *ngFor="let item of empleadosPagina; trackBy: trackById">
+          <div class="table-row" [class.row-expandida]="item.expandido" (click)="toggleDetalle(item)">
+            <div class="empleado-nombre">
+              {{ item.nombre }} {{ item.apellido }}
             </div>
-            <small *ngIf="item.devengos > 0">+ Devengos</small>
-          </div>
-
-          <div class="deduccion-col">
-            <div class="valor-deduccion" [class.negative]="item.deducciones > 0">
-              $ {{ item.deducciones | number:'1.0-0' }}
+            <div class="sueldo-base">
+              $ {{ item.sueldoBase | number:'1.0-0' }}
             </div>
-            <small *ngIf="item.deducciones > 0">- Deducciones</small>
+            <div class="devengo-col">
+              <div class="valor-devengo" [class.positive]="item.devengos > 0">
+                $ {{ item.devengos | number:'1.0-0' }}
+              </div>
+              <small *ngIf="item.devengos > 0">+ {{ item.detalleDevengos.length }} devengo(s)</small>
+            </div>
+            <div class="deduccion-col">
+              <div class="valor-deduccion" [class.negative]="item.deducciones > 0">
+                $ {{ item.deducciones | number:'1.0-0' }}
+              </div>
+              <small *ngIf="item.deducciones > 0">- {{ item.detalleDeducciones.length }} deducción(es)</small>
+            </div>
+            <div class="total-col highlight">
+              <strong>$ {{ item.totalPagar | number:'1.0-0' }}</strong>
+            </div>
+            <div class="col-accion">
+              <i class="fas fa-chevron-down" [class.rotada]="item.expandido" title="Ver detalle"></i>
+            </div>
           </div>
 
-          <div class="total-col highlight">
-            <strong>$ {{ item.totalPagar | number:'1.0-0' }}</strong>
+          <!-- DESGLOSE DE CONCEPTOS (fila expandible) -->
+          <div class="detalle-row" *ngIf="item.expandido">
+            <div class="detalle-panel">
+              <div class="detalle-col devengos" *ngIf="item.detalleDevengos.length > 0">
+                <h4><i class="fas fa-arrow-up"></i> Devengos</h4>
+                <ul>
+                  <li *ngFor="let d of item.detalleDevengos">
+                    <span>{{ d.concepto }}</span>
+                    <strong class="verde">$ {{ d.valor | number:'1.0-0' }}</strong>
+                  </li>
+                </ul>
+              </div>
+              <div class="detalle-col deducciones" *ngIf="item.detalleDeducciones.length > 0">
+                <h4><i class="fas fa-arrow-down"></i> Deducciones</h4>
+                <ul>
+                  <li *ngFor="let d of item.detalleDeducciones">
+                    <span>{{ d.concepto }}</span>
+                    <strong class="rojo">- $ {{ d.valor | number:'1.0-0' }}</strong>
+                  </li>
+                </ul>
+              </div>
+              <div class="detalle-col">
+                <h4>Costos patronales estimados (no se descuentan al empleado)</h4>
+                <ul>
+                  <li *ngFor="let aporte of item.detalleAportesEmpleador">
+                    <span>{{ aporte.concepto }}</span><strong>$ {{ aporte.valor | number:'1.0-0' }}</strong>
+                  </li>
+                  <li><span>Aportes empleador</span><strong>$ {{ item.aportesEmpleador | number:'1.0-0' }}</strong></li>
+                  <li><span>Provisiones prestacionales</span><strong>$ {{ item.provisionesPrestacionales | number:'1.0-0' }}</strong></li>
+                  <li><span>Costo total empleador</span><strong>$ {{ item.costoTotalEmpleador | number:'1.0-0' }}</strong></li>
+                </ul>
+              </div>
+              <div class="detalle-col vacio" *ngIf="item.detalleDevengos.length === 0 && item.detalleDeducciones.length === 0">
+                <p><i class="fas fa-info-circle"></i> Sin novedades registradas para este empleado en el período.</p>
+              </div>
+            </div>
           </div>
+        </ng-container>
+
+        <!-- FILA DE TOTALES -->
+        <div class="table-row totales">
+          <div class="empleado-nombre">Totales del período</div>
+          <div class="sueldo-base">—</div>
+          <div class="devengo-col"><strong class="verde">$ {{ totalDevengos | number:'1.0-0' }}</strong></div>
+          <div class="deduccion-col"><strong class="rojo">$ {{ totalDeducciones | number:'1.0-0' }}</strong></div>
+          <div class="total-col highlight"><strong>$ {{ totalNomina | number:'1.0-0' }}</strong></div>
+          <div class="col-accion"></div>
         </div>
       </div>
+      </app-tabla-base>
+
+      <div class="nomina-pagination" *ngIf="nominaVisible.length > 0">
+        <span>Mostrando {{ inicioPagina }}–{{ finPagina }} de {{ nominaVisible.length }} empleados{{ soloEmpleadosConNovedades ? ' con novedades' : '' }}</span>
+        <div>
+          <button type="button" (click)="cambiarPagina(-1)" [disabled]="paginaActual === 0">Anterior</button>
+          <span>Página {{ paginaActual + 1 }} de {{ totalPaginas }}</span>
+          <button type="button" (click)="cambiarPagina(1)" [disabled]="paginaActual + 1 >= totalPaginas">Siguiente</button>
+        </div>
+      </div>
+
+      <button class="btn-expandir" (click)="toggleTodo()" *ngIf="nominaVisible.length > 0">
+        <i class="fas" [class.fa-angles-down]="!expandidoGlobal" [class.fa-angles-up]="expandidoGlobal"></i>
+        {{ expandidoGlobal ? 'Contraer todo' : 'Expandir todo el detalle' }}
+      </button>
 
       <!-- ESTADO DE CARGA O VACÍO -->
       <div class="empty-state" *ngIf="cargando">
         <p>Cargando nómina...</p>
       </div>
 
+      <div class="alert warning" *ngIf="!cargando && errorCarga">
+        <p>{{ errorCarga }}</p>
+      </div>
+
       <div class="empty-state" *ngIf="!cargando && nominaData.length === 0">
-        <p>No hay empleados registrados aún.</p>
+        <p>Aún no hay registros en esta sección.</p>
+      </div>
+      <div class="empty-state" *ngIf="!cargando && soloEmpleadosConNovedades && nominaVisible.length === 0">
+        <p>No hay empleados con devengos o deducciones en este período.</p>
       </div>
     </div>
   </main>

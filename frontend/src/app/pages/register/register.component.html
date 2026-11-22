@@ -4,28 +4,28 @@
 
     <form (ngSubmit)="registrar()">
       <div class="field">
-        <label>Nombre de usuario</label>
-        <input [(ngModel)]="nombre" name="nombre" placeholder="Ej: juanperez" required />
+        <label for="reg-nombre">Nombre de usuario</label>
+        <input id="reg-nombre" [(ngModel)]="nombre" name="nombre" placeholder="Ej: juanperez" required autocomplete="username" />
       </div>
 
       <div class="field">
-        <label>Correo electrónico</label>
-        <input [(ngModel)]="correo" name="correo" type="email" placeholder="ejemplo@email.com" required />
+        <label for="reg-correo">Correo electrónico</label>
+        <input id="reg-correo" [(ngModel)]="correo" name="correo" type="email" placeholder="ejemplo@email.com" required autocomplete="email" />
       </div>
 
       <div class="field">
-        <label>Contraseña</label>
-        <input [(ngModel)]="contrasena" name="contrasena" type="password" placeholder="Mínimo 6 caracteres" required />
+        <label for="reg-pass">Contraseña</label>
+        <input id="reg-pass" [(ngModel)]="contrasena" name="contrasena" type="password" placeholder="Mínimo 6 caracteres" required autocomplete="new-password" />
       </div>
 
       <div class="field">
-        <label>Confirmar contraseña</label>
-        <input [(ngModel)]="confirmarContrasena" name="confirmarContrasena" type="password" required />
+        <label for="reg-confirm">Confirmar contraseña</label>
+        <input id="reg-confirm" [(ngModel)]="confirmarContrasena" name="confirmarContrasena" type="password" required autocomplete="new-password" />
       </div>
 
       <div class="field">
-        <label>Rol</label>
-        <select [(ngModel)]="rol" name="rol">
+        <label for="reg-rol">Rol</label>
+        <select id="reg-rol" [(ngModel)]="rol" name="rol">
           <option value="EMPLEADO">Empleado</option>
           <option value="ADMIN">Administrador</option>
         </select>
@@ -39,6 +39,6 @@
       <p *ngIf="error" class="error">{{ error }}</p>
     </form>
 
-    <p>¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+    <p class="login-redirect">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
   </div>
 </div>

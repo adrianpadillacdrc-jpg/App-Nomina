@@ -1,0 +1,1164 @@
+:host {
+  --ink: #221d2b;
+  --mute: #6b6577;
+  --line: #ddd7e6;
+  --brand: #5b1fa0;
+  --soft: #f4f0fa;
+  --ok: #1d6b45;
+  --okbg: #e9f5ee;
+  --bad: #a8281f;
+  --badbg: #fbecea;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Modal Backdrop */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 14, 28, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: clamp(6px, 2vw, 20px);
+}
+
+.modal-shell {
+  width: 100%;
+  max-width: 960px;
+  max-height: 96vh;
+  max-height: 96dvh;
+  background: #e7e4ec;
+  border-radius: clamp(12px, 2vw, 16px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+}
+
+/* Toolbar superior */
+.toolbar {
+  background: #ffffff;
+  padding: 10px clamp(10px, 2vw, 20px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #d1cadb;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  padding-bottom: 2px;
+}
+
+.tab-btn {
+  background: #f4f0fa;
+  border: 1px solid #ddd6fe;
+  color: #5b1fa0;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #ede9fe;
+  }
+
+  &.active {
+    background: #5b1fa0;
+    color: #ffffff;
+    border-color: #5b1fa0;
+  }
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.check-todos {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+.btn-print {
+  background: #1e293b;
+  color: #ffffff;
+  border: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.btn-close {
+  background: transparent;
+  border: none;
+  font-size: 1.4rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+
+  &:hover {
+    color: #111827;
+  }
+}
+
+/* Contenedor scrolleable con estilo A4 */
+.document-viewer {
+  flex: 1;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: clamp(10px, 2vw, 20px);
+  background: #e7e4ec;
+}
+
+/* ==========================================================================
+   ESTILOS EXACTOS DE LA PLANTILLA A4 DEL USUARIO
+   ========================================================================== */
+.page {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto 20px auto;
+  padding: 16mm 16mm 14mm;
+  background: #ffffff;
+  position: relative;
+  page-break-after: always;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  color: var(--ink);
+  font-size: 10.5pt;
+  line-height: 1.45;
+  box-sizing: border-box;
+
+  &:last-child {
+    margin-bottom: 0;
+    page-break-after: auto;
+  }
+}
+
+h1, h2 {
+  font-family: Georgia, 'Times New Roman', serif;
+  margin: 0;
+  font-weight: 700;
+}
+
+h1 { font-size: 19pt; }
+h2 { font-size: 12.5pt; }
+
+.num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 3px solid var(--brand);
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+
+.brand {
+  font-family: Georgia, serif;
+  font-size: 15pt;
+  font-weight: 700;
+  color: var(--brand);
+  letter-spacing: 0.5px;
+}
+
+.sub {
+  color: var(--mute);
+  font-size: 9.5pt;
+}
+
+.doc {
+  text-align: right;
+
+  b {
+    display: block;
+    font-size: 11pt;
+  }
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 99px;
+  font-size: 9pt;
+  font-weight: 600;
+  background: #fff4d6;
+  color: #8a5a00;
+  border: 1px solid #f0d58a;
+}
+
+.info {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px 18px;
+  background: var(--soft);
+  border-radius: 8px;
+  padding: 11px 14px;
+  margin-bottom: 16px;
+
+  dt {
+    font-size: 8.5pt;
+    color: var(--mute);
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
+  }
+}
+
+.cols {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 16px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  font-size: 9pt;
+  text-align: left;
+  color: var(--mute);
+  font-weight: 600;
+  padding: 5px 6px;
+  border-bottom: 1.5px solid var(--ink);
+
+  &.num {
+    text-align: right;
+  }
+}
+
+td {
+  padding: 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+.dev h2 { color: var(--ok); }
+.ded h2 { color: var(--bad); }
+
+tr.tot td {
+  font-weight: 700;
+  border-bottom: 0;
+  border-top: 1.5px solid var(--ink);
+}
+
+.dev tr.tot td { background: var(--okbg); }
+.ded tr.tot td { background: var(--badbg); }
+
+.neg { color: var(--bad); }
+
+.neto {
+  margin-top: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--brand);
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 16px 22px;
+
+  span {
+    font-size: 11pt;
+  }
+
+  strong {
+    font-family: Georgia, serif;
+    font-size: 24pt;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.note {
+  margin-top: 14px;
+  font-size: 9pt;
+  color: var(--mute);
+}
+
+.sign {
+  display: flex;
+  gap: 36px;
+  margin-top: 40px;
+
+  div {
+    flex: 1;
+    border-top: 1px solid var(--ink);
+    padding-top: 5px;
+    font-size: 9pt;
+  }
+}
+
+.foot {
+  position: absolute;
+  left: 16mm;
+  right: 16mm;
+  bottom: 10mm;
+  display: flex;
+  justify-content: space-between;
+  font-size: 8pt;
+  color: var(--mute);
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}
+
+.wm {
+  position: absolute;
+  top: 44%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font: 700 60pt Georgia, serif;
+  color: rgba(91, 31, 160, 0.07);
+  transform: rotate(-24deg);
+  pointer-events: none;
+}
+
+.alert {
+  background: #fff4d6;
+  border: 1px solid #f0d58a;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 9.5pt;
+  margin: 12px 0;
+}
+
+/* Estilos de Contrato */
+.contract {
+  p {
+    margin: 0 0 9px;
+    text-align: justify;
+  }
+
+  .data {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 24px;
+    margin: 12px 0 16px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 14px;
+
+    dt {
+      font-size: 8.5pt;
+      color: var(--mute);
+    }
+
+    dd {
+      margin: 0 0 4px;
+      font-weight: 600;
+    }
+  }
+
+  h3 {
+    font-family: Georgia, serif;
+    font-size: 10.5pt;
+    margin: 12px 0 3px;
+  }
+}
+
+/* ==========================================================================
+   ESTILOS DE IMPRESIÓN (PRINT MEDIA)
+   ========================================================================== */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+  }
+
+  .modal-overlay {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  .modal-shell {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    max-height: none !important;
+    background: #ffffff !important;
+  }
+
+  .document-viewer {
+    padding: 0 !important;
+    background: #ffffff !important;
+    overflow: visible !important;
+  }
+
+  .page {
+    margin: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    width: 100% !important;
+    min-height: 297mm !important;
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   FIRMAS TÁCTILES
+   ══════════════════════════════════════════════════════════════ */
+
+.sign {
+  display: flex;
+  gap: 32px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
+.sign-box {
+  flex: 1 1 240px;
+  min-width: 220px;
+  position: relative;
+}
+
+.sign-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin-bottom: 6px;
+}
+
+.linea-firma {
+  border-bottom: 1.5px solid var(--ink);
+  height: 48px;
+  margin-bottom: 8px;
+  border-radius: 0;
+}
+
+.sign-info {
+  font-size: 11.5px;
+  color: var(--ink);
+  line-height: 1.6;
+  b { font-weight: 700; }
+}
+
+.sign-empty { display: flex; flex-direction: column; gap: 4px; }
+
+.sign-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.firma-img {
+  width: 100%;
+  max-height: 80px;
+  object-fit: contain;
+  border-bottom: 1.5px solid var(--ink);
+  padding-bottom: 4px;
+}
+
+.btn-firma-primary {
+  margin-top: 6px;
+  align-self: flex-start;
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .18s;
+  &:hover { background: #7c33c7; }
+}
+
+.btn-firma-editar {
+  align-self: flex-start;
+  background: transparent;
+  color: var(--brand);
+  border: 1.5px solid var(--brand);
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  &:hover { background: var(--soft); }
+}
+
+/* ── Overlay del pad ───────────────────────────────────────── */
+.firma-pad-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 14, 28, .60);
+  backdrop-filter: blur(3px);
+  z-index: 20000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.firma-pad-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px 20px 20px;
+  width: min(480px, 94vw);
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.firma-pad-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--brand);
+}
+
+.firma-pad-hint {
+  font-size: 12px;
+  color: var(--mute);
+}
+
+.firma-canvas {
+  width: 100%;
+  height: 160px;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  background: #fafafa;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.firma-pad-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+
+  button {
+    border-radius: 7px;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: opacity .15s;
+    &:hover { opacity: .85; }
+  }
+
+  .btn-pad-limpiar {
+    background: #f0f0f0;
+    color: var(--ink);
+    margin-right: auto;
+  }
+  .btn-pad-cancel {
+    background: #f0f0f0;
+    color: var(--ink);
+  }
+  .btn-pad-guardar {
+    background: var(--brand);
+    color: #fff;
+  }
+}
+
+/* ── Botón Renovar Contrato en toolbar ── */
+.btn-renovar {
+  background: #5b1fa0;
+  color: #ffffff;
+  border: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #4a1585;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(91, 31, 160, 0.3);
+  }
+}
+
+/* ── Modal de Renovación ── */
+.renovacion-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 14, 28, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 10050;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+}
+
+.renovacion-card {
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: fadeInModal 0.2s ease-out;
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.renovacion-header {
+  padding: 18px 24px;
+  background: #f8f6fc;
+  border-bottom: 1px solid #e5def0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #431475;
+  }
+
+  .renovacion-sub {
+    margin: 4px 0 0;
+    font-size: 0.82rem;
+    color: #6b6577;
+  }
+
+  .btn-close-sub {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #888;
+    cursor: pointer;
+    line-height: 1;
+    &:hover { color: #222; }
+  }
+}
+
+.renovacion-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .info-vigencia-actual {
+    background: #fdf8e6;
+    border: 1px solid #f6e5ad;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .label-info { color: #856404; font-weight: 600; }
+    .valor-info { color: #533f03; font-weight: 700; }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #374151;
+    }
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .form-input {
+    padding: 8px 12px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    color: #111827;
+    outline: none;
+    transition: border-color 0.2s;
+
+    &:focus {
+      border-color: #5b1fa0;
+      box-shadow: 0 0 0 3px rgba(91, 31, 160, 0.12);
+    }
+  }
+
+  .duracion-chips {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .chip-label {
+      font-size: 0.8rem;
+      color: #6b7280;
+      font-weight: 500;
+    }
+
+    .chip-duracion {
+      background: #f3f0f9;
+      border: 1px solid #dcd3eb;
+      color: #5b1fa0;
+      font-weight: 600;
+      font-size: 0.78rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+
+      &:hover {
+        background: #5b1fa0;
+        color: #ffffff;
+      }
+    }
+  }
+
+  .salario-hint {
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+
+  .error-msg {
+    background: #fde8e8;
+    color: #9b1c1c;
+    border: 1px solid #f8b4b4;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+  }
+
+  .exito-msg {
+    background: #def7ec;
+    color: #03543f;
+    border: 1px solid #bcf0da;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+}
+
+.renovacion-footer {
+  padding: 14px 24px;
+  background: #f8f6fc;
+  border-top: 1px solid #e5def0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  .btn-cancelar-sub {
+    background: #e5e7eb;
+    color: #374151;
+    border: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    &:hover { background: #d1d5db; }
+  }
+
+  .btn-confirmar-sub {
+    background: #5b1fa0;
+    color: #ffffff;
+    border: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 8px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      background: #4a1585;
+      box-shadow: 0 4px 12px rgba(91, 31, 160, 0.3);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+/* ── Al imprimir: ocultar botones, mostrar imágenes ────────── */
+@media print {
+  .no-print { display: none !important; }
+
+  .firma-img {
+    max-height: 72px;
+    border-bottom: 1.5px solid #221d2b;
+  }
+
+  .linea-firma {
+    border-bottom: 1.5px solid #221d2b;
+    height: 56px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ESTILOS FIRMA OTP Y CERTIFICADO DIGITAL
+   ══════════════════════════════════════════════════════════════ */
+
+.firma-otp-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+
+  .badge-icon {
+    font-size: 1.4rem;
+  }
+
+  .badge-text {
+    font-size: 11px;
+    color: #166534;
+    line-height: 1.4;
+
+    b {
+      color: #14532d;
+      font-weight: 700;
+    }
+
+    span {
+      color: #15803d;
+      font-size: 10px;
+    }
+  }
+}
+
+.firma-acciones-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.firma-opciones-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.btn-firma-otp {
+  background: #ede9fe;
+  color: #6b21a8;
+  border: 1.5px solid #c4b5fd;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #ddd6fe;
+    border-color: #a78bfa;
+  }
+}
+
+.btn-firma-otp-sm {
+  background: transparent;
+  color: #6b21a8;
+  border: 1px solid #c4b5fd;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: #ede9fe;
+  }
+}
+
+/* ── Modal Popup OTP ────────────────────────────────────────── */
+.otp-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 14, 28, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 25000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.otp-card {
+  background: #ffffff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: fadeInModal 0.25s ease-out;
+}
+
+.otp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 18px 22px;
+  background: #fdfcff;
+  border-bottom: 1px solid #f0ecfa;
+
+  .otp-badge-top {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #7c3aed;
+    background: #ede9fe;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 4px;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e1b4b;
+  }
+
+  p {
+    margin: 3px 0 0;
+    font-size: 12px;
+    color: #64748b;
+  }
+
+  .btn-close {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #94a3b8;
+    cursor: pointer;
+    line-height: 1;
+    &:hover { color: #1e293b; }
+  }
+}
+
+.otp-body {
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.otp-destinatario-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 12.5px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  .otp-dest-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .otp-label { color: #64748b; }
+    .otp-val { color: #0f172a; font-weight: 600; }
+    .font-mono { font-family: monospace; }
+  }
+}
+
+.otp-step-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .otp-hint-text {
+    font-size: 13px;
+    color: #475569;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .btn-solicitar-otp {
+    background: #6d28d9;
+    color: #ffffff;
+    border: none;
+    padding: 11px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover:not(:disabled) {
+      background: #5b21b6;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .otp-input-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #334155;
+  }
+
+  .otp-input-container {
+    display: flex;
+    justify-content: center;
+  }
+
+  .otp-digit-input {
+    width: 200px;
+    text-align: center;
+    font-size: 26px;
+    letter-spacing: 8px;
+    font-weight: 700;
+    padding: 8px 12px;
+    border: 2px solid #c4b5fd;
+    border-radius: 8px;
+    color: #4c1d95;
+    background: #faf5ff;
+    outline: none;
+    transition: border-color 0.2s;
+
+    &:focus {
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+    }
+  }
+
+  .otp-sub-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+
+    .otp-expira-note {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .btn-reenviar-otp {
+      background: none;
+      border: none;
+      color: #7c3aed;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+
+      &:hover:not(:disabled) { color: #5b21b6; }
+      &:disabled { opacity: 0.5; cursor: not-allowed; }
+    }
+  }
+}
+
+.otp-feedback {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  line-height: 1.4;
+
+  &.success {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+  }
+
+  &.error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+  }
+}
+
+.otp-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 22px;
+  background: #f8fafc;
+  border-top: 1px solid #f1f5f9;
+
+  .btn-cancelar-otp {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    &:hover { background: #e2e8f0; }
+  }
+
+  .btn-firmar-otp {
+    background: #16a34a;
+    color: #ffffff;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover:not(:disabled) {
+      background: #15803d;
+      box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+

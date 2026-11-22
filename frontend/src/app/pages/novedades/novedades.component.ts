@@ -5,7 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { SidebarComponent } from '../../guards/components/sidebar/sidebar.component';
+import { EncabezadoPaginaComponent } from '../../shared/components/encabezado-pagina/encabezado-pagina.component';
 import { AuthService } from '../../services/auth.service';
+import { environment } from '../../../environments/environment';
 
 interface Empleado {
   id?: number;
@@ -31,7 +33,7 @@ interface Novedad {
 @Component({
   selector: 'app-novedades',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarComponent],
+  imports: [CommonModule, FormsModule, SidebarComponent, EncabezadoPaginaComponent],
   templateUrl: './novedades.component.html',
   styleUrls: ['./novedades.component.scss']
 })
@@ -53,18 +55,23 @@ export class NovedadesComponent implements OnInit {
     this.cargarEmpleados();
   }
 
+  // ✅ CORREGIDO: Extraemos de .content y pedimos 50 registros paginados
   cargarEmpleados() {
     const token = this.authService.getToken();
     console.log('Cargando empleados...');
 
-    this.http.get<Empleado[]>('http://localhost:8080/api/empleados', {
+    this.http.get<any>(`${environment.apiUrl}/api/empleados?page=0&size=50`, {
       headers: { 'Authorization': `Bearer ${token}` }
     }).subscribe({
       next: (data) => {
         console.log('Empleados recibidos:', data);
-        this.empleados = data.map(e => ({
+        
+        // ✅ CORRECCIÓN CLAVE: Extraer el arreglo desde la propiedad .content
+        const rawContent = data.content ? data.content : (Array.isArray(data) ? data : []);
+
+        this.empleados = rawContent.map((e: any) => ({
           id: e.id,
-          numeroDocumento: e.numeroDocumento?.toString() || 'S/N',
+          numeroDocumento: e.numeroDocumento?.toString() || e.documento?.toString() || 'S/N',
           nombre: this.capitalizar(e.nombre || ''),
           apellido: this.capitalizar(e.apellido || ''),
           cargo: this.capitalizar(e.cargo || ''),
@@ -96,7 +103,6 @@ export class NovedadesComponent implements OnInit {
     );
   }
 
-  // Redirige a nueva-novedad para agregar
   abrirNovedad(emp: Empleado) {
     this.router.navigate(['/nueva-novedad'], {
       queryParams: {
@@ -108,19 +114,17 @@ export class NovedadesComponent implements OnInit {
     });
   }
 
-  // Ver novedades del empleado
   verNovedades(emp: Empleado) {
     this.empleadoSeleccionado = emp;
     this.cargarNovedades(emp.id!);
     this.mostrarModalNovedades = true;
   }
 
-  // Cargar novedades desde el backend
   cargarNovedades(idEmpleado: number) {
     const token = this.authService.getToken();
     console.log('Cargando novedades para empleado:', idEmpleado);
 
-    this.http.get<Novedad[]>(`http://localhost:8080/api/novedades/empleado/${idEmpleado}`, {
+    this.http.get<Novedad[]>(`${environment.apiUrl}/api/novedades/empleado/${idEmpleado}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     }).subscribe({
       next: (data) => {

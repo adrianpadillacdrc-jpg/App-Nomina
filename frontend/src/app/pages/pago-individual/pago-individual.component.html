@@ -1,0 +1,111 @@
+<!-- src/app/pages/pago-individual/pago-individual.component.html -->
+<div class="page-wrapper">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content">
+    <div class="pago-ind-container">
+      <app-encabezado-pagina titulo="Pago Individual de Nómina"></app-encabezado-pagina>
+
+      <!-- Cargando -->
+      <div class="estado-carga" *ngIf="cargando && !empleado">
+        <i class="fas fa-spinner fa-spin"></i> Cargando datos del empleado…
+      </div>
+
+      <!-- Error -->
+      <div class="alerta-error" *ngIf="error">
+        <i class="fas fa-exclamation-circle"></i> {{ error }}
+        <button class="btn-volver" (click)="volver()">← Volver</button>
+      </div>
+
+      <!-- Formulario de pago -->
+      <div class="tarjeta" *ngIf="empleado && !pagoRealizado">
+
+        <!-- Ficha del empleado -->
+        <section class="ficha-empleado">
+          <div class="avatar">
+            <i class="fas fa-user-circle"></i>
+          </div>
+          <div class="info">
+            <h2>{{ empleado.nombre | titlecase }} {{ empleado.apellido | titlecase }}</h2>
+            <p><i class="fas fa-id-card"></i> C.C. {{ empleado.numeroDocumento }}</p>
+            <p><i class="fas fa-briefcase"></i> {{ empleado.cargo || 'Sin cargo' }}</p>
+          </div>
+        </section>
+
+        <hr>
+
+        <!-- Importe calculado (solo lectura) -->
+        <section class="importe-seccion">
+          <label class="campo-label">Importe a pagar (calculado automáticamente)</label>
+          <div class="importe-display">
+            <span class="importe-valor">{{ formatCOP(importeCalculado) }}</span>
+            <span class="importe-detalle">
+              Salario base {{ formatCOP(empleado.salarioBase || 0) }}
+              <span *ngIf="importeCalculado > (empleado.salarioBase || 0)">
+                + Auxilio de transporte {{ formatCOP(importeCalculado - (empleado.salarioBase || 0)) }}
+              </span>
+            </span>
+          </div>
+        </section>
+
+        <!-- Método de pago -->
+        <section class="metodo-seccion">
+          <label class="campo-label">Método de pago</label>
+          <div class="metodo-opciones">
+            <label class="opcion" [class.seleccionada]="metodoPago === 'TRANSFERENCIA'">
+              <input type="radio" name="metodo" value="TRANSFERENCIA" [(ngModel)]="metodoPago">
+              <i class="fas fa-university"></i> Transferencia bancaria
+            </label>
+            <label class="opcion" [class.seleccionada]="metodoPago === 'EFECTIVO'">
+              <input type="radio" name="metodo" value="EFECTIVO" [(ngModel)]="metodoPago">
+              <i class="fas fa-money-bill-wave"></i> Efectivo
+            </label>
+          </div>
+
+          <!-- Referencia bancaria (solo transferencia) -->
+          <div class="referencia-campo" *ngIf="metodoPago === 'TRANSFERENCIA'">
+            <label class="campo-label">Referencia / comprobante <span class="opcional">(opcional)</span></label>
+            <input type="text"
+                   class="campo-input"
+                   placeholder="N.° de transferencia o comprobante"
+                   [(ngModel)]="referencia">
+          </div>
+        </section>
+
+        <!-- Botón confirmar -->
+        <div class="acciones">
+          <button class="btn-cancelar" (click)="volver()" [disabled]="cargando">
+            Cancelar
+          </button>
+          <button class="btn-confirmar" (click)="confirmarPago()" [disabled]="cargando">
+            <i class="fas fa-check-circle"></i>
+            {{ cargando ? 'Procesando…' : 'Confirmar Pago' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- ✅ Pago exitoso -->
+      <div class="tarjeta exito" *ngIf="pagoRealizado">
+        <div class="exito-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h2>¡Pago de nómina exitoso!</h2>
+        <p>
+          Se registró el pago de <strong>{{ formatCOP(importeCalculado) }}</strong>
+          a <strong>{{ empleado?.nombre | titlecase }} {{ empleado?.apellido | titlecase }}</strong>
+          vía <strong>{{ metodoPago === 'TRANSFERENCIA' ? 'Transferencia bancaria' : 'Efectivo' }}</strong>.
+        </p>
+
+        <div class="exito-acciones">
+          <button class="btn-factura" (click)="descargarFactura()" *ngIf="pagoId">
+            <i class="fas fa-file-pdf"></i> Descargar comprobante PDF
+          </button>
+          <button class="btn-volver" (click)="volver()">
+            <i class="fas fa-arrow-left"></i> Volver al listado
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>

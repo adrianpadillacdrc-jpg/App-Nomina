@@ -16,15 +16,15 @@ import { AuthService } from '../../services/auth.service';
   template: `
     <div class="login-wrapper">
       <div class="login-card">
-        <h1>NUMA NOMINA</h1>
+        <h1>NUMA NÓMINA</h1>
         <form (ngSubmit)="ingresar()" #f="ngForm">
           <div class="field">
-            <label>USUARIO</label>
-            <input [(ngModel)]="usuario" name="usuario" placeholder="Ingrese su usuario" required />
+            <label for="login-usuario">USUARIO</label>
+            <input id="login-usuario" [(ngModel)]="usuario" name="usuario" placeholder="Ingrese su usuario" required autocomplete="username" />
           </div>
           <div class="field">
-            <label>CONTRASEÑA</label>
-            <input [(ngModel)]="password" name="password" type="password" placeholder="Ingrese su contraseña" required />
+            <label for="login-password">CONTRASEÑA</label>
+            <input id="login-password" [(ngModel)]="password" name="password" type="password" placeholder="Ingrese su contraseña" required autocomplete="current-password" />
           </div>
           <button type="submit" [disabled]="!f.valid || loading">
             {{ loading ? 'Cargando...' : 'Iniciar Sesión' }}
@@ -41,68 +41,68 @@ import { AuthService } from '../../services/auth.service';
       </div>
     </div>
   `,
-  styles: [` /* Tu CSS completo intacto */ 
+  styles: [`
     *, *::before, *::after { box-sizing: border-box; }
-    html, body, :host {
-      margin: 0 !important;
-      padding: 0 !important;
-      width: 100% !important;
-      height: 100% !important;
-      overflow: hidden !important;
+    :host {
+      display: block;
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
     }
 
     .login-wrapper {
       min-height: 100vh;
       min-height: 100dvh;
-      width: 100vw;
+      width: 100%;
       background: url('/assets/numa.jpg') center/cover no-repeat;
       background-attachment: fixed;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px;
+      padding: clamp(16px, 4vw, 32px);
       font-family: 'Segoe UI', sans-serif;
     }
 
     .login-card {
-      background: rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.16);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
-      border-radius: 40px;
-      width: 400px;
-      height: 460px;
-      padding: 56px 44px;
+      border-radius: clamp(20px, 4vw, 36px);
+      width: 100%;
+      max-width: 420px;
+      height: auto;
+      padding: clamp(28px, 6vw, 48px);
       text-align: center;
       box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
-      border: 1px solid rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.22);
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 20px;
+      gap: 18px;
     }
 
     h1 {
       color: #26222aff;
-      font-size: 2.2rem;
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
       font-weight: 800;
-      margin: 0;
-      line-height: 1.1;
+      margin: 0 0 6px;
+      line-height: 1.2;
       letter-spacing: 0.5px;
-      white-space: nowrap;
+      text-align: center;
     }
 
     .field {
-      margin: 0;
+      margin: 0 0 16px;
       text-align: left;
     }
 
     .field:last-of-type {
-      margin-bottom: 26px;
+      margin-bottom: 22px;
     }
 
     label {
       color: #f0f0f0;
-      font-size: 0.92rem;
+      font-size: 0.9rem;
       font-weight: 600;
       margin-bottom: 8px;
       display: block;
@@ -110,37 +110,43 @@ import { AuthService } from '../../services/auth.service';
 
     input {
       width: 100%;
-      padding: 16px 18px;
+      min-height: 48px;
+      padding: 12px 16px;
       background: rgba(255, 255, 255, 0.96);
       border: none;
-      border-radius: 14px;
+      border-radius: 12px;
       color: #333;
-      font-size: 1rem;
+      font-size: 16px; /* Evita zoom automático en iOS Safari */
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
       outline: none;
+      transition: box-shadow 0.2s ease, background 0.2s ease;
     }
 
     input::placeholder {
-      color: #aaa;
+      color: #888;
     }
 
     input:focus {
-      background: white;
-      box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.3);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.35);
     }
 
     button {
       width: 100%;
-      padding: 16px;
+      min-height: 48px;
+      padding: 12px 20px;
       background: #6a1b9a;
       color: white;
       border: none;
       border-radius: 50px;
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 5px 16px rgba(106, 27, 154, 0.5);
+      transition: all 0.25s ease;
+      box-shadow: 0 5px 16px rgba(106, 27, 154, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     button:hover:not(:disabled) {
@@ -156,15 +162,17 @@ import { AuthService } from '../../services/auth.service';
 
     .error {
       color: #ff6b6b;
-      font-size: 0.95rem;
-      margin-top: 8px;
+      font-size: 0.92rem;
+      margin-top: 10px;
     }
 
     .link {
       color: #d1c4e9;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       text-decoration: none;
       font-weight: 500;
+      display: inline-block;
+      margin-top: 6px;
     }
 
     .link:hover {
@@ -173,31 +181,20 @@ import { AuthService } from '../../services/auth.service';
     }
 
     .register-link {
-      margin-top: 15px;
+      margin-top: 14px;
       color: #d1c4e9;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
     }
 
     .register-link a {
-      color: #9c27b0;
-      font-weight: 600;
+      color: #ffffff;
+      font-weight: 700;
+      text-decoration: underline;
       cursor: pointer;
     }
 
     .register-link a:hover {
-      color: white;
-      text-decoration: underline;
-    }
-
-    @media (max-width: 480px) {
-      .login-card {
-        width: 340px;
-        height: 420px;
-        padding: 48px 36px;
-        gap: 18px;
-      }
-      h1 { font-size: 2.3rem; }
-      .field:last-of-type { margin-bottom: 22px; }
+      color: #e4d6fa;
     }
   `]
 })
@@ -229,7 +226,8 @@ export class LoginComponent {
 
         let targetRoute = '/dashboard';
 
-        if (role?.toUpperCase() === 'EMPLEADO') {
+        const upperRole = role?.toUpperCase() || '';
+        if (upperRole.includes('EMPLEADO')) {
           targetRoute = '/consulta-empleado';
         }
 

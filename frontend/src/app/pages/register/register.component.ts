@@ -2,13 +2,14 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css']
 })
@@ -59,11 +60,10 @@ export class RegisterComponent {
     const payload = {
       nombre: this.nombre.trim(),
       correo: this.correo.trim(),
-      contrasena: this.contrasena,
-      rol: this.rol.toUpperCase()
+      password: this.contrasena
     };
 
-    this.http.post('http://localhost:8080/api/auth/register', payload, { responseType: 'text' }).subscribe({
+    this.http.post(`${environment.apiUrl}/api/auth/register`, payload, { responseType: 'text' }).subscribe({
       next: (res: string) => {
         this.loading = false;
         this.success = res || 'Usuario registrado correctamente. Inicia sesión.';

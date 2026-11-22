@@ -1,6 +1,7 @@
 package com.nomina.numa.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nomina.numa.model.postgres.Empresa;
 import com.nomina.numa.service.EmpresaService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -38,5 +39,16 @@ public class EmpresaController {
     public Empresa update(@PathVariable Long id, @RequestBody Empresa e) {
         e.setId(id);
         return service.save(e);
+    }
+
+    // ✅ Guardar firma digital del representante legal de la empresa
+    @PostMapping("/{id}/firma")
+    public ResponseEntity<?> guardarFirmaRepresentante(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        String firma = body.get("firma");
+        return service.findById(id).map(empresa -> {
+            empresa.setFirmaRepresentante(firma);
+            service.save(empresa);
+            return ResponseEntity.ok(Map.of("mensaje", "Firma del representante legal guardada permanentemente"));
+        }).orElse(ResponseEntity.notFound().build());
     }
 }

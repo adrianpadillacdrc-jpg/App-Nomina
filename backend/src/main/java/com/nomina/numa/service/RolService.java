@@ -1,7 +1,7 @@
 package com.nomina.numa.service;
 
-import com.nomina.numa.model.mongo.Rol;
-import com.nomina.numa.repository.mongo.RolRepository;
+import com.nomina.numa.model.postgres.Rol;
+import com.nomina.numa.repository.jpa.RolRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;

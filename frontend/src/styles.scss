@@ -1,12 +1,140 @@
 /* src/styles.scss */
-html, body {
-  height: 100%;
+:root {
+  --fuente-base: 'Inter', 'Segoe UI', Arial, sans-serif;
+  --texto-base: clamp(0.9375rem, 0.85rem + 0.35vw, 1rem); /* 15px - 16px */
+  --titulo-pagina: clamp(1.35rem, 1.1rem + 1.2vw, 1.85rem); /* ~22px - 30px */
+  --titulo-seccion: clamp(1.15rem, 1rem + 0.8vw, 1.45rem); /* ~18px - 23px */
+  --titulo-subseccion: clamp(1rem, 0.95rem + 0.4vw, 1.2rem);
+  --texto-pequeno: clamp(0.75rem, 0.72rem + 0.2vw, 0.85rem);
+
+  /* Colores de marca */
+  --brand-purple: #6d3fc0;
+  --brand-purple-rgb: 109, 63, 192;
+  --brand-purple-dark: #3b1f73;
+  --brand-purple-dark-rgb: 59, 31, 115;
+  --brand-lilac: #e4d6fa;
+  --surface: #fff;
+  --surface-soft: #f6f4fa;
+  --surface-shadow: 0 4px 12px rgba(20, 9, 31, 0.15);
+  --table-border: #eee8f4;
+  --table-hover: #f7f2ff;
+  --success: #27ae60;
+  --success-dark: #388e3c;
+  --danger: #e74c3c;
+  --danger-dark: #c0392b;
+  --menu-muted: #766c83;
+  --danger-soft: #ffebee;
+  --text: #333;
+  --text-muted: #5f5d6e;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+html {
+  min-height: 100%;
+  margin: 0;
+  background: #14091f;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
   padding: 0;
-  font-family: 'Poppins', sans-serif;
-  background: url('/assets/numa.jpg') center/cover no-repeat fixed;
-  overflow: auto !important;
+  font-family: var(--fuente-base);
+  font-size: var(--texto-base);
+  line-height: 1.5;
+  background-color: #14091f;
+  overflow-x: hidden;
+  overflow-y: auto;
   scroll-behavior: smooth;
+}
+
+body *:not(.material-icons):not(.fas):not(.far):not(.fab):not(.fa) {
+  font-family: var(--fuente-base) !important;
+  text-transform: none !important;
+}
+
+button,
+input,
+select,
+textarea,
+table {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+input:not([type="checkbox"]):not([type="radio"]),
+select {
+  min-height: 44px;
+}
+
+h1,
+h2 {
+  font-family: var(--fuente-base);
+  font-weight: 600;
+  text-align: left;
+  text-transform: none !important;
+}
+
+h1 {
+  font-size: var(--titulo-pagina) !important;
+  font-weight: 600 !important;
+  line-height: 1.25;
+}
+
+h2 {
+  font-size: var(--titulo-seccion) !important;
+  font-weight: 600 !important;
+  color: var(--brand-purple-dark);
+  line-height: 1.35;
+}
+
+h3 {
+  font-size: var(--titulo-subseccion) !important;
+  font-weight: 600 !important;
+}
+
+h4 {
+  font-size: var(--texto-base) !important;
+  font-weight: 600 !important;
+}
+
+body *:not(h1):not(h2):not(h3):not(h4):not(.num):not(.kpi-value):not(.cost-value):not(.material-icons):not(.fas):not(.far):not(.fab):not(.fa):not(svg) {
+  font-size: max(var(--texto-pequeno), 1em) !important;
+}
+
+small,
+.mini {
+  font-size: var(--texto-pequeno) !important;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--brand-purple);
+  outline-offset: 3px;
+}
+
+table,
+.tabla-base,
+.num,
+.monto,
+.costo-valor,
+.cost-cell,
+.kpi-value,
+.periodo-item strong {
+  font-variant-numeric: tabular-nums;
 }
 
 app-root {
@@ -20,3 +148,452 @@ app-root {
 ::-webkit-scrollbar-thumb { background: #c1a8ff; border-radius: 10px; border: 3px solid #f1f1f1; }
 ::-webkit-scrollbar-thumb:hover { background: #9c27b0; }
 * { scrollbar-width: thin; scrollbar-color: #c1a8ff #f1f1f1; }
+
+/* ============================================
+   BARRA DE BÚSQUEDA GLOBAL - ESTILO SIMPLE
+   Píldora blanca limpia con lupa gris y botón
+   morado pequeño. Sin animaciones ni degradados
+   en el borde.
+   ============================================ */
+.numa-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border: 1.5px solid #e2dbe8;
+  border-radius: 12px;
+  padding: 6px 8px 6px 14px;
+  max-width: 100%;
+  width: 100%;
+  min-height: 48px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus-within {
+    border-color: #8e5cc7;
+    box-shadow: 0 0 0 3px rgba(142, 92, 199, 0.12);
+  }
+
+  .numa-search-icon {
+    flex: 0 0 auto;
+    color: #9a8fa8;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+  }
+
+  .numa-search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 14.5px;
+    color: #333;
+    padding: 8px 2px;
+    min-width: 0;
+
+    &::placeholder {
+      color: #a99fb3;
+      font-weight: 400;
+    }
+  }
+
+  .numa-search-btn {
+    flex: 0 0 auto;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 22px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    background: #6d28b6;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: #5b21a3;
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .numa-search {
+    .numa-search-btn { padding: 8px 16px; font-size: 13px; }
+    .numa-search-input { font-size: 13.5px; }
+  }
+}
+
+/* ============================================
+   UTILIDADES RESPONSIVE GLOBALES (MOBILE-FIRST)
+   ============================================ */
+.container,
+.container-responsive {
+  width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(12px, 3vw, 24px);
+  padding-right: clamp(12px, 3vw, 24px);
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+}
+
+.grid-responsive {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(12px, 2vw, 20px);
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 2vw, 20px);
+}
+
+@media (max-width: 900px) {
+  .page-wrapper.page-wrapper {
+    flex-direction: column !important;
+  }
+}
+
+.main-content,
+.contenido {
+  width: 100% !important;
+  max-width: 100%;
+  min-width: 0 !important;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin-left: 0 !important;
+  padding: clamp(14px, 2.5vw, 32px) !important;
+  box-sizing: border-box;
+  background: transparent !important;
+}
+
+@media (min-width: 901px) {
+  .main-content,
+  .contenido {
+    width: calc(100% - 260px) !important;
+    margin-left: 260px !important;
+  }
+}
+
+.page-wrapper,
+.layout {
+  min-height: 100vh;
+  background: transparent !important;
+}
+
+.main-content .card,
+.main-content .progress-section,
+.main-content .summary-card,
+.main-content .form-card,
+.main-content .chart-card,
+.main-content .comparador-chart,
+.main-content .history-card,
+.main-content .export-card,
+.main-content .comparador-section,
+.main-content .periodo-card,
+.main-content .table-card,
+.main-content .tabla-empleados,
+.main-content .empleado-card,
+.main-content .empty-state,
+.main-content .nomina-totales article,
+.main-content app-tabla-base,
+.contenido .tarjeta,
+.contenido .barra,
+.contenido .tabla-wrap,
+.contenido .timeline-wrap,
+.contenido .ev-card,
+.contenido app-tabla-base {
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #333333 !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-left: 4px solid var(--brand-purple) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--surface-shadow) !important;
+}
+
+.main-content .card,
+.main-content .progress-section,
+.main-content .summary-card,
+.main-content .form-card,
+.main-content .chart-card,
+.main-content .comparador-chart,
+.main-content .history-card,
+.main-content .export-card,
+.main-content .comparador-section,
+.main-content .periodo-card,
+.main-content .table-card,
+.main-content .tabla-empleados,
+.main-content .empleado-card,
+.main-content .empty-state,
+.main-content .nomina-totales article,
+.contenido .tarjeta,
+.contenido .barra,
+.contenido .tabla-wrap,
+.contenido .timeline-wrap,
+.contenido .ev-card {
+  padding: 24px !important;
+}
+
+.main-content .kpi-card {
+  padding: 24px 20px !important;
+  border-left: 0 !important;
+  border-radius: 20px !important;
+}
+
+.main-content .kpis .kpi-card {
+  padding-top: 72px !important;
+}
+
+.main-content .numa-search {
+  padding: 6px 8px 6px 14px !important;
+  min-height: 48px;
+  border: 1px solid #ded9e8 !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+.main-content .numa-search input {
+  min-height: 36px;
+  padding: 8px 2px;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.main-content .numa-search input:focus-visible {
+  outline: none !important;
+}
+
+.main-content app-tabla-base > .table-card,
+.main-content app-tabla-base > .tabla-empleados,
+.main-content app-tabla-base > .tabla-nomina {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.main-content .periodo-card {
+  text-align: left !important;
+}
+
+.main-content .summary-icon-wrap,
+.main-content .chart-svg-wrapper {
+  background: var(--surface-soft) !important;
+}
+
+.main-content .periodo-banner .periodo-item {
+  background: rgba(20, 9, 31, 0.6) !important;
+  color: #ffffff !important;
+  border-left: 0 !important;
+  border-radius: 18px !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+.main-content .periodo-card h2,
+.main-content .periodo-card h3,
+.main-content .periodo-card p,
+.main-content .periodo-card .descripcion-destacada,
+.main-content .periodo-card .estado-destacado,
+.main-content .card-header h2,
+.main-content .card-header h3,
+.main-content .section-title,
+.main-content .info h3,
+.contenido .cabecera h1,
+.contenido .ev-titulo {
+  color: var(--brand-purple-dark) !important;
+}
+
+.main-content .subtitle,
+.main-content .section-kicker {
+  text-shadow: 0 2px 8px rgba(20, 9, 31, 0.6);
+}
+
+.main-content .numa-search input,
+.main-content .search-input,
+.main-content input:not([type="checkbox"]):not([type="radio"]),
+.main-content select,
+.main-content textarea,
+.contenido input:not([type="checkbox"]):not([type="radio"]),
+.contenido select,
+.contenido textarea {
+  background-color: var(--surface-soft) !important;
+  border: 1px solid #ded9e8 !important;
+  border-radius: 12px !important;
+  color: #333333 !important;
+}
+
+.main-content .numa-search input {
+  background-color: transparent !important;
+}
+
+.main-content .numa-search input:focus,
+.main-content .search-input:focus,
+.main-content input:focus-visible,
+.main-content select:focus-visible,
+.main-content textarea:focus-visible,
+.contenido input:focus-visible,
+.contenido select:focus-visible,
+.contenido textarea:focus-visible {
+  border-color: var(--brand-purple) !important;
+  outline: 3px solid rgba(var(--brand-purple-rgb), 0.22) !important;
+  outline-offset: 1px;
+}
+
+.main-content .numa-search input,
+.main-content .search-input,
+.main-content input,
+.main-content select,
+.main-content textarea,
+.contenido input,
+.contenido select,
+.contenido textarea {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.main-content > .container,
+.main-content > .registro-container,
+.main-content > .consultar-container,
+.main-content > .liquidar-container,
+.main-content > .novedades-container,
+.main-content > .pago-container,
+.main-content > .periodos-container,
+.main-content > .content,
+.contenido > * {
+  width: 100%;
+  max-width: 1280px !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+}
+
+.main-content > app-encabezado-pagina,
+.main-content .page-header,
+.contenido > app-encabezado-pagina {
+  margin-bottom: 24px;
+}
+
+.main-content .numa-search {
+  max-width: none;
+  min-height: 48px;
+  margin: 0 0 24px;
+}
+
+.main-content .numa-search input,
+.main-content .numa-search select,
+.main-content .numa-search button {
+  min-height: 36px;
+  font-size: var(--texto-base);
+}
+
+.main-content .tabla-empleados,
+.main-content .table-container,
+.main-content .table-card,
+.main-content .tabla-nomina {
+  width: 100%;
+  max-width: 100%;
+}
+
+.main-content .header-row,
+.main-content .table-header,
+.main-content .tabla-nomina .header {
+  background: var(--brand-lilac) !important;
+  color: var(--brand-purple-dark) !important;
+  font-weight: 600 !important;
+  text-align: left !important;
+}
+
+.main-content .empleado-row,
+.main-content .table-row,
+.main-content .tabla-nomina .row {
+  border-bottom: 1px solid var(--table-border);
+  padding: 12px 16px !important;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+}
+
+.main-content .header-row,
+.main-content .table-header,
+.main-content .tabla-nomina .header {
+  padding: 12px 16px !important;
+}
+
+.main-content .empleado-row:hover,
+.main-content .table-row:hover,
+.main-content .tabla-nomina .row:hover {
+  background: var(--table-hover);
+}
+
+.main-content th,
+.main-content td {
+  font-variant-numeric: tabular-nums;
+}
+
+.main-content .paginacion,
+.main-content .paginacion-wrapper,
+.main-content .paginacion-dashboard,
+.main-content .nomina-pagination,
+.contenido .paginacion {
+  justify-content: flex-end !important;
+  margin-top: 24px !important;
+}
+
+.main-content .paginacion-dashboard > div:first-child {
+  margin-right: auto;
+}
+
+.main-content .table-container,
+.main-content .tabla-empleados,
+.main-content .table-card,
+.main-content .tabla-nomina {
+  text-align: left;
+}
+
+@media (max-width: 900px) {
+  .main-content,
+  .contenido {
+    width: 100% !important;
+    min-height: calc(100vh - 100px);
+    margin-left: 0 !important;
+    padding: 16px !important;
+  }
+
+  .main-content > .container,
+  .main-content > .registro-container,
+  .main-content > .consultar-container,
+  .main-content > .liquidar-container,
+  .main-content > .novedades-container,
+  .main-content > .pago-container,
+  .main-content > .periodos-container,
+  .main-content > .content,
+  .contenido > * {
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content,
+  .contenido {
+    padding: 16px !important;
+  }
+}

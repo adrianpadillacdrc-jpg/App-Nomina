@@ -1,0 +1,52 @@
+<div class="chatbot-widget">
+  <section class="chat-panel" *ngIf="abierto" role="dialog" aria-label="NUMA CHAT">
+    <header class="chat-header">
+      <div>
+        <strong>{{ titulo }}</strong>
+        <span><i></i> En línea</span>
+      </div>
+      <button type="button" class="close-button" aria-label="Cerrar NUMA CHAT" (click)="toggle()">×</button>
+    </header>
+
+    <p class="privacy-notice" *ngIf="mode === 'employee'">{{ avisoPrivacidad }}</p>
+
+    <div #messageList class="messages" aria-live="polite">
+      <div
+        *ngFor="let mensaje of mensajes"
+        class="message"
+        [class.from-user]="mensaje.role === 'user'"
+      >
+        {{ mensaje.content }}
+      </div>
+      <div class="message typing" *ngIf="enviando">Estoy preparando una respuesta…</div>
+    </div>
+
+    <p class="error-message" *ngIf="error" role="alert">{{ error }}</p>
+
+    <form class="composer" (ngSubmit)="enviar()">
+      <textarea
+        [(ngModel)]="texto"
+        name="message"
+        rows="2"
+        maxlength="1500"
+        placeholder="Escribe tu consulta…"
+        aria-label="Escribe tu consulta"
+        (keydown)="onKeydown($event)"
+      ></textarea>
+      <button type="submit" [disabled]="enviando || !texto.trim()" aria-label="Enviar mensaje">
+        Enviar
+      </button>
+    </form>
+    <small class="hint">Enter para enviar</small>
+  </section>
+
+  <button
+    type="button"
+    class="launcher"
+    [attr.aria-expanded]="abierto"
+    [attr.aria-label]="abierto ? 'Cerrar NUMA CHAT' : 'Abrir NUMA CHAT'"
+    (click)="toggle()"
+  >
+    <span aria-hidden="true">{{ abierto ? '×' : '☁' }}</span>
+  </button>
+</div>

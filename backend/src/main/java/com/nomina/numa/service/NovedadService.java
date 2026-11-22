@@ -1,7 +1,7 @@
 package com.nomina.numa.service;
 
-import com.nomina.numa.model.mongo.Novedad;
-import com.nomina.numa.repository.mongo.NovedadRepository;
+import com.nomina.numa.model.postgres.Novedad;
+import com.nomina.numa.repository.jpa.NovedadRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -34,5 +34,9 @@ public class NovedadService {
 
     public List<Novedad> findByEmpleado(Long id) {
         return repository.findByIdEmpleado(id);
+    }
+
+    public void deleteAll() {
+        repository.deleteAll();
     }
 }

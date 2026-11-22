@@ -1,0 +1,684 @@
+<div class="modal-overlay" *ngIf="visible" (click)="cerrarModal()">
+  <div class="modal-shell" (click)="$event.stopPropagation()">
+
+    <!-- Barra superior de control del visor de documentos -->
+    <header class="toolbar no-print">
+      <div class="tabs">
+        <button type="button" class="tab-btn" [class.active]="pestanaActiva === 'comprobante' && !modoImpresionCompleta"
+          (click)="cambiarPestana('comprobante')">
+          1. Comprobante de Pago
+        </button>
+        <button type="button" class="tab-btn" [class.active]="pestanaActiva === 'novedades' && !modoImpresionCompleta"
+          (click)="cambiarPestana('novedades')">
+          2. Resumen de Novedades
+        </button>
+        <button type="button" class="tab-btn" [class.active]="pestanaActiva === 'contrato' && !modoImpresionCompleta"
+          (click)="cambiarPestana('contrato')">
+          3. Contrato Laboral
+        </button>
+      </div>
+
+      <div class="toolbar-actions">
+        <label class="check-todos" title="Mostrar e imprimir las 3 páginas consecutivas">
+          <input type="checkbox" [(ngModel)]="modoImpresionCompleta">
+          <span>Ver las 3 páginas</span>
+        </label>
+        <button *ngIf="pestanaActiva === 'contrato' && !soloLectura" type="button" class="btn-renovar"
+          (click)="abrirModalRenovacion()">
+          🔄 Renovar Contrato
+        </button>
+        <button type="button" class="btn-print" (click)="imprimir()">
+          Imprimir / Guardar PDF
+        </button>
+        <button type="button" class="btn-close" (click)="cerrarModal()" aria-label="Cerrar modal">
+          ✕
+        </button>
+      </div>
+    </header>
+
+    <!-- Contenedor scrolleable con las páginas A4 -->
+    <div class="document-viewer">
+
+      <!-- ============ 1. COMPROBANTE DE PAGO ============ -->
+      <section class="page" *ngIf="pestanaActiva === 'comprobante' || modoImpresionCompleta">
+        <div class="head">
+          <div>
+            <div class="brand">NUMA STORE S.A.S.</div>
+            <div class="sub">NIT 901.234.567-1 · Calle 22 Kr 83, Cartagena</div>
+          </div>
+          <div class="doc">
+            <b>Comprobante de pago de nómina</b>
+            <span class="sub">N.º {{ codigoDocumento }}</span><br>
+            <span class="badge">Comprobante Oficial de Nómina</span>
+          </div>
+        </div>
+
+        <dl class="info">
+          <div>
+            <dt>Colaborador</dt>
+            <dd>{{ nombreCompleto }}</dd>
+          </div>
+          <div>
+            <dt>Cédula</dt>
+            <dd>C.C. {{ documentoIdentidad }}</dd>
+          </div>
+          <div>
+            <dt>Cargo</dt>
+            <dd>{{ cargo }}</dd>
+          </div>
+          <div>
+            <dt>Período</dt>
+            <dd>{{ descripcionPeriodo }}</dd>
+          </div>
+          <div>
+            <dt>Fecha de pago</dt>
+            <dd>{{ hoy | date:'dd/MM/yyyy' }}</dd>
+          </div>
+          <div>
+            <dt>Salario base mensual</dt>
+            <dd class="num" style="text-align:left">{{ formatCOP(salarioBase) }}</dd>
+          </div>
+        </dl>
+
+        <div class="cols">
+          <div class="dev">
+            <h2>Devengados</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Concepto</th>
+                  <th class="num">Base</th>
+                  <th class="num">Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Sueldo básico quincenal (15 días)</td>
+                  <td class="num sub">{{ formatCOP(salarioBase) }}</td>
+                  <td class="num">{{ formatCOP(sueldoQuincenal) }}</td>
+                </tr>
+                <tr>
+                  <td>Auxilio de transporte quincenal</td>
+                  <td class="num sub">{{ auxilioAplica ? '$ 249.095' : '$ 0' }}</td>
+                  <td class="num">{{ formatCOP(auxilioQuincenal) }}</td>
+                </tr>
+                <tr>
+                  <td>Horas extras y recargos ({{ novedades.length }} novedades)</td>
+                  <td class="num sub">ver detalle</td>
+                  <td class="num">{{ formatCOP(valorHorasExtras) }}</td>
+                </tr>
+                <tr class="tot">
+                  <td colspan="2">Total devengado</td>
+                  <td class="num">{{ formatCOP(totalDevengado) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="ded">
+            <h2>Deducciones</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Concepto</th>
+                  <th class="num">Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Salud (4 % sobre IBC)</td>
+                  <td class="num neg">− {{ formatCOP(deduccionSalud) }}</td>
+                </tr>
+                <tr>
+                  <td>Pensión (4 % sobre IBC)</td>
+                  <td class="num neg">− {{ formatCOP(deduccionPension) }}</td>
+                </tr>
+                <tr class="tot">
+                  <td>Total deducido</td>
+                  <td class="num neg">− {{ formatCOP(totalDeducido) }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="sub" style="margin:6px 0 0">
+              IBC = sueldo + horas extras = {{ formatCOP(ibc) }} (el auxilio de transporte no cotiza).
+            </p>
+          </div>
+        </div>
+
+        <div class="neto">
+          <span>Total neto a pagar</span>
+          <strong>{{ formatCOP(totalNeto) }} COP</strong>
+        </div>
+
+        <p class="note">
+          Medio de pago: transferencia a cuenta nómina registrada. Dudas sobre este comprobante: rrhh&#64;numastore.co.
+          Emitido conforme al Código Sustantivo del Trabajo y la Ley 2101 de 2021.
+        </p>
+
+        <div class="sign">
+          <!-- Firma empleador (misma que en el contrato) -->
+          <div class="sign-box">
+            <div class="sign-label">Firma del empleador · NUMA STORE</div>
+            <div class="sign-preview" *ngIf="firmaEmpleadorGuardada">
+              <img [src]="firmaEmpleadorGuardada" alt="Firma empleador" class="firma-img">
+              <div class="sign-info"><b>Adrian Padilla</b><br>Representante Legal</div>
+              <button class="btn-firma-editar no-print" (click)="abrirPadEmpleador()">✏️ Editar firma</button>
+            </div>
+            <div class="sign-empty no-print" *ngIf="!firmaEmpleadorGuardada">
+              <div class="linea-firma"></div>
+              <div class="sign-info"><b>Adrian Padilla</b><br>Representante Legal</div>
+              <button class="btn-firma-primary no-print" (click)="abrirPadEmpleador()">Firmar aquí</button>
+            </div>
+            <!-- PAD empleador -->
+            <div class="firma-pad-overlay no-print" *ngIf="mostrarPadEmpleador">
+              <div class="firma-pad-card">
+                <div class="firma-pad-title">Firma del empleador</div>
+                <div class="firma-pad-hint">Dibuja tu firma con el mouse o con el dedo</div>
+                <canvas #canvasFirmaEmpleador class="firma-canvas" (mousedown)="onPointerDown($event)"
+                  (mousemove)="onPointerMove($event)" (mouseup)="onPointerUp()" (touchstart)="onPointerDown($event)"
+                  (touchmove)="onPointerMove($event)" (touchend)="onPointerUp()">
+                </canvas>
+                <div class="firma-pad-actions">
+                  <button class="btn-pad-limpiar" (click)="limpiarFirma('emp')"> Borrar</button>
+                  <button class="btn-pad-cancel" (click)="cancelarPad('emp')">Cancelar</button>
+                  <button class="btn-pad-guardar" (click)="guardarFirma('emp')">Guardar firma</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Firma trabajador (misma que en el contrato) -->
+          <div class="sign-box">
+            <div class="sign-label">Firma del colaborador · Recibido</div>
+            <div class="sign-preview" *ngIf="firmaTrabajadorGuardada">
+              <img [src]="firmaTrabajadorGuardada" alt="Firma trabajador" class="firma-img">
+              <div class="sign-info"><b>{{ nombreCompleto }}</b><br>C.C. {{ documentoIdentidad }}</div>
+              <button class="btn-firma-editar no-print" (click)="abrirPadTrabajador()"> Editar firma</button>
+            </div>
+            <div class="sign-empty no-print" *ngIf="!firmaTrabajadorGuardada">
+              <div class="linea-firma"></div>
+              <div class="sign-info"><b>{{ nombreCompleto }}</b><br>C.C. {{ documentoIdentidad }}</div>
+              <button class="btn-firma-primary no-print" (click)="abrirPadTrabajador()">Firmar aquí</button>
+            </div>
+            <!-- PAD trabajador -->
+            <div class="firma-pad-overlay no-print" *ngIf="mostrarPadTrabajador">
+              <div class="firma-pad-card">
+                <div class="firma-pad-title">Firma del trabajador</div>
+                <div class="firma-pad-hint">Dibuja tu firma con el mouse o con el dedo</div>
+                <canvas #canvasFirmaTrabajador class="firma-canvas" (mousedown)="onPointerDown($event)"
+                  (mousemove)="onPointerMove($event)" (mouseup)="onPointerUp()" (touchstart)="onPointerDown($event)"
+                  (touchmove)="onPointerMove($event)" (touchend)="onPointerUp()">
+                </canvas>
+                <div class="firma-pad-actions">
+                  <button class="btn-pad-limpiar" (click)="limpiarFirma('trab')"> Borrar</button>
+                  <button class="btn-pad-cancel" (click)="cancelarPad('trab')">Cancelar</button>
+                  <button class="btn-pad-guardar" (click)="guardarFirma('trab')"> Guardar firma</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="foot">
+          <span>Generado el {{ hoy | date:'dd/MM/yyyy' }}</span>
+          <span>Código de verificación: NS-7F3K-92QD</span>
+        </div>
+      </section>
+
+      <!-- ============ 2. RESUMEN DE NOVEDADES ============ -->
+      <section class="page" *ngIf="pestanaActiva === 'novedades' || modoImpresionCompleta">
+        <div class="head">
+          <div>
+            <div class="brand">NUMA STORE S.A.S.</div>
+            <div class="sub">{{ descripcionPeriodo }}</div>
+          </div>
+          <div class="doc">
+            <b>Resumen de salario y novedades aprobadas</b>
+            <span class="sub">{{ nombreCompleto }} · C.C. {{ documentoIdentidad }}</span>
+          </div>
+        </div>
+
+        <div class="alert" *ngIf="valorHorasExtras > 0">
+          <b>Auditoría Ley 2101:</b> Las horas extras y recargos suman {{ formatCOP(valorHorasExtras) }}. El límite
+          legal según MinTrabajo es de máximo 2h extras diarias y 12h extras semanales por persona.
+        </div>
+        <div class="alert" *ngIf="valorHorasExtras === 0"
+          style="background:#e9f5ee; border-color:#86efac; color:#15803d;">
+          <b>Operación al día:</b> No se registran sobrecargas ni horas extras atípicas para este colaborador en el
+          período.
+        </div>
+
+        <h2>Devengos</h2>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:56px">Cód.</th>
+              <th>Concepto</th>
+              <th>Detalle</th>
+              <th class="num">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>001</td>
+              <td>Sueldo básico quincenal</td>
+              <td class="sub">15 días</td>
+              <td class="num">{{ formatCOP(sueldoQuincenal) }}</td>
+            </tr>
+            <tr>
+              <td>002</td>
+              <td>Auxilio de transporte</td>
+              <td class="sub">15 días</td>
+              <td class="num">{{ formatCOP(auxilioQuincenal) }}</td>
+            </tr>
+            <tr *ngFor="let nov of novedades; let i = index">
+              <td>{{ (i + 3).toString().padStart(3, '0') }}</td>
+              <td>{{ nov.tipoNovedad || nov.concepto || 'Hora extra' }}</td>
+              <td class="sub">{{ nov.descripcion || 'Novedad aprobada en tienda' }}</td>
+              <td class="num">{{ formatCOP(nov.valor || nov.monto || 0) }}</td>
+            </tr>
+            <tr *ngIf="!novedades || novedades.length === 0">
+              <td>003</td>
+              <td>Horas extras ordinarias</td>
+              <td class="sub">Sin novedades adicionales</td>
+              <td class="num">{{ formatCOP(0) }}</td>
+            </tr>
+            <tr class="tot">
+              <td colspan="3">Subtotal horas extras</td>
+              <td class="num">{{ formatCOP(valorHorasExtras) }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="cols" style="grid-template-columns:1fr 1fr">
+          <div class="dev">
+            <h2>Total devengado</h2>
+            <table>
+              <tr class="tot">
+                <td>Suma de devengos</td>
+                <td class="num">{{ formatCOP(totalDevengado) }}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="ded">
+            <h2>Total deducido</h2>
+            <table>
+              <tr class="tot">
+                <td>Salud + pensión</td>
+                <td class="num neg">− {{ formatCOP(totalDeducido) }}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="neto">
+          <span>Neto estimado</span>
+          <strong>{{ formatCOP(totalNeto) }}</strong>
+        </div>
+
+        <div class="foot">
+          <span>Generado el {{ hoy | date:'dd/MM/yyyy' }}</span>
+          <span>NUMA Nómina · Auditoría de Personal</span>
+        </div>
+      </section>
+
+      <!-- ============ 3. CONTRATO ============ -->
+      <section class="page contract" *ngIf="pestanaActiva === 'contrato' || modoImpresionCompleta">
+        <div class="head">
+          <div>
+            <div class="brand">NUMA STORE S.A.S.</div>
+            <div class="sub">NIT 901.234.567-1 · Calle 22 Kr 83</div>
+          </div>
+          <div class="doc">
+            <b>Contrato individual de trabajo</b>
+            <span class="sub">A término fijo · N.º {{ codigoContrato }}</span>
+          </div>
+        </div>
+
+        <dl class="data">
+          <div>
+            <dt>Empleador</dt>
+            <dd>NUMA STORE S.A.S.</dd>
+          </div>
+          <div>
+            <dt>Representante legal</dt>
+            <dd>Adrian Padilla</dd>
+          </div>
+          <div>
+            <dt>Trabajador(a)</dt>
+            <dd>{{ nombreCompleto }}</dd>
+          </div>
+          <div>
+            <dt>Identificación</dt>
+            <dd>C.C. {{ documentoIdentidad }}</dd>
+          </div>
+          <div>
+            <dt>Dirección</dt>
+            <dd>{{ direccionEmpleado }}</dd>
+          </div>
+          <div>
+            <dt>Teléfono</dt>
+            <dd>{{ telefonoEmpleado }}</dd>
+          </div>
+          <div>
+            <dt>Cargo</dt>
+            <dd>{{ cargo }}</dd>
+          </div>
+          <div>
+            <dt>Sede</dt>
+            <dd>Villa Grande · Calle 45 #12-30</dd>
+          </div>
+          <div>
+            <dt>Vigencia</dt>
+            <dd>{{ fechaInicioContrato | date:'dd/MM/yyyy' }} al {{ fechaFinContrato | date:'dd/MM/yyyy' }}</dd>
+          </div>
+          <div>
+            <dt>Salario mensual</dt>
+            <dd>{{ formatCOP(salarioBase) }} COP</dd>
+          </div>
+        </dl>
+
+        <p>
+          Entre NUMA STORE S.A.S., representada por Adrian Padilla, y el(la) trabajador(a) identificado(a) arriba, se
+          celebra un contrato individual de trabajo a término fijo, regido por las siguientes cláusulas:
+        </p>
+
+        <h3>Primera · Objeto</h3>
+        <p>El trabajador presta sus servicios personales, bajo dependencia y subordinación del empleador, en el cargo de
+          {{ cargo }}.</p>
+
+        <h3>Segunda · Duración</h3>
+        <p>Desde el {{ fechaInicioContrato | date:'dd/MM/yyyy' }} hasta el {{ fechaFinContrato | date:'dd/MM/yyyy' }}.
+          Se prorroga por períodos iguales si ninguna parte avisa por escrito su decisión de no renovar con al menos 30
+          días de anticipación.</p>
+
+        <h3>Tercera · Jornada</h3>
+        <p>La jornada ordinaria es de 42 horas semanales (Ley 2101 de 2021), distribuida según las necesidades de la
+          empresa. El trabajo suplementario requiere autorización previa y no puede superar el máximo legal.</p>
+
+        <h3>Cuarta · Remuneración</h3>
+        <p>Salario mensual de {{ formatCOP(salarioBase) }} COP, pagadero por quincenas. Se pagan además el auxilio de
+          transporte y los recargos y horas extras que correspondan conforme a la ley.</p>
+
+        <h3>Quinta · Lugar de trabajo</h3>
+        <p>Sede Villa Grande de NUMA STORE, Calle 45 #12-30. El empleador puede reubicar al trabajador dentro de la
+          ciudad sin desmejorar sus condiciones laborales.</p>
+
+        <h3>Sexta · Obligaciones</h3>
+        <p>Cumplir el reglamento interno de trabajo, cuidar los bienes y el inventario a su cargo, y guardar absoluta
+          reserva sobre la información confidencial de la empresa.</p>
+
+        <h3>Séptima · Seguridad social y deducciones</h3>
+        <p>El empleador afilia al trabajador al sistema general de seguridad social. El trabajador autoriza descontar de
+          su salario los aportes a salud y pensión y demás deducciones autorizadas por la ley colombiana.</p>
+
+        <p style="margin-top:14px;">Para constancia se firma en dos ejemplares el {{ hoy | date:'dd/MM/yyyy' }}.</p>
+
+        <!-- ═══════════════════ FIRMAS TÁCTILES ═══════════════════ -->
+        <div class="sign">
+
+          <!-- FIRMA TRABAJADOR -->
+          <div class="sign-box">
+            <div class="sign-label">Firma del Trabajador</div>
+
+            <!-- Imagen ya guardada o Certificado OTP -->
+            <div class="sign-preview" *ngIf="firmaTrabajadorGuardada">
+              <img *ngIf="!esFirmaOTP(firmaTrabajadorGuardada)" [src]="firmaTrabajadorGuardada" alt="Firma trabajador" class="firma-img">
+              <div class="firma-otp-badge" *ngIf="esFirmaOTP(firmaTrabajadorGuardada)">
+                <div class="badge-icon"></div>
+                <div class="badge-text">
+                  <b>Firma Electrónica Certificada (OTP)</b><br>
+                  <span>{{ obtenerDetalleFirmaOTP(firmaTrabajadorGuardada) }}</span>
+                </div>
+              </div>
+              <div class="sign-info">
+                <b>{{ nombreCompleto }}</b><br>
+                C.C. {{ documentoIdentidad }}
+              </div>
+              <div class="firma-acciones-row no-print">
+                <button class="btn-firma-editar" (click)="abrirPadTrabajador()">✏️ Dibujar firma</button>
+                <button class="btn-firma-otp-sm" (click)="abrirModalOTP()">📩 Validar con código OTP</button>
+              </div>
+            </div>
+
+            <!-- Opciones si aún no hay firma -->
+            <div class="sign-empty no-print" *ngIf="!firmaTrabajadorGuardada">
+              <div class="linea-firma"></div>
+              <div class="sign-info">
+                <b>{{ nombreCompleto }}</b><br>
+                C.C. {{ documentoIdentidad }}
+              </div>
+              <div class="firma-opciones-grid">
+                <button class="btn-firma-primary" (click)="abrirPadTrabajador()">✍️ Dibujar firma</button>
+                <button class="btn-firma-otp" (click)="abrirModalOTP()">📩 Firmar con código (OTP)</button>
+              </div>
+            </div>
+
+            <!-- PAD táctil trabajador -->
+            <div class="firma-pad-overlay no-print" *ngIf="mostrarPadTrabajador">
+              <div class="firma-pad-card">
+                <div class="firma-pad-title"> Firma del trabajador</div>
+                <div class="firma-pad-hint">Dibuja tu firma con el mouse o con el dedo</div>
+                <canvas #canvasFirmaTrabajador class="firma-canvas" (mousedown)="onPointerDown($event)"
+                  (mousemove)="onPointerMove($event)" (mouseup)="onPointerUp()" (touchstart)="onPointerDown($event)"
+                  (touchmove)="onPointerMove($event)" (touchend)="onPointerUp()">
+                </canvas>
+                <div class="firma-pad-actions">
+                  <button class="btn-pad-limpiar" (click)="limpiarFirma('trab')"> Borrar</button>
+                  <button class="btn-pad-cancel" (click)="cancelarPad('trab')">Cancelar</button>
+                  <button class="btn-pad-guardar" (click)="guardarFirma('trab')"> Guardar firma</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FIRMA EMPLEADOR -->
+          <div class="sign-box">
+            <div class="sign-label">Firma del Empleador</div>
+
+            <!-- Imagen ya guardada -->
+            <div class="sign-preview" *ngIf="firmaEmpleadorGuardada">
+              <img [src]="firmaEmpleadorGuardada" alt="Firma empleador" class="firma-img">
+              <div class="sign-info">
+                <b>Dilibeth Cordoba y Adrian padilla</b><br>
+                Representante legal · NUMA STORE
+              </div>
+              <button class="btn-firma-editar no-print" (click)="abrirPadEmpleador()"> Editar firma</button>
+            </div>
+
+            <!-- Línea vacía si aún no hay firma -->
+            <div class="sign-empty no-print" *ngIf="!firmaEmpleadorGuardada">
+              <div class="linea-firma"></div>
+              <div class="sign-info">
+                <b>Adrian Padilla</b><br>
+                Representante legal · NUMA STORE
+              </div>
+              <button class="btn-firma-primary no-print" (click)="abrirPadEmpleador()">Firmar aquí</button>
+            </div>
+
+            <!-- PAD táctil empleador -->
+            <div class="firma-pad-overlay no-print" *ngIf="mostrarPadEmpleador">
+              <div class="firma-pad-card">
+                <div class="firma-pad-title"> Firma del empleador</div>
+                <div class="firma-pad-hint">tu firma </div>
+                <canvas #canvasFirmaEmpleador class="firma-canvas" (mousedown)="onPointerDown($event)"
+                  (mousemove)="onPointerMove($event)" (mouseup)="onPointerUp()" (touchstart)="onPointerDown($event)"
+                  (touchmove)="onPointerMove($event)" (touchend)="onPointerUp()">
+                </canvas>
+                <div class="firma-pad-actions">
+                  <button class="btn-pad-limpiar" (click)="limpiarFirma('emp')"> Borrar</button>
+                  <button class="btn-pad-cancel" (click)="cancelarPad('emp')">Cancelar</button>
+                  <button class="btn-pad-guardar" (click)="guardarFirma('emp')"> Guardar firma</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- ══════════════════════════════════════════════════════ -->
+
+        <div class="foot">
+          <span>NUMA STORE S.A.S. · Contrato {{ codigoContrato }}</span>
+          <span>Fecha de generación: {{ hoy | date:'dd/MM/yyyy' }}</span>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ═══════════════════ MODAL RENOVACIÓN DE CONTRATO ═══════════════════ -->
+    <div class="renovacion-overlay no-print" *ngIf="mostrarModalRenovacion" (click)="cerrarModalRenovacion()">
+      <div class="renovacion-card" (click)="$event.stopPropagation()">
+        <div class="renovacion-header">
+          <div>
+            <h3> Renovar Contrato Laboral</h3>
+            <p class="renovacion-sub">Colaborador: <b>{{ nombreCompleto }}</b> (C.C. {{ documentoIdentidad }})</p>
+          </div>
+          <button type="button" class="btn-close-sub" (click)="cerrarModalRenovacion()">✕</button>
+        </div>
+
+        <div class="renovacion-body">
+          <div class="info-vigencia-actual">
+            <span class="label-info">Contrato actual:</span>
+            <span class="valor-info">{{ fechaInicioContrato | date:'dd/MM/yyyy' }} al {{ fechaFinContrato |
+              date:'dd/MM/yyyy' }}</span>
+          </div>
+
+          <div class="form-group">
+            <label>Tipo de Contrato</label>
+            <select [(ngModel)]="renovacion.tipoContrato" class="form-input">
+              <option value="TERMINO_FIJO">Término Fijo (Prorrogable)</option>
+              <option value="INDEFINIDO">Término Indefinido</option>
+              <option value="OBRA_LABOR">Por Obra o Labor</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nueva Fecha de Inicio</label>
+              <input type="date" [(ngModel)]="renovacion.fechaInicio" (change)="calcularFechaFinPorDuracion()"
+                class="form-input">
+            </div>
+
+            <div class="form-group" *ngIf="renovacion.tipoContrato !== 'INDEFINIDO'">
+              <label>Nueva Fecha de Fin</label>
+              <input type="date" [(ngModel)]="renovacion.fechaFin" class="form-input">
+            </div>
+          </div>
+
+          <div class="duracion-chips" *ngIf="renovacion.tipoContrato !== 'INDEFINIDO'">
+            <span class="chip-label">Prorrogar por:</span>
+            <button type="button" class="chip-duracion" (click)="setDuracionMeses(3)">3 meses</button>
+            <button type="button" class="chip-duracion" (click)="setDuracionMeses(6)">6 meses</button>
+            <button type="button" class="chip-duracion" (click)="setDuracionMeses(12)">1 año</button>
+          </div>
+
+          <div class="form-group">
+            <label>Salario Mensual (COP)</label>
+            <input type="number" [(ngModel)]="renovacion.salario" class="form-input" placeholder="Ej: 1800000">
+            <small class="salario-hint">SMLMV 2026: $1.750.905 COP</small>
+          </div>
+
+          <div *ngIf="mensajeErrorRenovacion" class="error-msg">
+            {{ mensajeErrorRenovacion }}
+          </div>
+          <div *ngIf="mensajeExitoRenovacion" class="exito-msg">
+            {{ mensajeExitoRenovacion }}
+          </div>
+        </div>
+
+        <div class="renovacion-footer">
+          <button type="button" class="btn-cancelar-sub" (click)="cerrarModalRenovacion()">Cancelar</button>
+          <button type="button" class="btn-confirmar-sub" [disabled]="guardandoRenovacion"
+            (click)="confirmarRenovacion()">
+            {{ guardandoRenovacion ? 'Guardando...' : 'Confirmar y Renovar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ MODAL FIRMA CON CÓDIGO OTP ═══════════════════ -->
+    <div class="otp-overlay no-print" *ngIf="mostrarModalOTP" (click)="cerrarModalOTP()">
+      <div class="otp-card" (click)="$event.stopPropagation()">
+        <div class="otp-header">
+          <div class="otp-header-info">
+            <span class="otp-badge-top">Firma Electrónica Legal</span>
+            <h3>Validación de Firma por Código (OTP)</h3>
+            <p>Se enviará un código de seguridad de 6 dígitos al correo del empleado.</p>
+          </div>
+          <button type="button" class="btn-close" (click)="cerrarModalOTP()">✕</button>
+        </div>
+
+        <div class="otp-body">
+          <div class="otp-destinatario-card">
+            <div class="otp-dest-row">
+              <span class="otp-label">Colaborador:</span>
+              <span class="otp-val">{{ nombreCompleto }}</span>
+            </div>
+            <div class="otp-dest-row">
+              <span class="otp-label">Correo registrado:</span>
+              <span class="otp-val font-mono">{{ correoDestinoOTP || 'Cargando correo...' }}</span>
+            </div>
+          </div>
+
+          <div class="otp-step-box" *ngIf="!codigoEnviado">
+            <p class="otp-hint-text">
+              Para generar el código en el sistema y despacharlo al correo, haz clic a continuación:
+            </p>
+            <button
+              type="button"
+              class="btn-solicitar-otp"
+              [disabled]="enviandoCodigoOTP"
+              (click)="solicitarCodigoOTP()">
+              {{ enviandoCodigoOTP ? '⏳ Enviando código...' : '📩 Enviar código de seguridad a mi correo' }}
+            </button>
+          </div>
+
+          <div class="otp-step-box" *ngIf="codigoEnviado">
+            <label for="inputCodigoOTP" class="otp-input-label">Ingresa el código de 6 dígitos:</label>
+            <div class="otp-input-container">
+              <input
+                id="inputCodigoOTP"
+                type="text"
+                maxlength="6"
+                [(ngModel)]="codigoOTPInput"
+                placeholder="000000"
+                class="otp-digit-input"
+                autocomplete="one-time-code"
+              />
+            </div>
+            <div class="otp-sub-actions">
+              <span class="otp-expira-note">⏱️ Expira en 24 horas · Máx 3 intentos</span>
+              <button
+                type="button"
+                class="btn-reenviar-otp"
+                [disabled]="enviandoCodigoOTP"
+                (click)="solicitarCodigoOTP()">
+                Reenviar código
+              </button>
+            </div>
+          </div>
+
+          <div class="otp-feedback success" *ngIf="mensajeExitoOTP">
+            {{ mensajeExitoOTP }}
+          </div>
+          <div class="otp-feedback error" *ngIf="mensajeErrorOTP">
+            {{ mensajeErrorOTP }}
+          </div>
+        </div>
+
+        <div class="otp-footer">
+          <button type="button" class="btn-cancelar-otp" (click)="cerrarModalOTP()">Cancelar</button>
+          <button
+            type="button"
+            class="btn-firmar-otp"
+            *ngIf="codigoEnviado"
+            [disabled]="validandoCodigoOTP || !codigoOTPInput || codigoOTPInput.length < 6"
+            (click)="validarCodigoOTP()">
+            {{ validandoCodigoOTP ? '⏳ Verificando...' : '🔒 Validar y Firmar Contrato' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

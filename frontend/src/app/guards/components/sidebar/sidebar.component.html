@@ -1,40 +1,86 @@
 <!-- src/app/components/sidebar/sidebar.component.html -->
-<aside class="sidebar">
-  <div class="logo-container">
-    <img src="/assets/logo.png" alt="NUMA Nómina" class="logo">
+<!-- Barra superior visible solo en móvil (< 900px) -->
+<header class="mobile-navbar">
+  <button type="button" class="btn-hamburger" (click)="toggleMenu()" aria-label="Abrir menú de navegación">
+    <i class="fas fa-bars"></i>
+  </button>
+  <div class="mobile-logo-wrap">
+    <img src="/assets/logo.svg" alt="NUMA Nómina" class="logo">
+  </div>
+  <div class="mobile-notif-wrap">
+    <app-notificaciones></app-notificaciones>
+  </div>
+</header>
+
+<!-- Overlay / Backdrop para oscurecer el fondo en móvil cuando el menú está abierto -->
+<div class="sidebar-overlay" [class.is-open]="menuAbierto" (click)="cerrarMenu()"></div>
+
+<aside class="sidebar" [class.is-open]="menuAbierto">
+  <div class="drawer-header">
+    <div class="logo-container">
+      <img src="/assets/logo.svg" alt="NUMA Nómina" class="logo">
+    </div>
+    <button type="button" class="btn-close-drawer" (click)="cerrarMenu()" aria-label="Cerrar menú">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <div class="desktop-notif-wrap">
+    <app-notificaciones></app-notificaciones>
   </div>
 
   <nav class="menu">
-    <a routerLink="/dashboard" routerLinkActive="active">
-      <i class="fas fa-home"></i> Inicio
-    </a>
-    <a routerLink="/registro" routerLinkActive="active">
-      <i class="fas fa-user-plus"></i> Registrar
-    </a>
-    <a routerLink="/liquidar" routerLinkActive="active">
-      <i class="fas fa-file-invoice-dollar"></i> Liquidar
-    </a>
-    <a routerLink="/consultar" routerLinkActive="active">
-      <i class="fas fa-search"></i> Consultar
-    </a>
-    <a routerLink="/contratos" routerLinkActive="active">
-      <i class="fas fa-file-contract"></i> Contratos
-    </a>
-    <a routerLink="/novedades" routerLinkActive="active">
-      <i class="fas fa-clipboard-list"></i> Novedades
-    </a>
-    <a routerLink="/pago-nomina" routerLinkActive="active">
-      <i class="fas fa-credit-card"></i> Pago Nómina
-    </a>
-    <a routerLink="/periodos-nomina" routerLinkActive="active" class="periodos-link">
-      <i class="fas fa-calendar-alt"></i> Períodos Nómina
-    </a>
-    <a routerLink="/predicciones" routerLinkActive="active">
-      <i class="fas fa-chart-line"></i> Predicciones
-    </a>
+    <div class="menu-section menu-primary">
+      <a routerLink="/dashboard" routerLinkActive="active" (click)="cerrarMenu()">
+        <i class="fas fa-home"></i><span>Inicio</span>
+      </a>
+    </div>
 
-    <a (click)="cerrarSesion()" class="logout">
-      <i class="fas fa-sign-out-alt"></i> Salir
-    </a>
+    <div class="menu-section">
+      <h2 class="menu-section-title">Gestión</h2>
+      <a routerLink="/registro" routerLinkActive="active" (click)="cerrarMenu()">
+        <i class="fas fa-user-plus"></i><span>Registrar</span>
+      </a>
+      <a routerLink="/contratos" routerLinkActive="active" (click)="cerrarMenu()">
+        <i class="fas fa-file-contract"></i><span>Contratos</span>
+      </a>
+      <a routerLink="/consultar" routerLinkActive="active" (click)="cerrarMenu()">
+        <i class="fas fa-search"></i><span>Consultar</span>
+      </a>
+    </div>
+
+    <div class="menu-section">
+      <h2 class="menu-section-title">Nómina</h2>
+      <a routerLink="/liquidar" routerLinkActive="active" (click)="cerrarMenu()">
+        <i class="fas fa-file-invoice-dollar"></i><span>Liquidar</span>
+      </a>
+      <a routerLink="/admin-aprobaciones" routerLinkActive="active" (click)="cerrarMenu()">
+        <i class="fas fa-clipboard-list"></i><span>Novedades</span>
+      </a>
+      <a routerLink="/pago-nomina" routerLinkActive="active" (click)="cerrarMenu()">
+        <i class="fas fa-credit-card"></i><span>Pago Nómina</span>
+      </a>
+      <a routerLink="/periodos-nomina" routerLinkActive="active" class="periodos-link" (click)="cerrarMenu()">
+        <i class="fas fa-calendar-alt"></i><span>Períodos Nómina</span>
+      </a>
+    </div>
+
+    <div class="menu-section">
+      <h2 class="menu-section-title">Análisis</h2>
+      <a routerLink="/historial" routerLinkActive="active" (click)="cerrarMenu()">
+        <i class="fas fa-history"></i><span>Historial</span>
+      </a>
+      <a routerLink="/optimizacion" routerLinkActive="active" (click)="cerrarMenu()">
+        <i class="fas fa-cogs"></i><span>Optimización</span>
+      </a>
+    </div>
+
+    <div class="menu-section menu-footer">
+      <button type="button" (click)="cerrarSesion()" class="logout">
+        <i class="fas fa-sign-out-alt"></i><span>Salir</span>
+      </button>
+    </div>
   </nav>
 </aside>
+
+<app-chatbot-widget *ngIf="esAdministrador" mode="admin"></app-chatbot-widget>

@@ -6,6 +6,7 @@ import java.util.List;
 @Data @NoArgsConstructor @AllArgsConstructor
 public class PagoNominaRequest {
     private String periodoId;
+    private String metodoPago;
     private List<DetalleNomina> detalles;
 
     @Data @NoArgsConstructor @AllArgsConstructor

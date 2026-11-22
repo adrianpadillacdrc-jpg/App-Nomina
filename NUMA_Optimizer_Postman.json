@@ -1,0 +1,49 @@
+{
+  "info": {
+    "name": "NUMA Optimizer",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Login (obtener token)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "http://localhost:8080/api/auth/login", "host": ["localhost"], "port": "8080", "path": ["api","auth","login"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"correo\": \"admin@numa.com\",\n  \"contrasena\": \"AdminNuma2025!\"\n}"
+        }
+      }
+    },
+    {
+      "name": "2. POST /api/optimizacion",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": { "raw": "http://localhost:8080/api/optimizacion", "host": ["localhost"], "port": "8080", "path": ["api","optimizacion"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"demandaPorCargo\": {\n    \"1\": { \"diurna\": 2000, \"nocturna\": 800, \"dom_diurna\": 300, \"dom_nocturna\": 80 },\n    \"2\": { \"diurna\": 1600, \"nocturna\": 650, \"dom_diurna\": 240, \"dom_nocturna\": 60 },\n    \"3\": { \"diurna\": 1550, \"nocturna\": 600, \"dom_diurna\": 220, \"dom_nocturna\": 50 }\n  },\n  \"horasSemanMax\": 42,\n  \"horasExtraMaxSemana\": 12,\n  \"horasDomMaxSemana\": 8\n}"
+        }
+      }
+    },
+    {
+      "name": "3. GET /resultados (optimizer directo)",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:8000/resultados?limit=10", "host": ["localhost"], "port": "8000", "path": ["resultados"], "query": [{"key": "limit","value": "10"}] }
+      }
+    },
+    {
+      "name": "4. GET /health optimizer",
+      "request": {
+        "method": "GET",
+        "url": { "raw": "http://localhost:8000/health", "host": ["localhost"], "port": "8000", "path": ["health"] }
+      }
+    }
+  ]
+}

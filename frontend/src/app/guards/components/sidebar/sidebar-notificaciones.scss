@@ -1,0 +1,453 @@
+// src/app/guards/components/sidebar/sidebar-notificaciones.scss
+.notificaciones {
+  position: fixed;
+  top: 18px;
+  right: 22px;
+  z-index: 3000;
+}
+
+.campana-btn {
+  position: relative;
+  background: #f5f0fa;
+  border: none;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  cursor: pointer;
+  color: #4a148c;
+  font-size: 18px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #e8dcf5;
+  }
+
+  .badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #d32f2f;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    line-height: 18px;
+    border-radius: 9px;
+    padding: 0 4px;
+  }
+}
+
+.panel {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  width: 340px;
+  max-height: 480px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+  z-index: 2000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid #eee;
+
+  .limpiar {
+    background: none;
+    border: none;
+    color: #4a148c;
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eee;
+
+  .filtro-btn {
+    background: #f5f0fa;
+    border: 1px solid transparent;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    .chip {
+      background: #d8c9ec;
+      color: #4a148c;
+      border-radius: 8px;
+      padding: 0 5px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-left: 2px;
+    }
+
+    &.activo {
+      background: #4a148c;
+      color: white;
+
+      .chip {
+        background: white;
+        color: #4a148c;
+      }
+    }
+
+    &:hover:not(.activo) {
+      background: #e8dcf5;
+    }
+  }
+}
+
+.panel-body {
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.vacio {
+  text-align: center;
+  color: #777;
+  font-size: 13px;
+  padding: 16px 0;
+}
+
+.alerta {
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border-left: 4px solid #fbc02d;
+  background: #fffde7;
+
+  &.urgente {
+    border-left-color: #f57c00;
+    background: #fff3e0;
+  }
+
+  &.vencido {
+    border-left-color: #d32f2f;
+    background: #ffebee;
+  }
+
+  .alerta-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .titulo {
+      font-weight: 600;
+      font-size: 13px;
+      color: #333;
+    }
+
+    .cerrar {
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      color: #888;
+      line-height: 1;
+
+      &:hover {
+        color: #333;
+      }
+    }
+  }
+
+  .mensaje {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: #555;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .acciones {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+
+    .btn-accion {
+      background: #4a148c;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #6a1cb0;
+      }
+
+      &.secundario {
+        background: white;
+        color: #4a148c;
+        border: 1px solid #4a148c;
+
+        &:hover {
+          background: #f5f0fa;
+        }
+      }
+
+      &.liquidar {
+        background: #e65100;
+
+        &:hover {
+          background: #ef6c00;
+        }
+      }
+    }
+  }
+}
+
+// ===== Modal: Detalles del contrato =====
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 10, 40, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 4000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-detalle {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: #f5f0fa;
+  border-bottom: 1px solid #e4dcef;
+
+  strong { font-size: 15px; color: #3a2a55; }
+  .cerrar {
+    background: none;
+    border: none;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    color: #7a6a95;
+    &:hover { color: #3a2a55; }
+  }
+}
+
+.modal-body {
+  padding: 16px 18px;
+  overflow-y: auto;
+}
+
+.ficha {
+  h4 {
+    margin: 0 0 10px;
+    font-size: 17px;
+    color: #3a2a55;
+  }
+}
+
+.ficha-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 14px;
+  font-size: 13px;
+  color: #444;
+
+  .lbl {
+    color: #8a7aa5;
+    font-weight: 600;
+  }
+}
+
+.badge-estado {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+
+  &.activo { background: #e3f6e8; color: #1e7c3a; }
+  &.inactivo { background: #fdeaea; color: #b3261e; }
+}
+
+.seccion {
+  margin-top: 18px;
+
+  h5 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    color: #8a7aa5;
+  }
+}
+
+.acciones-contrato {
+  margin-top: 14px;
+}
+
+.acciones-grid-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.btn-acc {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+
+  i { font-size: 13px; }
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  }
+
+  &.btn-acc-contrato {
+    background: linear-gradient(135deg, #7c4dff, #6200ea);
+    color: #fff;
+    &:hover { background: #5c00d2; }
+  }
+
+  &.btn-acc-liquidar {
+    background: #fff1f2;
+    color: #e11d48;
+    border-color: #fecdd3;
+    &:hover { background: #ffe4e6; }
+  }
+
+  &.btn-acc-pagar {
+    background: #f0fdf4;
+    color: #16a34a;
+    border-color: #bbf7d0;
+    &:hover { background: #dcfce7; }
+  }
+
+  &.btn-acc-novedad {
+    background: #f5f3ff;
+    color: #7c3aed;
+    border-color: #ddd6fe;
+    &:hover { background: #ede9fe; }
+  }
+}
+
+.btn-ver-contrato {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 50px;
+  background: linear-gradient(135deg, #7c4dff, #9c27b0);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 16px rgba(124, 77, 255, 0.35);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(124, 77, 255, 0.5);
+  }
+}
+
+.historial {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: #e4dcef;
+  }
+
+  li {
+    position: relative;
+    padding: 0 0 14px 26px;
+    display: flex;
+
+    &:last-child { padding-bottom: 0; }
+
+    .ev-punto {
+      position: absolute;
+      left: 2px;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #b7a5d6;
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 2px #e4dcef;
+    }
+
+    &.registro .ev-punto { background: #4a90d9; }
+    &.contrato .ev-punto { background: #2e9e5b; }
+    &.liquidacion .ev-punto { background: #b3261e; }
+    &.fin_contrato .ev-punto { background: #d97b2e; }
+  }
+}
+
+.ev-contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+
+  .ev-titulo { font-weight: 700; color: #3a2a55; }
+  .ev-fecha { color: #8a7aa5; font-size: 12px; }
+  .ev-detalle { color: #555; }
+}
+
+.vacio {
+  color: #8a7aa5;
+  font-size: 13px;
+  text-align: center;
+  padding: 12px 0;
+}

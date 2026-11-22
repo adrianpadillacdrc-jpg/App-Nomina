@@ -5,7 +5,7 @@ import { Novedad } from '../models/novedad.model';
 
 @Injectable({ providedIn: 'root' })
 export class NovedadService {
-  private api = 'http://localhost:8080/api/novedad';
+  private api = 'https://giving-joy-production.up.railway.app'
 
   constructor(private http: HttpClient) {}
 

@@ -1,27 +1,30 @@
-/* === FONDO + SIDEBAR FIJO === */
+/* === LAYOUT + SIDEBAR FIJO === */
 .page-wrapper {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
-  background: url('/assets/numa.jpg') center/cover no-repeat fixed;
-  position: relative;
-}
+  min-height: 100dvh;
+  width: 100%;
 
-.page-wrapper::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(255, 255, 255, 0);
-  z-index: 1;
-  pointer-events: none;
+  @media (min-width: 901px) {
+    flex-direction: row;
+  }
 }
 
 .main-content {
-  margin-left: 240px;
-  padding: 40px;
+  margin-left: 0;
+  padding: clamp(14px, 3vw, 40px);
   flex: 1;
+  width: 100%;
+  min-width: 0;
   position: relative;
   z-index: 2;
   overflow-y: auto;
+
+  @media (min-width: 901px) {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+  }
 }
 
 /* === CONTENEDOR === */
@@ -34,9 +37,9 @@
 .page-title {
   text-align: left;
   color: #ffffff;
-  font-size: 32px;
+  font-size: clamp(1.4rem, 4vw, 2rem);
   font-weight: 700;
-  margin-bottom: 30px;
+  margin-bottom: 24px;
 }
 
 /* === FORMULARIO === */
@@ -50,23 +53,28 @@
 .card {
   background: white;
   border-radius: 24px;
-  padding: 30px;
+  padding: clamp(18px, 4vw, 30px);
   box-shadow: 0 15px 40px rgba(0,0,0,0.12);
   border-left: 5px solid #7c4dff;
 }
 
 .card-header h2 {
   color: #4a148c;
-  font-size: 22px;
+  font-size: clamp(1.15rem, 3vw, 1.4rem);
   font-weight: 700;
-  margin: 0 0 25px 0;
+  margin: 0 0 20px 0;
 }
 
 /* === GRID === */
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  grid-template-columns: 1fr;
+  gap: 16px;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
 }
 
 .form-group {

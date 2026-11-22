@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +18,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -28,12 +30,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        final String requestPath = request.getServletPath();
+        final String requestURI = request.getRequestURI();
 
-        // ✅ Saltar filtro para endpoints públicos
-        if (requestPath.startsWith("/api/auth/") ||
-                requestPath.startsWith("/api/periodo-nomina/") ||
-                requestPath.startsWith("/api/prediccion/")) {
+        if (requestURI.equals("/api/auth/login")
+                || requestURI.equals("/api/auth/register")
+                || requestURI.equals("/login")
+                || requestURI.equals("/register")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -65,7 +67,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Error processing JWT: " + e.getMessage());
+            log.debug("JWT inválido en {} ({})", requestURI, e.getClass().getSimpleName());
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);

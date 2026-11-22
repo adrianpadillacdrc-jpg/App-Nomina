@@ -2,14 +2,28 @@
 
 .page-wrapper {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+
+  @media (min-width: 901px) {
+    flex-direction: row;
+  }
 }
 
 .main-content {
-  margin-left: 240px;
-  padding: 40px;
+  margin-left: 0;
+  padding: clamp(14px, 3vw, 40px);
   flex: 1;
+  width: 100%;
+  min-width: 0;
   background: transparent;
+
+  @media (min-width: 901px) {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+  }
 }
 
 .consultar-container {
@@ -19,9 +33,9 @@
 
 .page-title {
   color: #fff;
-  font-size: 36px;
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
   font-weight: 700;
-  margin-bottom: 30px;
+  margin-bottom: 24px;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
@@ -44,7 +58,8 @@
 .tabla-empleados {
   background: white;
   border-radius: 20px;
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
 }
 
@@ -53,15 +68,17 @@
   color: white;
   font-weight: 600;
   display: grid;
-  grid-template-columns: 1fr 2fr 1.5fr 1.2fr 1.4fr;
-  padding: 20px;
+  grid-template-columns: minmax(80px, 1fr) minmax(150px, 2fr) minmax(120px, 1.5fr) minmax(100px, 1.2fr) minmax(140px, 1.4fr);
+  min-width: 650px;
+  padding: 16px 20px;
   text-align: center;
 }
 
 .empleado-row {
   display: grid;
-  grid-template-columns: 1fr 2fr 1.5fr 1.2fr 1.4fr;
-  padding: 18px 20px;
+  grid-template-columns: minmax(80px, 1fr) minmax(150px, 2fr) minmax(120px, 1.5fr) minmax(100px, 1.2fr) minmax(140px, 1.4fr);
+  min-width: 650px;
+  padding: 16px 20px;
   border-bottom: 1px solid #eee;
   align-items: center;
   transition: all 0.3s;
@@ -131,7 +148,6 @@
   align-items: center;
   justify-content: center;
   z-index: 9000;
-  backdrop-filter: blur(8px);
 }
 
 .modal-nomina {
@@ -346,7 +362,7 @@
 
 /* REUTILIZAMOS EL MISMO ESTILO DEL EMPLEADO */
 .comprobante-colombia {
-  font-family: 'Courier New', monospace;
+  font-family: inherit;
   background: white;
   color: #000;
 }
@@ -406,7 +422,7 @@
 .tabla-nomina td.valor {
   text-align: right;
   font-weight: bold;
-  font-family: monospace;
+  font-family: inherit;
 }
 
 .totales {

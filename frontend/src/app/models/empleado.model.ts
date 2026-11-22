@@ -5,5 +5,8 @@ export interface Empleado {
   apellido: string;
   cargo: string;
   salarioBase: number;
+  idSucursal?: number;
+  fechaInicioContrato?: string;
+  fechaFinContrato?: string;
   estado?: string;
 }

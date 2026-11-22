@@ -1,18 +1,24 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { ActualizarEmpleado } from './actualizar-empleado';
+import { ActualizarEmpleadoComponent } from './actualizar-empleado.component';
+import { EmpleadosService } from '../../../services/empleados.service';
 
 describe('ActualizarEmpleado', () => {
-  let component: ActualizarEmpleado;
-  let fixture: ComponentFixture<ActualizarEmpleado>;
+  let component: ActualizarEmpleadoComponent;
+  let fixture: ComponentFixture<ActualizarEmpleadoComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ActualizarEmpleado]
+      imports: [ActualizarEmpleadoComponent],
+      providers: [
+        {
+          provide: EmpleadosService,
+          useValue: {}
+        }
+      ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ActualizarEmpleado);
+    fixture = TestBed.createComponent(ActualizarEmpleadoComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

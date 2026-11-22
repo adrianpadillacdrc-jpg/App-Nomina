@@ -6,6 +6,7 @@ import com.nomina.numa.dto.RegisterRequest;
 import com.nomina.numa.model.postgres.Usuario;
 import com.nomina.numa.repository.jpa.UsuarioRepository;
 import com.nomina.numa.security.JwtService;
+import com.nomina.numa.service.EmailService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,15 +14,15 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/auth")
+// 💡 SOLUCIÓN: Eliminamos el @RequestMapping general para que el login quede exactamente en "/login"
 public class AuthController {
 
     @Autowired
@@ -39,43 +40,29 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @PostMapping("/login")
+    @Autowired
+    private EmailService emailService;
+
+    @PostMapping({ "/login", "/api/auth/login" })
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
-            System.err.println("========== LOGIN INICIADO ==========");
-            System.err.println("Username recibido: " + request.getUsername());
-            
-            Authentication authentication = authenticationManager.authenticate(
+            authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getUsername(),
                             request.getPassword()));
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-            System.err.println("UserDetails cargado: " + userDetails.getUsername());
 
             Usuario usuario = usuarioRepository.findByCorreo(request.getUsername())
                     .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-            
-            System.err.println("Usuario encontrado en BD:");
-            System.err.println("  - Nombre: " + usuario.getNombre());
-            System.err.println("  - Correo: " + usuario.getCorreo());
-            System.err.println("  - Rol: " + usuario.getRol());
 
             String userRole = usuario.getRol();
-            
-            // Asegurar que el rol tenga el formato correcto
             if (userRole == null || userRole.isEmpty()) {
                 userRole = "ROLE_USER";
-                System.err.println("Rol era nulo, asignando ROLE_USER");
             } else if (!userRole.startsWith("ROLE_")) {
                 userRole = "ROLE_" + userRole;
-                System.err.println("Rol sin prefijo, agregando: " + userRole);
             }
-            
-            System.err.println("Rol final para token: '" + userRole + "'");
-            
             String token = jwtService.generateToken(userDetails.getUsername(), userRole);
-            System.err.println("Token generado. Longitud: " + token.length());
             
             LoginResponse response = new LoginResponse(
                     token,
@@ -84,17 +71,13 @@ public class AuthController {
                     userRole
             );
             
-            System.err.println("========== LOGIN EXITOSO ==========");
-            
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            System.err.println("ERROR EN LOGIN: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(401).body("Credenciales invalidas: " + e.getMessage());
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(401).body("Credenciales inválidas");
         }
     }
 
-    @PostMapping("/register")
+    @PostMapping({ "/register", "/api/auth/register" })
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         if (usuarioRepository.existsByCorreo(request.getCorreo())) {
             return ResponseEntity.badRequest().body("El correo ya esta registrado");
@@ -109,7 +92,12 @@ public class AuthController {
 
         usuarioRepository.save(usuario);
 
-        return ResponseEntity.ok("Usuario registrado exitosamente");
+        boolean correoEnviado = emailService.enviarConfirmacionRegistro(
+            usuario.getCorreo(), usuario.getNombre());
+        String mensaje = correoEnviado
+            ? "Usuario registrado exitosamente. Revisa tu correo de confirmación."
+            : "Usuario registrado exitosamente. El correo de confirmación está pendiente de configuración SMTP.";
+        return ResponseEntity.ok(mensaje);
     }
 
     @GetMapping("/test")

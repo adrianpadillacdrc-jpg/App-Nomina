@@ -1,8 +1,6 @@
-*.tar
-*.tar.gz
-*.jar
-BOOT-INF/
-backend_full.txt
-backend_logs.txt
-login_debug.txt
-logs.txt
+.env
+node_modules/
+dist/
+.angular/
+*.sql
+mongodump_test/

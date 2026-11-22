@@ -26,8 +26,28 @@
                 <input type="text" [(ngModel)]="form.cargo" name="cargo" required>
             </div>
             <div class="input-group">
-                <label>Salario Base</label>
-                <input type="number" [(ngModel)]="form.salarioBase" name="salarioBase" required>
+                <label>Salario Base (COP)</label>
+                <input type="text" [(ngModel)]="form.salarioBase" name="salarioBase" placeholder="Ej: 1800000" required>
+                <small style="font-size:11px;color:#8a7aa5;">Mínimo 2026: $1.750.905</small>
+            </div>
+            <div class="input-group">
+                <label>Tasa ARL asignada (%)</label>
+                <input type="number" [(ngModel)]="form.tasaArl" name="tasaArl" placeholder="0.522" required min="0.001" max="100" step="0.001">
+                <small style="font-size:11px;color:#8a7aa5;">Riesgo I típico: 0.522%</small>
+            </div>
+            <div class="input-group">
+                <label>Modalidad de trabajo</label>
+                <select [(ngModel)]="form.modalidadTrabajo" name="modalidadTrabajo" required>
+                    <option value="PRESENCIAL">Presencial</option>
+                    <option value="REMOTO">Remoto</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>¿La empresa suministra transporte?</label>
+                <select [(ngModel)]="form.transporteSuministrado" name="transporteSuministrado" required>
+                    <option [ngValue]="false">No</option>
+                    <option [ngValue]="true">Sí</option>
+                </select>
             </div>
             <div class="input-group full">
                 <label>Documento</label>

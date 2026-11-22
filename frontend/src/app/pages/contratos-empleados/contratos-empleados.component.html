@@ -3,23 +3,45 @@
     <app-sidebar></app-sidebar>
     <main class="main-content">
         <div class="container">
-            <h1 class="page-title">Contratos de Empleados</h1>
+            <app-encabezado-pagina titulo="Contratos de empleados"></app-encabezado-pagina>
 
-            <div class="search-box">
-                <input type="text" class="search-input" placeholder="Buscar por nombre, cédula o cargo..."
-                    [(ngModel)]="busqueda" (input)="filtrar()">
+            <div *ngIf="empresaError" class="empty-state" role="alert">{{ empresaError }}</div>
+
+            <div class="search-box numa-search">
+                <span class="numa-search-icon"><i class="fas fa-search"></i></span>
+                <input type="text" class="numa-search-input" placeholder="Buscar por nombre, cédula o cargo..."
+                    [(ngModel)]="busqueda" (input)="filtrar()" (keyup.enter)="buscarDirecto()">
+                <button class="numa-search-btn" (click)="buscarDirecto()">Buscar</button>
             </div>
 
+            <!-- FILTRO POR SUCURSAL -->
+            <div class="sucursal-filtro-bar">
+                <span class="filtro-label"><i class="fas fa-store"></i> Filtrar por Sucursal:</span>
+                <div class="chips-sucursales">
+                    <button class="chip-sucursal" [class.activo]="sucursalFiltro === ''" (click)="setSucursalFiltro('')">
+                        Todas las sedes (12.000)
+                    </button>
+                    <button class="chip-sucursal sede-1" [class.activo]="sucursalFiltro === 1" (click)="setSucursalFiltro(1)">
+                        <i class="fas fa-map-marker-alt"></i> Sucursal San José (6.003)
+                    </button>
+                    <button class="chip-sucursal sede-2" [class.activo]="sucursalFiltro === 2" (click)="setSucursalFiltro(2)">
+                        <i class="fas fa-map-marker-alt"></i> Sucursal Villa Grande (5.997)
+                    </button>
+                </div>
+            </div>
+
+            <app-tabla-base>
             <div class="tabla-empleados">
                 <div class="header-row">
                     <div>Documento</div>
                     <div>Nombre Completo</div>
                     <div>Cargo</div>
+                    <div>Sucursal Asignada</div>
                     <div>Acción</div>
                 </div>
 
                 <div *ngIf="empleadosFiltrados.length === 0" class="empty-state">
-                    No se encontraron empleados
+                    Aún no hay registros en esta sección.
                 </div>
 
                 <div class="empleado-row" *ngFor="let emp of empleadosFiltrados">
@@ -27,160 +49,44 @@
                     <div class="nombre">{{ emp.nombre }} {{ emp.apellido }}</div>
                     <div>{{ emp.cargo }}</div>
                     <div>
+                        <span class="badge-sucursal" [class.sede-1]="emp.idSucursal === 1" [class.sede-2]="emp.idSucursal === 2">
+                            <i class="fas fa-building"></i> {{ obtenerNombreSucursal(emp.idSucursal) }}
+                        </span>
+                    </div>
+                    <div>
                         <button class="btn-contrato" (click)="verContrato(emp)">
                             Ver Contrato
                         </button>
                     </div>
                 </div>
             </div>
+            </app-tabla-base>
+
+            <!-- PAGINACIÓN -->
+            <div class="paginacion-contratos" *ngIf="totalElementos > 0">
+                <div class="info-paginacion">
+                    Mostrando empleados de la página <strong>{{ paginaActual + 1 }}</strong> de <strong>{{ totalPaginas }}</strong> (Total: {{ totalElementos | number:'1.0-0' }})
+                </div>
+                <div class="botones-paginacion">
+                    <button class="btn-pag" (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 0">
+                        ← Anterior
+                    </button>
+                    <span class="pagina-actual">{{ paginaActual + 1 }}</span>
+                    <button class="btn-pag" (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual >= totalPaginas - 1">
+                        Siguiente →
+                    </button>
+                </div>
+            </div>
         </div>
     </main>
 </div>
 
-<!-- MODAL CONTRATO - 100% NUMA S.A.S -->
-<div class="overlay" *ngIf="mostrarContrato" (click)="cerrarContrato()">
-    <div class="modal-contrato" (click)="$event.stopPropagation()">
-        <button class="cerrar" (click)="cerrarContrato()">×</button>
-
-        <div class="contrato-content">
-            <!-- Información del estado del contrato -->
-            <div class="estado-contrato" *ngIf="contratoSeleccionado">
-                <div class="badge" [class.vigente]="contratoSeleccionado.estado === 'VIGENTE'"
-                    [class.terminado]="contratoSeleccionado.estado === 'TERMINADO'">
-                    {{ contratoSeleccionado.estado }}
-                </div>
-                <p><strong>Fecha de inicio:</strong> {{ contratoSeleccionado.fechaInicio | date:'fullDate' }}</p>
-                <p><strong>Fecha de fin:</strong> {{ contratoSeleccionado.fechaFin | date:'fullDate' }}</p>
-            </div>
-
-            <div class="header-contrato">
-                <img src="/assets/logo.png" alt="NUMA S.A.S" class="logo-empresa">
-                <div class="info-empresa">
-                    <h1>NUMA S.A.S</h1>
-                    <h2>Soluciones Integrales de Nómina</h2>
-                    <p><strong>NIT:</strong> 901.234.567-8</p>
-                    <p>Cartagena, Colombia</p>
-                </div>
-            </div>
-
-            <h1 class="titulo-contrato">CONTRATO INDIVIDUAL DE TRABAJO A TÉRMINO FIJO</h1>
-
-            <table class="tabla-datos">
-                <tr>
-                    <td><strong>NOMBRE DEL EMPLEADOR:</strong></td>
-                    <td>NUMA S.A.S</td>
-                </tr>
-                <tr>
-                    <td><strong>REPRESENTANTE LEGAL:</strong></td>
-                    <td>ING. ADRIAN ANDRES PADILLA ROQUEME</td>
-                </tr>
-                <tr>
-                    <td><strong>NOMBRE DEL EMPLEADO(A):</strong></td>
-                    <td>{{ empleadoSeleccionado?.nombre?.toUpperCase() }} {{
-                        empleadoSeleccionado?.apellido?.toUpperCase() }}</td>
-                </tr>
-                <tr>
-                    <td><strong>IDENTIFICADO(A) CON:</strong></td>
-                    <td>C.C. {{ empleadoSeleccionado?.documento }}</td>
-                </tr>
-                <tr>
-                    <td><strong>LUGAR DE RESIDENCIA:</strong></td>
-                    <td>CARTAGENA.</td>
-                </tr>
-                <tr>
-                    <td><strong>TELÉFONO:</strong></td>
-                    <td>{{ empleadoSeleccionado?.telefono || 'No registrado' }}</td>
-                </tr>
-                <tr>
-                    <td><strong>CARGO:</strong></td>
-                    <td>{{ empleadoSeleccionado?.cargo?.toUpperCase() }}</td>
-                </tr>
-                <tr>
-                    <td><strong>SALARIO MENSUAL:</strong></td>
-                    <td>$ {{ (empleadoSeleccionado?.salarioBase || 0) | number:'1.0-0' }}</td>
-                </tr>
-                <tr>
-                    <td><strong>FECHA DE INICIO:</strong></td>
-                    <td>{{ (contratoSeleccionado?.fechaInicio || nuevoContrato.fechaInicio) | date:'fullDate' }}</td>
-                </tr>
-                <tr>
-                    <td><strong>FECHA DE FIN:</strong></td>
-                    <td>{{ (contratoSeleccionado?.fechaFin || nuevoContrato.fechaFin) | date:'fullDate' }}</td>
-                </tr>
-                <tr>
-                    <td><strong>ESTADO:</strong></td>
-                    <td>{{ contratoSeleccionado?.estado || 'NUEVO' }}</td>
-                </tr>
-            </table>
-
-            <div class="clausulas">
-                <p>Conste por el presente documento que entre <strong>NUMA S.A.S</strong>, representada legalmente por
-                    el <strong>ING. ADRIAN PADILLA ROQUEME</strong>, y el(la) trabajador(a) arriba identificado(a), se
-                    celebra un <strong>CONTRATO INDIVIDUAL DE TRABAJO A TÉRMINO FIJO</strong> conforme a las siguientes
-                    cláusulas:</p>
-
-                <p><strong>PRIMERA - OBJETO:</strong> El trabajador se obliga a prestar sus servicios personales bajo
-                    dependencia y subordinación al empleador, desempeñando el cargo de <strong>{{
-                        empleadoSeleccionado?.cargo?.toUpperCase() }}</strong>.</p>
-
-                <p><strong>SEGUNDA - DURACIÓN:</strong> El presente contrato tendrá una duración de <strong>UN (1)
-                        AÑO</strong> contado a partir de la fecha de ingreso, pudiendo ser renovado por mutuo acuerdo.
-                </p>
-
-                <p><strong>TERCERA - JORNADA:</strong> La jornada laboral será de 48 horas semanales, distribuidas según
-                    las necesidades de la empresa, cumpliendo con la normatividad laboral vigente.</p>
-
-                <p><strong>CUARTA - REMUNERACIÓN:</strong> El trabajador devengará un salario mensual de <strong>$ {{
-                        (empleadoSeleccionado?.salarioBase || 0) | number:'1.0-0' }}</strong> pesos colombianos,
-                    pagadero quincenalmente.</p>
-
-                <p><strong>QUINTA - LUGAR DE TRABAJO:</strong> Las labores se desarrollarán en las instalaciones de NUMA
-                    S.A.S ubicadas en la ciudad de Cartagena o en el lugar que la empresa determine.</p>
-            </div>
-
-            <div class="footer-contrato">
-                <p><strong>Fecha de generación:</strong> {{ hoy | date:'fullDate' | titlecase }}</p>
-                <div class="firmas">
-                    <div class="firma-empleado">
-                        <div class="linea-firma"></div>
-                        <p>Firma del Empleado(a)</p>
-                        <p>{{ empleadoSeleccionado?.nombre }} {{ empleadoSeleccionado?.apellido }}</p>
-                    </div>
-                    <div class="firma-empleador">
-                        <div class="linea-firma"></div>
-                        <p>ING. ADRIAN ANDRES PADILLA ROQUEME</p>
-                        <p>Representante Legal - NUMA S.A.S</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- BOTONES DE ACCIÓN -->
-        <div class="botones-accion">
-            <!-- Botón para crear contrato si no existe -->
-            <button *ngIf="!contratoSeleccionado" class="btn-crear" (click)="crearNuevoContrato()">
-                📝 CREAR CONTRATO
-            </button>
-
-            <!-- Botones para contratos existentes -->
-            <div *ngIf="contratoSeleccionado" class="botones-contrato-existente">
-                <button class="btn-imprimir" (click)="imprimirContrato()" [disabled]="generandoPDF">
-                    🖨️ IMPRIMIR
-                </button>
-                <button class="btn-descargar" (click)="descargarContrato()" [disabled]="generandoPDF">
-                    📥 DESCARGAR PDF
-                </button>
-
-                <!-- Botones de estado -->
-                <button *ngIf="contratoSeleccionado.estado === 'VIGENTE'" class="btn-terminar"
-                    (click)="cambiarEstadoContrato('TERMINADO')">
-                    🔴 TERMINAR CONTRATO
-                </button>
-                <button *ngIf="contratoSeleccionado.estado === 'TERMINADO'" class="btn-reactivar"
-                    (click)="cambiarEstadoContrato('VIGENTE')">
-                    🔵 REACTIVAR CONTRATO
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Modal oficial de documentos NUMA STORE (Contrato A4, Comprobante de pago, Resumen de novedades) -->
+<app-documento-nomina-modal
+    [visible]="mostrarContrato"
+    [empleado]="empleadoSeleccionado"
+    [contrato]="contratoSeleccionado"
+    [pestanaInicial]="'contrato'"
+    (renovar)="onContratoRenovado($event)"
+    (cerrar)="cerrarContrato()">
+</app-documento-nomina-modal>

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nomina.numa.model.mongo.DetallePago;
+import com.nomina.numa.model.postgres.DetallePago;
 import com.nomina.numa.service.DetallePagoService;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;

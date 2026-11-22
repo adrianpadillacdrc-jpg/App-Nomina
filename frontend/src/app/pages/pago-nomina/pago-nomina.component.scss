@@ -1,14 +1,28 @@
 /* src/app/pages/pago-nomina/pago-nomina.component.scss */
 .page-wrapper {
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+
+  @media (min-width: 901px) {
+    flex-direction: row;
+  }
 }
 
 .main-content {
-  margin-left: 240px;
-  padding: 40px;
+  margin-left: 0;
+  padding: clamp(14px, 3vw, 40px);
   flex: 1;
+  width: 100%;
+  min-width: 0;
   background: transparent;
+
+  @media (min-width: 901px) {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+  }
 }
 
 .pago-container {
@@ -18,9 +32,9 @@
 
 .page-title {
   color: #ffffff;
-  font-size: 42px;
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
   font-weight: 800;
-  margin-bottom: 30px;
+  margin-bottom: 24px;
   text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
   letter-spacing: 0.5px;
 }
@@ -29,17 +43,17 @@
 .periodo-card {
   background: linear-gradient(135deg, #7c4dff, #9c27b0);
   color: white;
-  padding: 32px 40px;
-  border-radius: 28px;
+  padding: clamp(20px, 4vw, 36px);
+  border-radius: clamp(18px, 3vw, 28px);
   text-align: center;
-  margin-bottom: 45px;
+  margin-bottom: 35px;
   box-shadow: 0 15px 40px rgba(124, 77, 255, 0.5);
   border: 3px solid rgba(255, 255, 255, 0.2);
 }
 
 .periodo-card h2 {
   margin: 0 0 12px 0;
-  font-size: 36px;
+  font-size: clamp(1.3rem, 3.5vw, 2rem);
   font-weight: 800;
   line-height: 1.2;
 }
@@ -60,8 +74,7 @@
   font-size: 26px;
   padding: 8px 20px;
   border-radius: 50px;
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(5px);
+  background: #f6f4fa;
 }
 
 .abierto { color: #a8e6cf; }
@@ -88,7 +101,6 @@
   transition: all 0.4s ease;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   min-width: 260px;
-  text-transform: uppercase;
   letter-spacing: 1.2px;
 }
 
@@ -140,25 +152,217 @@
 .table-card {
   background: white;
   border-radius: 28px;
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.18);
   border-left: 8px solid #7c4dff;
 }
 
+.nomina-totales {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin: 22px 0 14px;
+}
+
+.nomina-totales article {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 5px 16px rgba(36, 20, 58, 0.08);
+}
+
+.nomina-totales article span {
+  color: #5f536c;
+  font-size: 13px;
+}
+
+.nomina-totales article strong {
+  color: #4a148c;
+  font-size: 19px;
+}
+
+.nomina-totales article.positivo strong { color: #2e7d32; }
+.nomina-totales article.negativo strong { color: #c62828; }
+
+.nomina-list-tools {
+  display: flex;
+  justify-content: flex-end;
+  margin: 12px 0;
+}
+
+.btn-ver-novedades {
+  padding: 9px 14px;
+  border: 1px solid #d8c6f3;
+  border-radius: 8px;
+  background: #fff;
+  color: #4a148c;
+  cursor: pointer;
+}
+
+.btn-ver-novedades span { font-weight: 700; }
+
+.nomina-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+@media (max-width: 900px) {
+  .nomina-totales { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 560px) {
+  .nomina-totales { grid-template-columns: minmax(0, 1fr); }
+  .nomina-pagination { align-items: flex-start; flex-direction: column; }
+}
+
+.nomina-pagination > div {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nomina-pagination button {
+  padding: 0.45rem 0.8rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.nomina-pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .table-header, .table-row {
   display: grid;
-  grid-template-columns: 2.5fr 1.5fr 1.3fr 1.3fr 1.5fr;
-  padding: 22px 28px;
+  grid-template-columns: minmax(160px, 2.5fr) minmax(110px, 1.5fr) minmax(100px, 1.3fr) minmax(100px, 1.3fr) minmax(110px, 1.5fr) 50px;
+  min-width: 720px;
+  padding: 18px 22px;
   align-items: center;
-  font-size: 16px;
+  font-size: 15px;
+  gap: 12px;
+}
+
+.table-row { cursor: pointer; }
+
+.row-expandida { background: #f3e8ff; }
+
+.col-accion {
+  text-align: center;
+  color: #7c4dff;
+}
+
+.col-accion .fa-chevron-down {
+  transition: transform 0.3s ease;
+}
+
+.col-accion .rotada {
+  transform: rotate(180deg);
+}
+
+/* === DESGLOSE DE CONCEPTOS === */
+.detalle-row {
+  background: #faf7ff;
+  border-bottom: 2px solid #ede7f6;
+  animation: desplegar 0.25s ease;
+}
+
+@keyframes desplegar {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.detalle-panel {
+  display: flex;
+  gap: 30px;
+  padding: 20px 28px 20px 48px;
+  flex-wrap: wrap;
+}
+
+.detalle-col {
+  flex: 1;
+  min-width: 280px;
+}
+
+.detalle-col h4 {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.detalle-col.devengos h4 { color: #2e7d32; }
+.detalle-col.deducciones h4 { color: #c62828; }
+
+.detalle-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.detalle-col li {
+  display: flex;
+  justify-content: space-between;
   gap: 15px;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.detalle-col li span { color: #444; }
+
+.verde { color: #2e7d32; }
+.rojo { color: #c62828; }
+
+.detalle-col.vacio p {
+  color: #888;
+  font-style: italic;
+  font-size: 14px;
+}
+
+.table-row.totales {
+  background: linear-gradient(135deg, #ede7f6, #e1bee7);
+  font-weight: 800;
+  border-top: 3px solid #7c4dff;
+  cursor: default;
+}
+
+.table-row.totales .empleado-nombre {
+  letter-spacing: 1px;
+  font-size: 14px;
+}
+
+.btn-expandir {
+  display: block;
+  margin: 18px auto 40px;
+  padding: 12px 30px;
+  border: 2px solid #7c4dff;
+  background: transparent;
+  color: #fff;
+  border-radius: 50px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-expandir:hover {
+  background: #7c4dff;
 }
 
 .table-header {
   background: linear-gradient(135deg, #f8f4ff, #ede7f6);
   font-weight: 800;
   color: #6a1b9a;
-  text-transform: uppercase;
   letter-spacing: 1.2px;
   font-size: 14px;
 }

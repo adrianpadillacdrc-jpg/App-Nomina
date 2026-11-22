@@ -18,4 +18,7 @@ public class Empresa {
 
     @Builder.Default
     private Boolean activo = true;
+
+    @Column(name = "firma_representante", columnDefinition = "TEXT")
+    private String firmaRepresentante;
 }
